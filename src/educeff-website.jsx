@@ -248,6 +248,8 @@ const css = `
     max-width: 480px;
     position: relative;
     border: 1px solid #C8E4FA;
+    max-height: 90vh;
+    overflow-y: auto;
   }
   
   @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -258,6 +260,143 @@ const css = `
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { background: #EEF5FF; color: #6D28D9; font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 1px solid #C8E4FA; }
   td { padding: 12px 14px; border-bottom: 1px solid #EEF5FF; color: #6D28D9; }
+
+  /* ── MOBILE HAMBURGER ── */
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+  .hamburger span { width: 22px; height: 2px; background: white; border-radius: 2px; transition: all 0.3s; display: block; }
+  .mobile-menu { display: none; }
+
+  /* ── TABLET (max 1024px) ── */
+  @media (max-width: 1024px) {
+    .container { padding: 0 20px; }
+    .section { padding: 60px 0; }
+  }
+
+  /* ── MOBILE & TABLET NAV (max 768px) ── */
+  @media (max-width: 768px) {
+    .hamburger { display: flex; }
+    .desktop-nav { display: none !important; }
+    .desktop-btns { display: none !important; }
+    .mobile-menu {
+      display: block;
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      background: #64B5F6;
+      padding: 16px 20px;
+      z-index: 99;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+    .mobile-menu .nav-link {
+      display: block;
+      padding: 12px 0;
+      font-size: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .mobile-menu-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    /* sections */
+    .section { padding: 48px 0; }
+    .container { padding: 0 16px; }
+
+    /* grids → single column */
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+
+    /* hero */
+    .hero-title { font-size: 32px !important; }
+    .hero-stats { flex-wrap: wrap; gap: 20px !important; }
+    .hero-btns { flex-direction: column; align-items: flex-start; }
+
+    /* cards */
+    .card { padding: 20px !important; }
+
+    /* headings */
+    .section-title { font-size: 28px !important; }
+
+    /* process steps → 2 columns on mobile */
+    .process-grid { grid-template-columns: 1fr 1fr !important; }
+
+    /* footer grid */
+    .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
+
+    /* about page stat boxes */
+    .about-stats { grid-template-columns: 1fr 1fr !important; }
+
+    /* portal sidebar → bottom nav on mobile */
+    .portal-sidebar { width: 100% !important; flex-direction: row !important; overflow-x: auto; padding: 8px 12px !important; min-height: auto !important; }
+    .portal-sidebar .sidebar-link { flex-direction: column; font-size: 10px !important; gap: 3px !important; padding: 8px 10px !important; white-space: nowrap; min-width: 60px; justify-content: center; text-align: center; }
+    .portal-sidebar .sidebar-user { display: none; }
+    .portal-layout { flex-direction: column !important; }
+    .portal-content { padding: 20px 16px !important; }
+
+    /* stat cards grid */
+    .stats-grid { grid-template-columns: 1fr 1fr !important; }
+
+    /* modal */
+    .modal { padding: 24px 18px !important; margin: 10px; }
+
+    /* table → scroll */
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 500px; }
+
+    /* contact grid */
+    .contact-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+
+    /* why us grid */
+    .whyus-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+    .whyus-reasons { grid-template-columns: 1fr !important; }
+
+    /* testimonials */
+    .testimonials-grid { grid-template-columns: 1fr !important; }
+
+    /* services grid */
+    .services-grid { grid-template-columns: 1fr !important; }
+
+    /* colleges grid */
+    .colleges-grid { grid-template-columns: 1fr !important; }
+
+    /* team grid */
+    .team-grid { grid-template-columns: 1fr 1fr !important; }
+
+    /* admin sidebar */
+    .admin-layout { flex-direction: column !important; }
+    .admin-sidebar { width: 100% !important; flex-direction: row !important; overflow-x: auto; padding: 8px !important; }
+    .admin-sidebar .sidebar-link { flex-direction: column; font-size: 10px !important; gap: 2px !important; padding: 8px !important; min-width: 56px; text-align: center; justify-content: center; }
+    .admin-content { padding: 16px !important; }
+
+    /* doc upload grid */
+    .doc-grid { grid-template-columns: 1fr !important; }
+
+    /* profile grid */
+    .profile-grid { grid-template-columns: 1fr !important; }
+    .profile-form-grid { grid-template-columns: 1fr !important; }
+
+    /* CTA section */
+    .cta-btns { flex-direction: column; align-items: center; }
+
+    /* booking form */
+    .booking-form-grid { grid-template-columns: 1fr !important; }
+
+    /* application form */
+    .app-form-grid { grid-template-columns: 1fr !important; }
+  }
+
+  /* ── SMALL MOBILE (max 480px) ── */
+  @media (max-width: 480px) {
+    .hero-title { font-size: 26px !important; }
+    .section-title { font-size: 24px !important; }
+    .process-grid { grid-template-columns: 1fr !important; }
+    .footer-grid { grid-template-columns: 1fr !important; }
+    .team-grid { grid-template-columns: 1fr !important; }
+    .about-stats { grid-template-columns: 1fr 1fr !important; }
+    .stats-grid { grid-template-columns: 1fr 1fr !important; }
+  }
   tr:hover td { background: #FAFCFF; }
   
   ::-webkit-scrollbar { width: 6px; }
@@ -318,13 +457,14 @@ const MOCK_STUDENTS = [
 // ─── COMPONENTS ─────────────────────────────────────────────────────────────
 
 function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const publicPages = ["Home", "About", "Services", "Colleges", "Contact"];
 
   return (
-    <nav style={{ background: "#64B5F6", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+    <nav style={{ background: "#64B5F6", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
       <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => setPage("Home")}>
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => { setPage("Home"); setMenuOpen(false); }}>
           <svg width="36" height="36" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="rgba(255,255,255,0.18)"/>
             <polygon points="30,8 50,19 50,41 30,52 10,41 10,19" fill="none" stroke="white" strokeWidth="2"/>
@@ -333,19 +473,19 @@ function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
           <span className="font-display" style={{ fontSize: 20, fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.01em" }}>Edu<span style={{color:"#E0D4FC"}}>ceff</span></span>
         </div>
 
-        <div style={{ display: "flex", gap: 28, alignItems: "center", marginLeft: 32 }}>
+        {/* Desktop Nav */}
+        <div className="desktop-nav" style={{ display: "flex", gap: 28, alignItems: "center", marginLeft: 32 }}>
           {publicPages.map(p => (
             <span key={p} className={`nav-link ${page === p ? "active" : ""}`} onClick={() => setPage(p)}>{p}</span>
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 10, alignItems: "center", marginLeft: 24 }}>
+        {/* Desktop Buttons */}
+        <div className="desktop-btns" style={{ display: "flex", gap: 10, alignItems: "center", marginLeft: 24 }}>
           {isLoggedIn ? (
             <>
-              <button className="btn-outline" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => setPage(isAdmin ? "Admin" : "Portal")}>
-                {isAdmin ? "Admin Dashboard" : "My Portal"}
-              </button>
-              <button className="btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => { setModal(null); }}>Logout</button>
+              <button className="btn-outline" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => setPage(isAdmin ? "Admin" : "Portal")}>{isAdmin ? "Admin Dashboard" : "My Portal"}</button>
+              <button className="btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => setModal(null)}>Logout</button>
             </>
           ) : (
             <>
@@ -354,7 +494,36 @@ function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
             </>
           )}
         </div>
+
+        {/* Hamburger Button */}
+        <div className="hamburger" onClick={() => setMenuOpen(o => !o)}>
+          <span style={{ transform: menuOpen ? "rotate(45deg) translate(5px, 5px)" : "none", transition: "all 0.3s" }} />
+          <span style={{ opacity: menuOpen ? 0 : 1, transition: "all 0.3s" }} />
+          <span style={{ transform: menuOpen ? "rotate(-45deg) translate(5px, -5px)" : "none", transition: "all 0.3s" }} />
+        </div>
       </div>
+
+      {/* Mobile Dropdown Menu */}
+      {menuOpen && (
+        <div className="mobile-menu">
+          {publicPages.map(p => (
+            <span key={p} className="nav-link" onClick={() => { setPage(p); setMenuOpen(false); }} style={{ display: "block", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.1)", fontSize: 15 }}>{p}</span>
+          ))}
+          <div className="mobile-menu-btns">
+            {isLoggedIn ? (
+              <>
+                <button className="btn-outline" style={{ width: "100%", padding: 12 }} onClick={() => { setPage(isAdmin ? "Admin" : "Portal"); setMenuOpen(false); }}>{isAdmin ? "Admin Dashboard" : "My Portal"}</button>
+                <button className="btn-primary" style={{ width: "100%", padding: 12 }} onClick={() => { setModal(null); setMenuOpen(false); }}>Logout</button>
+              </>
+            ) : (
+              <>
+                <button className="btn-outline" style={{ width: "100%", padding: 12 }} onClick={() => { setModal("login"); setMenuOpen(false); }}>Student Login</button>
+                <button className="btn-primary" style={{ width: "100%", padding: 12 }} onClick={() => { setModal("register"); setMenuOpen(false); }}>Register Free</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
@@ -367,7 +536,7 @@ function Hero({ setPage, setModal }) {
       <div className="container" style={{ padding: "80px 24px" }}>
         <div style={{ maxWidth: 640 }} className="fade-in">
           <div className="tag" style={{ color: "#ffffff", borderColor: "rgba(255,255,255,0.7)", background: "rgba(255,255,255,0.15)" }}>India's Trusted Education Consultancy</div>
-          <h1 className="font-display" style={{ fontSize: 52, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.12, marginBottom: 20, letterSpacing: "-0.02em" }}>
+          <h1 className="font-display" style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.12, marginBottom: 20, letterSpacing: "-0.02em" }}>
             Your One-Stop Solution for College Admissions & Counseling
           </h1>
           <p style={{ fontSize: 17, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, marginBottom: 36, maxWidth: 520 }}>
@@ -378,7 +547,7 @@ function Hero({ setPage, setModal }) {
             <button className="btn-outline" onClick={() => setModal("counseling")}>Book Free Counseling</button>
             <button className="btn-outline" onClick={() => setModal("login")}>Student Login</button>
           </div>
-          <div style={{ display: "flex", gap: 32, marginTop: 48 }}>
+          <div style={{ display: "flex", gap: 24, marginTop: 48, flexWrap: "wrap" }}>
             {STATS.map(s => (
               <div key={s.label}>
                 <div className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#6D28D9" }}>{s.num}</div>
@@ -398,12 +567,12 @@ function ServicesSection({ setPage }) {
       <div className="container">
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <div className="tag">What We Offer</div>
-          <h2 className="font-display" style={{ fontSize: 38, fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Comprehensive Education Services</h2>
+          <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Comprehensive Education Services</h2>
           <p style={{ color: "#6D28D9", marginTop: 12, fontSize: 15, maxWidth: 520, margin: "12px auto 0" }}>
             End-to-end support from exam registration to college admission — every step covered by our expert team.
           </p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
           {SERVICES.map(s => (
             <div key={s.title} className="card" style={{ borderTop: `3px solid #64B5F6` }}>
               <div style={{ fontSize: 32, marginBottom: 14, background: s.color, width: 52, height: 52, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>{s.icon}</div>
@@ -432,14 +601,14 @@ function WhyUs() {
   return (
     <section className="section section-alt">
       <div className="container">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40, alignItems: "center" }}>
           <div>
             <div className="tag">Why Choose Us</div>
-            <h2 className="font-display" style={{ fontSize: 38, fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em", marginBottom: 16 }}>Trusted by Students Across Maharashtra</h2>
+            <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em", marginBottom: 16 }}>Trusted by Students Across Maharashtra</h2>
             <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>
               Educeff combines deep domain expertise with modern technology to deliver a seamless, transparent, and successful admission experience for every student.
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
               {reasons.map(r => (
                 <div key={r.title} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                   <span style={{ fontSize: 20 }}>{r.icon}</span>
@@ -481,9 +650,9 @@ function Testimonials() {
       <div className="container">
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <div className="tag">Student Stories</div>
-          <h2 className="font-display" style={{ fontSize: 38, fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Real Results, Real Students</h2>
+          <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Real Results, Real Students</h2>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
           {TESTIMONIALS.map(t => (
             <div key={t.name} className="card" style={{ borderLeft: `4px solid #64B5F6` }}>
               <div style={{ fontSize: 32, color: "#64B5F6", marginBottom: 12, lineHeight: 1 }}>"</div>
@@ -510,9 +679,9 @@ function AdmissionProcess() {
       <div className="container">
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <div className="tag">How It Works</div>
-          <h2 className="font-display" style={{ fontSize: 38, fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Simple 4-Step Admission Process</h2>
+          <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Simple 4-Step Admission Process</h2>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 24 }}>
           {PROCESS_STEPS.map((s, i) => (
             <div key={s.title} style={{ textAlign: "center", position: "relative" }}>
               {i < 3 && <div style={{ position: "absolute", top: 20, left: "70%", width: "60%", height: 1, background: `linear-gradient(to right, #C8E4FA, #E3F2FD)` }} />}
@@ -535,7 +704,7 @@ function FAQ() {
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <div className="tag">FAQ</div>
-            <h2 className="font-display" style={{ fontSize: 38, fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Frequently Asked Questions</h2>
+            <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Frequently Asked Questions</h2>
           </div>
           {FAQS.map((f, i) => (
             <div key={i} className="faq-item">
@@ -584,10 +753,10 @@ function ContactForm() {
   return (
     <section className="section section-alt">
       <div className="container">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40 }}>
           <div>
             <div className="tag">Get In Touch</div>
-            <h2 className="font-display" style={{ fontSize: 36, fontWeight: 700, color: "#64B5F6", marginBottom: 16, letterSpacing: "-0.02em" }}>Let's Start Your Journey Today</h2>
+            <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#64B5F6", marginBottom: 16, letterSpacing: "-0.02em" }}>Let's Start Your Journey Today</h2>
             <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>Reach out to our team for any queries about admissions, counseling, or services. We typically respond within 2 hours.</p>
             {[
               { icon: "📍", label: "Address", val: "123 Pimpri Road, Pimpri-Chinchwad, Pune 411018" },
@@ -632,13 +801,13 @@ function CTA({ setModal }) {
   return (
     <section style={{ background: `linear-gradient(135deg, #64B5F6, #64B5F6)`, padding: "72px 0" }}>
       <div className="container" style={{ textAlign: "center" }}>
-        <h2 className="font-display" style={{ fontSize: 40, fontWeight: 700, color: "#FFFFFF", marginBottom: 14, letterSpacing: "-0.02em" }}>
+        <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 700, color: "#FFFFFF", marginBottom: 14, letterSpacing: "-0.02em" }}>
           Ready to Secure Your Admission?
         </h2>
         <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, marginBottom: 32, maxWidth: 480, margin: "0 auto 32px" }}>
           Join 12,000+ students who trusted Educeff for their academic journey. Register today and get a free counseling session.
         </p>
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", padding: "0 16px" }}>
           <button className="btn-primary" style={{ padding: "14px 32px", fontSize: 15 }} onClick={() => setModal("register")}>Register Now — It's Free</button>
           <button className="btn-outline" style={{ padding: "14px 32px", fontSize: 15 }} onClick={() => setModal("counseling")}>Book Free Counseling</button>
         </div>
@@ -651,7 +820,7 @@ function Footer({ setPage }) {
   return (
     <footer style={{ background: "#64B5F6", color: "rgba(255,255,255,0.6)", padding: "56px 0 24px" }}>
       <div className="container">
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40, marginBottom: 40 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 32, marginBottom: 40 }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
               <svg width="32" height="32" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -881,8 +1050,8 @@ function StudentPortal({ setPage, user }) {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#FFFFFF" }}>
-      <div style={{ width: 240, background: "#64B5F6", padding: "24px 12px", flexShrink: 0 }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#FFFFFF", flexDirection: "column" }}>
+      <div style={{ background: "#64B5F6", padding: "24px 12px", flexShrink: 0, minWidth: 200 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 28, padding: "0 8px" }}>
           <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="rgba(255,255,255,0.18)"/>
@@ -905,7 +1074,7 @@ function StudentPortal({ setPage, user }) {
           <span style={{ fontSize: 16 }}>🚪</span> Logout
         </div>
       </div>
-      <div style={{ flex: 1, padding: "28px 32px", overflowY: "auto", background: "#FAFCFF" }}>
+      <div style={{ flex: 1, padding: "clamp(16px, 3vw, 32px)", overflowY: "auto", background: "#FAFCFF" }}>
         {tab === "dashboard" && <PortalDashboard user={user} profile={profile} />}
         {tab === "profile" && <PortalProfile user={user} profile={profile} onSave={loadProfile} />}
         {tab === "documents" && <DocumentCenter user={user} uploadedDocs={uploadedDocs} onUpload={loadProfile} />}
@@ -942,7 +1111,7 @@ function PortalDashboard({ user, profile }) {
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Welcome back, {firstName} 👋</h1>
       <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 28 }}>Here's an overview of your current applications and tasks.</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
         {[
           { label: "Active Applications", val: stats.applications, color: "#64B5F6" },
           { label: "Documents Uploaded", val: `${stats.docs}/4`, color: "#D97706" },
@@ -992,7 +1161,7 @@ function PortalProfile({ user, profile, onSave }) {
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 28 }}>Profile Management</h1>
       {saved && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#065F46" }}>✅ Profile saved successfully!</div>}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
         <div className="card" style={{ textAlign: "center", padding: 28 }}>
           <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#E3F2FD", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 22, margin: "0 auto 14px" }}>{initials}</div>
           <div style={{ fontWeight: 600, fontSize: 16, color: "#64B5F6" }}>{form.first_name} {form.last_name}</div>
@@ -1071,7 +1240,7 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
       <div style={{ background: "#FFFFFF", borderRadius: 8, border: "1px solid #E3F2FD", padding: 24, marginBottom: 24 }}>
         <h3 style={{ fontSize: 15, fontWeight: 600, color: "#64B5F6", marginBottom: 4 }}>Required Documents</h3>
         <p style={{ fontSize: 13, color: "#DC2626", marginBottom: 20 }}>All 4 documents must be uploaded to proceed with applications.</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
           {REQUIRED_DOCS.map(doc => {
             const isUploaded = !!uploadedDocs[doc] || Object.keys(uploadedDocs).some(k => k.startsWith(doc));
             return (
@@ -1228,7 +1397,7 @@ function SupportTab() {
   return (
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Support Center</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 28 }}>
         {[
           { icon: "📞", title: "Call Support", desc: "+91 98765 43210", sub: "Mon–Sat, 9AM–7PM", action: "Call Now" },
           { icon: "💬", title: "Live Chat", desc: "Chat with an advisor", sub: "Avg. response: 5 min", action: "Start Chat" },
@@ -1275,8 +1444,8 @@ function AdminDashboard({ setPage }) {
   ];
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#FFFFFF" }}>
-      <div style={{ width: 248, background: "#64B5F6", padding: "24px 12px", flexShrink: 0 }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#FFFFFF", flexDirection: "column" }}>
+      <div style={{ background: "#64B5F6", padding: "24px 12px", flexShrink: 0, minWidth: 200 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, padding: "0 8px" }}>
           <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="rgba(255,255,255,0.18)"/>
@@ -1330,7 +1499,7 @@ function AdminOverview() {
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Dashboard Overview</h1>
       <p style={{ color: "#6D28D9", fontSize: 13, marginBottom: 28 }}>Last updated: {new Date().toLocaleString("en-IN")}</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
         {metrics.map(m => (
           <div key={m.label} className="stat-card">
             <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 6 }}>{m.label}</div>
@@ -1339,7 +1508,7 @@ function AdminOverview() {
           </div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
         <div className="card" style={{ padding: 22 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#64B5F6" }}>Recent Registrations</h3>
           <table>
@@ -1462,7 +1631,7 @@ function AdminApplications() {
   return (
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Exam Application Management</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 24 }}>
         {[{ l: "Total Applications", v: "1,284", b: "badge-info" }, { l: "Pending", v: "89", b: "badge-warning" }, { l: "Approved", v: "1,103", b: "badge-success" }, { l: "Rejected", v: "92", b: "badge-danger" }].map(s => (
           <div key={s.l} className="stat-card">
             <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 4 }}>{s.l}</div>
@@ -1501,7 +1670,7 @@ function AdminCounseling() {
   return (
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Counseling Management</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
         <div className="card" style={{ padding: 22 }}>
           <h3 style={{ fontWeight: 600, marginBottom: 16, fontSize: 15, color: "#64B5F6" }}>Upcoming Sessions</h3>
           {[
@@ -1575,7 +1744,7 @@ function AdminReports() {
   return (
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Reports & Analytics</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
         <div className="card" style={{ padding: 24 }}>
           <h3 style={{ fontWeight: 600, marginBottom: 20, fontSize: 15, color: "#64B5F6" }}>Admissions by Stream (2024–25)</h3>
           {bars.map(b => (
@@ -1651,7 +1820,7 @@ function AboutPage() {
       <div style={{ background: "#64B5F6", padding: "64px 0" }}>
         <div className="container">
           <div className="tag">Our Story</div>
-          <h1 className="font-display" style={{ fontSize: 46, fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>About Educeff</h1>
+          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>About Educeff</h1>
           <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, maxWidth: 540, marginTop: 12, lineHeight: 1.7 }}>Founded in Pune, we've been transforming academic dreams into realities since 2015.</p>
         </div>
       </div>
@@ -1667,7 +1836,7 @@ function AboutPage() {
                 Today, we've guided over 12,000 students into their dream colleges — from premier IITs and NITs to top private institutions across the country. Our certified team of 14 counselors brings together expertise in engineering, medical, law, management, and arts streams.
               </p>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
               {STATS.map(s => (
                 <div key={s.label} style={{ background: "#64B5F6", borderRadius: 10, padding: 28, textAlign: "center" }}>
                   <div className="font-display" style={{ fontSize: 32, fontWeight: 700, color: "#64B5F6" }}>{s.num}</div>
@@ -1682,9 +1851,9 @@ function AboutPage() {
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <div className="tag">Our Team</div>
-            <h2 className="font-display" style={{ fontSize: 36, fontWeight: 700, color: "#64B5F6" }}>Meet Our Expert Counselors</h2>
+            <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#64B5F6" }}>Meet Our Expert Counselors</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
             {[
               { name: "Dr. Priya Mehta", role: "Head Counselor — Engineering", exp: "12 years", initials: "PM" },
               { name: "Mr. Arun Kumar", role: "Senior Counselor — Medical", exp: "9 years", initials: "AK" },
@@ -1711,12 +1880,12 @@ function ServicesPage() {
       <div style={{ background: "#64B5F6", padding: "64px 0" }}>
         <div className="container">
           <div className="tag">What We Offer</div>
-          <h1 className="font-display" style={{ fontSize: 46, fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Our Services</h1>
+          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Our Services</h1>
         </div>
       </div>
       <section className="section section-alt">
         <div className="container">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
             {SERVICES.map(s => (
               <div key={s.title} className="card" style={{ borderTop: `4px solid ${"#64B5F6"}` }}>
                 <div style={{ fontSize: 36, marginBottom: 16 }}>{s.icon}</div>
@@ -1751,7 +1920,7 @@ function CollegesPage() {
       <div style={{ background: "#64B5F6", padding: "64px 0" }}>
         <div className="container">
           <div className="tag">Partner Institutions</div>
-          <h1 className="font-display" style={{ fontSize: 46, fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Colleges & Courses</h1>
+          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Colleges & Courses</h1>
           <p style={{ color: "rgba(255,255,255,0.65)", marginTop: 10, fontSize: 15 }}>340+ partner colleges across Maharashtra and India</p>
         </div>
       </div>
@@ -1762,7 +1931,7 @@ function CollegesPage() {
               <button key={f} className="btn-teal" style={{ fontSize: 12, padding: "6px 16px", background: f === "All" ? "#A8D4F5" : "transparent", color: f === "All" ? "white" : "#A8D4F5", border: `1px solid ${"#A8D4F5"}` }}>{f}</button>
             ))}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
             {colleges.map(c => (
               <div key={c.name} className="card">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
