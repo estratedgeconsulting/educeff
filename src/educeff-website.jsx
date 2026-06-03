@@ -4,8 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 // ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
 // Replace these with your actual Supabase project URL and anon key
 // Get them from: https://supabase.com → your project → Settings → API
-const SUPABASE_URL = "https://psjvkijxsjyhmrzgvdxh.supabase.co";
-const SUPABASE_ANON_KEY ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzanZraWp4c2p5aG1yemd2ZHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ2MDgsImV4cCI6MjA5NjA1MDYwOH0.XF_GG9_jldjhWtp4wV-K3H4VBTDlNqWSJLqEEDiQpHc";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const COLORS = {
