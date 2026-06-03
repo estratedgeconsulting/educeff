@@ -1,4 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+// ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
+// Replace these with your actual Supabase project URL and anon key
+// Get them from: https://supabase.com → your project → Settings → API
+const SUPABASE_URL = "https://psjvkijxsjyhmrzgvdxh.supabase.co";
+const SUPABASE_ANON_KEY ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzanZraWp4c2p5aG1yemd2ZHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ2MDgsImV4cCI6MjA5NjA1MDYwOH0.XF_GG9_jldjhWtp4wV-K3H4VBTDlNqWSJLqEEDiQpHc";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const COLORS = {
   navy: "#64B5F6",
@@ -545,6 +553,34 @@ function FAQ() {
 }
 
 function ContactForm() {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleSubmit = async () => {
+    setError(""); setLoading(true);
+    try {
+      const { error: err } = await supabase.from("contact_messages").insert({
+        full_name: form.name,
+        email: form.email,
+        phone: form.phone,
+        subject: form.subject,
+        message: form.message,
+        created_at: new Date().toISOString(),
+      });
+      if (err) throw err;
+      setSent(true);
+      setForm({ name: "", email: "", phone: "", subject: "", message: "" });
+    } catch (err) {
+      setError(err.message || "Failed to send. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="section section-alt">
       <div className="container">
@@ -570,14 +606,21 @@ function ContactForm() {
           </div>
           <div className="card">
             <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 20, color: "#64B5F6" }}>Send us a Message</h3>
-            <label>Full Name</label><input placeholder="Your full name" />
-            <label>Email Address</label><input placeholder="your@email.com" type="email" />
-            <label>Phone Number</label><input placeholder="+91 98765 43210" />
+            {sent && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46" }}>✅ Message sent! We'll get back to you within 2 hours.</div>}
+            {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
+            <label>Full Name</label><input name="name" placeholder="Your full name" value={form.name} onChange={handleChange} />
+            <label>Email Address</label><input name="email" placeholder="your@email.com" type="email" value={form.email} onChange={handleChange} />
+            <label>Phone Number</label><input name="phone" placeholder="+91 98765 43210" value={form.phone} onChange={handleChange} />
             <label>Subject</label>
-            <select><option>Select topic</option><option>Admission Inquiry</option><option>Counseling Session</option><option>Exam Form Filling</option><option>Scholarship Help</option><option>Other</option></select>
+            <select name="subject" value={form.subject} onChange={handleChange}>
+              <option value="">Select topic</option>
+              <option>Admission Inquiry</option><option>Counseling Session</option><option>Exam Form Filling</option><option>Scholarship Help</option><option>Other</option>
+            </select>
             <label>Message</label>
-            <textarea rows={4} placeholder="Tell us how we can help..." style={{ resize: "vertical" }} />
-            <button className="btn-navy" style={{ width: "100%", padding: 14 }}>Send Message →</button>
+            <textarea name="message" rows={4} placeholder="Tell us how we can help..." style={{ resize: "vertical" }} value={form.message} onChange={handleChange} />
+            <button className="btn-navy" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }} onClick={handleSubmit} disabled={loading}>
+              {loading ? "Sending..." : "Send Message →"}
+            </button>
           </div>
         </div>
       </div>
@@ -649,29 +692,34 @@ function Footer({ setPage }) {
 // ─── MODALS ──────────────────────────────────────────────────────────────────
 
 function LoginModal({ onClose, onLogin }) {
-  const [step, setStep] = useState("creds");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  if (step === "otp") {
-    return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal" onClick={e => e.stopPropagation()}>
-          <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6D28D9" }}>×</button>
-          <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Verify OTP</h2>
-          <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Enter the 6-digit OTP sent to your mobile number.</p>
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 24 }}>
-            {[...Array(6)].map((_, i) => (
-              <input key={i} maxLength={1} style={{ width: 44, height: 48, textAlign: "center", fontSize: 20, fontWeight: 600, marginBottom: 0 }} />
-            ))}
-          </div>
-          <button className="btn-navy" style={{ width: "100%", padding: 14 }} onClick={() => onLogin(isAdmin)}>Verify & Login →</button>
-          <p style={{ textAlign: "center", marginTop: 14, fontSize: 13, color: "#6D28D9" }}>
-            Didn't receive? <span style={{ color: "#64B5F6", cursor: "pointer" }}>Resend OTP</span>
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const handleLogin = async () => {
+    setError(""); setLoading(true);
+    try {
+      if (isAdmin) {
+        // Admin: check against admins table after auth
+        const { data, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (authErr) throw authErr;
+        const { data: adminData } = await supabase.from("admins").select("*").eq("user_id", data.user.id).single();
+        if (!adminData) throw new Error("You do not have admin access.");
+        onLogin(true);
+      } else {
+        // Student login
+        const { error: authErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (authErr) throw authErr;
+        onLogin(false);
+      }
+    } catch (err) {
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -681,17 +729,24 @@ function LoginModal({ onClose, onLogin }) {
         <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Sign in to your Educeff account</p>
         <div style={{ display: "flex", gap: 0, background: "#F5FAFF", borderRadius: 6, padding: 3, marginBottom: 20 }}>
           {["Student", "Admin"].map(t => (
-            <button key={t} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 4, background: (t === "Admin") === isAdmin ? "#FFFFFF" : "transparent", fontWeight: 500, fontSize: 13, cursor: "pointer", color: (t === "Admin") === isAdmin ? "#64B5F6" : "#F5FAFF", transition: "all 0.2s" }} onClick={() => setIsAdmin(t === "Admin")}>{t}</button>
+            <button key={t} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 4, background: (t === "Admin") === isAdmin ? "#FFFFFF" : "transparent", fontWeight: 500, fontSize: 13, cursor: "pointer", color: (t === "Admin") === isAdmin ? "#64B5F6" : "#6D28D9", transition: "all 0.2s" }} onClick={() => { setIsAdmin(t === "Admin"); setError(""); }}>{t}</button>
           ))}
         </div>
-        <label>Email / Mobile</label>
-        <input placeholder={isAdmin ? "admin@educeff.com" : "your@email.com or +91 XXXXX"} />
+        {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
+        <label>Email Address</label>
+        <input type="email" placeholder={isAdmin ? "admin@educeff.com" : "your@email.com"} value={email} onChange={e => setEmail(e.target.value)} />
         <label>Password</label>
-        <input type="password" placeholder="Enter password" />
+        <input type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} />
         <div style={{ textAlign: "right", marginTop: -8, marginBottom: 16 }}>
-          <span style={{ fontSize: 12, color: "#64B5F6", cursor: "pointer" }}>Forgot password?</span>
+          <span style={{ fontSize: 12, color: "#64B5F6", cursor: "pointer" }} onClick={async () => {
+            if (!email) { alert("Enter your email first"); return; }
+            await supabase.auth.resetPasswordForEmail(email);
+            alert("Password reset email sent!");
+          }}>Forgot password?</span>
         </div>
-        <button className="btn-navy" style={{ width: "100%", padding: 14 }} onClick={() => setStep("otp")}>Send OTP & Continue →</button>
+        <button className="btn-navy" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }} onClick={handleLogin} disabled={loading}>
+          {loading ? "Signing in..." : "Sign In →"}
+        </button>
         <p style={{ textAlign: "center", marginTop: 16, fontSize: 13, color: "#6D28D9" }}>
           New student? <span style={{ color: "#64B5F6", cursor: "pointer" }} onClick={onClose}>Register for free</span>
         </p>
@@ -701,27 +756,84 @@ function LoginModal({ onClose, onLogin }) {
 }
 
 function RegisterModal({ onClose }) {
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", mobile: "", dob: "", course: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleRegister = async () => {
+    setError(""); setLoading(true);
+    try {
+      // 1. Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: { data: { full_name: `${form.firstName} ${form.lastName}` } }
+      });
+      if (authError) throw authError;
+
+      // 2. Save student profile to 'students' table
+      const { error: profileError } = await supabase.from("students").insert({
+        user_id: authData.user.id,
+        first_name: form.firstName,
+        last_name: form.lastName,
+        email: form.email,
+        mobile: form.mobile,
+        date_of_birth: form.dob,
+        course_interest: form.course,
+        status: "active",
+        created_at: new Date().toISOString(),
+      });
+      if (profileError) throw profileError;
+
+      setSuccess(true);
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 420, textAlign: "center" }} onClick={e => e.stopPropagation()}>
+        <div style={{ fontSize: 52, marginBottom: 16 }}>🎉</div>
+        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#64B5F6", marginBottom: 8 }}>Account Created!</h2>
+        <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Please check your email <strong>{form.email}</strong> and click the confirmation link to activate your account.</p>
+        <button className="btn-primary" style={{ width: "100%", padding: 13 }} onClick={onClose}>Got it →</button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6D28D9" }}>×</button>
         <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Create Your Account</h2>
         <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Join Educeff — your academic journey starts here.</p>
+        {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-          <div><label>First Name</label><input placeholder="Rahul" /></div>
-          <div><label>Last Name</label><input placeholder="Sharma" /></div>
+          <div><label>First Name</label><input name="firstName" placeholder="Rahul" value={form.firstName} onChange={handleChange} /></div>
+          <div><label>Last Name</label><input name="lastName" placeholder="Sharma" value={form.lastName} onChange={handleChange} /></div>
         </div>
-        <label>Email Address</label><input placeholder="rahul@email.com" type="email" />
-        <label>Mobile Number</label><input placeholder="+91 98765 43210" />
-        <label>Date of Birth</label><input type="date" />
+        <label>Email Address</label><input name="email" placeholder="rahul@email.com" type="email" value={form.email} onChange={handleChange} />
+        <label>Mobile Number</label><input name="mobile" placeholder="+91 98765 43210" value={form.mobile} onChange={handleChange} />
+        <label>Date of Birth</label><input name="dob" type="date" value={form.dob} onChange={handleChange} />
         <label>Course Interested In</label>
-        <select><option>Select your field</option><option>Engineering</option><option>Medical</option><option>Law</option><option>Management</option><option>Architecture</option><option>Science / Commerce</option></select>
-        <label>Password</label><input type="password" placeholder="Create a strong password" />
+        <select name="course" value={form.course} onChange={handleChange}>
+          <option value="">Select your field</option>
+          <option>Engineering</option><option>Medical</option><option>Law</option><option>Management</option><option>Architecture</option><option>Science / Commerce</option>
+        </select>
+        <label>Password</label><input name="password" type="password" placeholder="Create a strong password (min 6 chars)" value={form.password} onChange={handleChange} />
         <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 16 }}>
           <input type="checkbox" style={{ width: "auto", marginTop: 3, marginBottom: 0 }} />
           <span style={{ fontSize: 12, color: "#6D28D9" }}>I agree to the <span style={{ color: "#64B5F6" }}>Terms of Service</span> and <span style={{ color: "#64B5F6" }}>Privacy Policy</span>.</span>
         </div>
-        <button className="btn-primary" style={{ width: "100%", padding: 14 }}>Create Account & Verify OTP →</button>
+        <button className="btn-primary" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }} onClick={handleRegister} disabled={loading}>
+          {loading ? "Creating Account..." : "Create Account →"}
+        </button>
       </div>
     </div>
   );
@@ -729,8 +841,29 @@ function RegisterModal({ onClose }) {
 
 // ─── STUDENT PORTAL ──────────────────────────────────────────────────────────
 
-function StudentPortal({ setPage }) {
+function StudentPortal({ setPage, user }) {
   const [tab, setTab] = useState("dashboard");
+  const [profile, setProfile] = useState(null);
+  const [uploadedDocs, setUploadedDocs] = useState({});
+
+  useEffect(() => {
+    if (user) loadProfile();
+  }, [user]);
+
+  const loadProfile = async () => {
+    const { data } = await supabase.from("students").select("*").eq("user_id", user.id).single();
+    if (data) setProfile(data);
+    // Load uploaded doc names
+    const { data: docs } = await supabase.storage.from("student-documents").list(`${user.id}/`);
+    if (docs) {
+      const docMap = {};
+      docs.forEach(d => { docMap[d.name] = true; });
+      setUploadedDocs(docMap);
+    }
+  };
+
+  const initials = profile ? `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}` : "ST";
+  const fullName = profile ? `${profile.first_name} ${profile.last_name}` : "Student";
 
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: "📊" },
@@ -742,7 +875,10 @@ function StudentPortal({ setPage }) {
     { id: "support", label: "Support", icon: "💬" },
   ];
 
-  const [uploadedDocs, setUploadedDocs] = useState({ "Aadhaar Card": true, "10th Marksheet": true, "Passport Size Photo": false, "Signature": false });
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setPage("Home");
+  };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#FFFFFF" }}>
@@ -755,46 +891,63 @@ function StudentPortal({ setPage }) {
           </svg>
           <span className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#FFFFFF" }}>Edu<span style={{color:"#E0D4FC"}}>ceff</span></span>
         </div>
-        <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: "12px 14px", marginBottom: 20 }}>
-          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#F5FAFF", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, marginBottom: 8 }}>RK</div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>Rahul Kulkarni</div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>EDU2025-1042 · Engineering</div>
+        <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 8, padding: "12px 14px", marginBottom: 20 }}>
+          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#F5FAFF", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, marginBottom: 8 }}>{initials}</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>{fullName}</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>{profile?.course_interest || "Student"}</div>
         </div>
         {tabs.map(t => (
           <div key={t.id} className={`sidebar-link ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
-            <span style={{ fontSize: 16 }}>{t.icon}</span>
-            {t.label}
+            <span style={{ fontSize: 16 }}>{t.icon}</span>{t.label}
           </div>
         ))}
-        <div className="sidebar-link" onClick={() => setPage("Home")} style={{ marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 14 }}>
+        <div className="sidebar-link" onClick={handleLogout} style={{ marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 14 }}>
           <span style={{ fontSize: 16 }}>🚪</span> Logout
         </div>
       </div>
-
-      <div style={{ flex: 1, padding: "28px 32px", overflowY: "auto", background: "#FFFFFF" }}>
-        {tab === "dashboard" && <PortalDashboard />}
-        {tab === "profile" && <PortalProfile />}
-        {tab === "documents" && <DocumentCenter uploadedDocs={uploadedDocs} setUploadedDocs={setUploadedDocs} />}
-        {tab === "applications" && <ApplicationsTab />}
-        {tab === "tracking" && <TrackingTab />}
-        {tab === "notifications" && <NotificationsTab />}
-        {tab === "support" && <SupportTab />}
+      <div style={{ flex: 1, padding: "28px 32px", overflowY: "auto", background: "#FAFCFF" }}>
+        {tab === "dashboard" && <PortalDashboard user={user} profile={profile} />}
+        {tab === "profile" && <PortalProfile user={user} profile={profile} onSave={loadProfile} />}
+        {tab === "documents" && <DocumentCenter user={user} uploadedDocs={uploadedDocs} onUpload={loadProfile} />}
+        {tab === "applications" && <ApplicationsTab user={user} />}
+        {tab === "tracking" && <TrackingTab user={user} />}
+        {tab === "notifications" && <NotificationsTab user={user} />}
+        {tab === "support" && <SupportTab user={user} />}
       </div>
     </div>
   );
 }
 
-function PortalDashboard() {
+function PortalDashboard({ user, profile }) {
+  const [stats, setStats] = useState({ applications: 0, docs: 0, sessions: 0, pending: 0 });
+  const [recentApps, setRecentApps] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      const { data: apps } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5);
+      if (apps) {
+        setRecentApps(apps);
+        setStats(s => ({ ...s, applications: apps.filter(a => a.status !== "rejected").length, pending: apps.filter(a => a.status === "pending").length }));
+      }
+      const { data: docs } = await supabase.storage.from("student-documents").list(`${user.id}/`);
+      if (docs) setStats(s => ({ ...s, docs: docs.length }));
+    };
+    load();
+  }, [user]);
+
+  const firstName = profile?.first_name || "Student";
+
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Welcome back, Rahul 👋</h1>
+      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Welcome back, {firstName} 👋</h1>
       <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 28 }}>Here's an overview of your current applications and tasks.</p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
         {[
-          { label: "Active Applications", val: "3", color: "#64B5F6" },
-          { label: "Documents Uploaded", val: "2/4", color: "#D97706" },
-          { label: "Counseling Sessions", val: "1", color: "#059669" },
-          { label: "Pending Actions", val: "2", color: "#DC2626" },
+          { label: "Active Applications", val: stats.applications, color: "#64B5F6" },
+          { label: "Documents Uploaded", val: `${stats.docs}/4`, color: "#D97706" },
+          { label: "Counseling Sessions", val: stats.sessions, color: "#059669" },
+          { label: "Pending Actions", val: stats.pending, color: "#DC2626" },
         ].map(s => (
           <div key={s.label} className="stat-card">
             <div style={{ fontSize: 13, color: "#6D28D9", marginBottom: 6 }}>{s.label}</div>
@@ -802,118 +955,159 @@ function PortalDashboard() {
           </div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <div className="card" style={{ padding: 22 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#64B5F6" }}>Recent Applications</h3>
-          {[
-            { name: "COEP Pune — B.E. Computer", status: "Under Review", badge: "badge-info" },
-            { name: "VJTI Mumbai — B.E. Mechanical", status: "Submitted", badge: "badge-success" },
-            { name: "MIT Pune — B.E. Electronics", status: "Documents Required", badge: "badge-warning" },
-          ].map(a => (
-            <div key={a.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${"#F5FAFF"}` }}>
-              <span style={{ fontSize: 13, color: "#64B5F6" }}>{a.name}</span>
-              <span className={`badge ${a.badge}`}>{a.status}</span>
-            </div>
-          ))}
-        </div>
-        <div className="card" style={{ padding: 22 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#64B5F6" }}>Pending Tasks</h3>
-          {[
-            { task: "Upload Passport Size Photo", priority: "High" },
-            { task: "Upload Signature", priority: "High" },
-            { task: "Complete profile information", priority: "Medium" },
-            { task: "Verify mobile number", priority: "Low" },
-          ].map(t => (
-            <div key={t.task} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${"#F5FAFF"}` }}>
-              <span style={{ fontSize: 13, color: "#64B5F6" }}>🔸 {t.task}</span>
-              <span className={`badge ${t.priority === "High" ? "badge-danger" : t.priority === "Medium" ? "badge-warning" : "badge-gray"}`}>{t.priority}</span>
-            </div>
-          ))}
-        </div>
+      <div className="card" style={{ padding: 22 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#64B5F6" }}>Recent Applications</h3>
+        {recentApps.length === 0 ? (
+          <p style={{ fontSize: 14, color: "#6D28D9" }}>No applications yet. Click "My Applications" to add one.</p>
+        ) : recentApps.map(a => (
+          <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid #F5FAFF" }}>
+            <span style={{ fontSize: 13, color: "#64B5F6" }}>{a.college} — {a.course}</span>
+            <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`}>{a.status?.replace("_", " ")}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function PortalProfile() {
+function PortalProfile({ user, profile, onSave }) {
+  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", mobile: "", date_of_birth: "", gender: "", address: "", tenth_percent: "", twelfth_percent: "", entrance_exam: "", score: "" });
+  const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => { if (profile) setForm(f => ({ ...f, ...profile })); }, [profile]);
+
+  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleSave = async () => {
+    setLoading(true); setSaved(false);
+    const { error } = await supabase.from("students").update({ ...form, updated_at: new Date().toISOString() }).eq("user_id", user.id);
+    setLoading(false);
+    if (!error) { setSaved(true); onSave(); setTimeout(() => setSaved(false), 3000); }
+  };
+
+  const initials = `${form.first_name?.[0] || ""}${form.last_name?.[0] || ""}` || "ST";
+
   return (
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 28 }}>Profile Management</h1>
+      {saved && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#065F46" }}>✅ Profile saved successfully!</div>}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 24 }}>
         <div className="card" style={{ textAlign: "center", padding: 28 }}>
-          <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#64B5F6", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 22, margin: "0 auto 14px" }}>RK</div>
-          <div style={{ fontWeight: 600, fontSize: 16, color: "#64B5F6" }}>Rahul Kulkarni</div>
-          <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>EDU2025-1042</div>
-          <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 20 }}>Engineering Stream</div>
+          <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#E3F2FD", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 22, margin: "0 auto 14px" }}>{initials}</div>
+          <div style={{ fontWeight: 600, fontSize: 16, color: "#64B5F6" }}>{form.first_name} {form.last_name}</div>
+          <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>{user?.email}</div>
+          <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 20 }}>{form.course_interest || "Student"}</div>
           <span className="badge badge-success">Profile Active</span>
-          <div style={{ marginTop: 20 }}>
-            <button className="btn-teal" style={{ width: "100%" }}>Change Photo</button>
-          </div>
         </div>
         <div className="card" style={{ padding: 28 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: "#64B5F6" }}>Personal Information</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-            <div><label>First Name</label><input defaultValue="Rahul" /></div>
-            <div><label>Last Name</label><input defaultValue="Kulkarni" /></div>
-            <div><label>Email</label><input defaultValue="rahul.k@gmail.com" type="email" /></div>
-            <div><label>Mobile</label><input defaultValue="+91 98765 43210" /></div>
-            <div><label>Date of Birth</label><input type="date" defaultValue="2006-03-15" /></div>
-            <div><label>Gender</label><select defaultValue="Male"><option>Male</option><option>Female</option><option>Other</option></select></div>
-            <div style={{ gridColumn: "span 2" }}><label>Address</label><input defaultValue="123 Pimpri Road, Pune 411018" /></div>
+            <div><label>First Name</label><input name="first_name" value={form.first_name || ""} onChange={handleChange} /></div>
+            <div><label>Last Name</label><input name="last_name" value={form.last_name || ""} onChange={handleChange} /></div>
+            <div><label>Email</label><input value={user?.email || ""} disabled style={{ background: "#F5FAFF" }} /></div>
+            <div><label>Mobile</label><input name="mobile" value={form.mobile || ""} onChange={handleChange} /></div>
+            <div><label>Date of Birth</label><input name="date_of_birth" type="date" value={form.date_of_birth || ""} onChange={handleChange} /></div>
+            <div><label>Gender</label><select name="gender" value={form.gender || ""} onChange={handleChange}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+            <div style={{ gridColumn: "span 2" }}><label>Address</label><input name="address" value={form.address || ""} onChange={handleChange} /></div>
           </div>
           <h3 style={{ fontSize: 16, fontWeight: 600, margin: "20px 0 16px", color: "#64B5F6" }}>Academic Information</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-            <div><label>10th Percentage</label><input defaultValue="92.4%" /></div>
-            <div><label>12th Percentage</label><input defaultValue="88.6%" /></div>
-            <div><label>Entrance Exam</label><select><option>JEE Main</option><option>MHT-CET</option><option>NEET</option></select></div>
-            <div><label>Score/Percentile</label><input defaultValue="95.2 Percentile" /></div>
+            <div><label>10th Percentage</label><input name="tenth_percent" value={form.tenth_percent || ""} onChange={handleChange} /></div>
+            <div><label>12th Percentage</label><input name="twelfth_percent" value={form.twelfth_percent || ""} onChange={handleChange} /></div>
+            <div><label>Entrance Exam</label><select name="entrance_exam" value={form.entrance_exam || ""} onChange={handleChange}><option value="">Select</option><option>JEE Main</option><option>MHT-CET</option><option>NEET</option><option>CLAT</option><option>CAT</option></select></div>
+            <div><label>Score/Percentile</label><input name="score" value={form.score || ""} onChange={handleChange} /></div>
           </div>
-          <button className="btn-primary" style={{ marginTop: 8 }}>Save Changes</button>
+          <button className="btn-primary" style={{ marginTop: 8, opacity: loading ? 0.7 : 1 }} onClick={handleSave} disabled={loading}>
+            {loading ? "Saving..." : "Save Changes"}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function DocumentCenter({ uploadedDocs, setUploadedDocs }) {
+function DocumentCenter({ user, uploadedDocs, onUpload }) {
+  const [uploading, setUploading] = useState({});
+  const [error, setError] = useState("");
+
+  const handleUpload = async (docName, file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { setError(`${docName}: File too large. Max 5MB.`); return; }
+    setError(""); setUploading(u => ({ ...u, [docName]: true }));
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/${docName}.${ext}`;
+    const { error: uploadErr } = await supabase.storage.from("student-documents").upload(path, file, { upsert: true });
+    if (!uploadErr) {
+      await supabase.from("student_documents").upsert({ user_id: user.id, doc_name: docName, file_path: path, uploaded_at: new Date().toISOString(), status: "pending_review" });
+      onUpload();
+    } else setError(uploadErr.message);
+    setUploading(u => ({ ...u, [docName]: false }));
+  };
+
+  const handleView = async (docName) => {
+    const { data } = await supabase.storage.from("student-documents").list(`${user.id}/`, { search: docName });
+    if (data && data.length > 0) {
+      const { data: url } = supabase.storage.from("student-documents").getPublicUrl(`${user.id}/${data[0].name}`);
+      window.open(url.publicUrl, "_blank");
+    }
+  };
+
+  const handleRemove = async (docName) => {
+    const { data } = await supabase.storage.from("student-documents").list(`${user.id}/`, { search: docName });
+    if (data && data.length > 0) {
+      await supabase.storage.from("student-documents").remove([`${user.id}/${data[0].name}`]);
+      await supabase.from("student_documents").delete().eq("user_id", user.id).eq("doc_name", docName);
+      onUpload();
+    }
+  };
+
   return (
     <div>
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Document Upload Center</h1>
       <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 28 }}>All documents are encrypted and stored securely. Accepted formats: PDF, JPG, PNG (max 5MB each).</p>
+      {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
 
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: `1px solid ${"#F5FAFF"}`, padding: 24, marginBottom: 24 }}>
+      <div style={{ background: "#FFFFFF", borderRadius: 8, border: "1px solid #E3F2FD", padding: 24, marginBottom: 24 }}>
         <h3 style={{ fontSize: 15, fontWeight: 600, color: "#64B5F6", marginBottom: 4 }}>Required Documents</h3>
         <p style={{ fontSize: 13, color: "#DC2626", marginBottom: 20 }}>All 4 documents must be uploaded to proceed with applications.</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
-          {REQUIRED_DOCS.map(doc => (
-            <div key={doc} style={{ border: `1px solid ${uploadedDocs[doc] ? "#059669" : "#F5FAFF"}`, borderRadius: 8, padding: 16, background: uploadedDocs[doc] ? "#F0FDF4" : "#FFFFFF" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <span style={{ fontSize: 14, fontWeight: 500, color: "#64B5F6" }}>📄 {doc}</span>
-                <span className={`badge ${uploadedDocs[doc] ? "badge-success" : "badge-danger"}`}>{uploadedDocs[doc] ? "✓ Uploaded" : "Required"}</span>
+          {REQUIRED_DOCS.map(doc => {
+            const isUploaded = !!uploadedDocs[doc] || Object.keys(uploadedDocs).some(k => k.startsWith(doc));
+            return (
+              <div key={doc} style={{ border: `1px solid ${isUploaded ? "#059669" : "#E3F2FD"}`, borderRadius: 8, padding: 16, background: isUploaded ? "#F0FDF4" : "#FFFFFF" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <span style={{ fontSize: 14, fontWeight: 500, color: "#64B5F6" }}>📄 {doc}</span>
+                  <span className={`badge ${isUploaded ? "badge-success" : "badge-danger"}`}>{isUploaded ? "✓ Uploaded" : "Required"}</span>
+                </div>
+                {isUploaded ? (
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="btn-teal" style={{ fontSize: 11, padding: "5px 12px" }} onClick={() => handleView(doc)}>View</button>
+                    <button style={{ fontSize: 11, padding: "5px 12px", background: "none", border: "1px solid #E3F2FD", borderRadius: 4, cursor: "pointer", color: "#DC2626" }} onClick={() => handleRemove(doc)}>Remove</button>
+                  </div>
+                ) : (
+                  <label className="upload-zone" style={{ padding: "14px", cursor: "pointer", display: "block" }}>
+                    <div style={{ fontSize: 13, color: "#6D28D9" }}>{uploading[doc] ? "Uploading..." : "Click to upload or drag & drop"}</div>
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} />
+                  </label>
+                )}
               </div>
-              {uploadedDocs[doc] ? (
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button className="btn-teal" style={{ fontSize: 11, padding: "5px 12px" }}>View</button>
-                  <button style={{ fontSize: 11, padding: "5px 12px", background: "none", border: `1px solid ${"#F5FAFF"}`, borderRadius: 4, cursor: "pointer", color: "#DC2626" }}>Remove</button>
-                </div>
-              ) : (
-                <div className="upload-zone" style={{ padding: "14px", cursor: "pointer" }} onClick={() => setUploadedDocs(p => ({ ...p, [doc]: true }))}>
-                  <div style={{ fontSize: 13, color: "#6D28D9" }}>Click to upload or drag & drop</div>
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: `1px solid ${"#F5FAFF"}`, padding: 24 }}>
+      <div style={{ background: "#FFFFFF", borderRadius: 8, border: "1px solid #E3F2FD", padding: 24 }}>
         <h3 style={{ fontSize: 15, fontWeight: 600, color: "#64B5F6", marginBottom: 4 }}>Optional Documents</h3>
         <p style={{ fontSize: 13, color: "#6D28D9", marginBottom: 20 }}>These may be required depending on your category and scholarship application.</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
           {OPTIONAL_DOCS.map(doc => (
-            <div key={doc} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", border: `1px solid ${"#F5FAFF"}`, borderRadius: 6, padding: "12px 16px" }}>
+            <div key={doc} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", border: "1px solid #E3F2FD", borderRadius: 6, padding: "12px 16px" }}>
               <span style={{ fontSize: 13, color: "#64B5F6" }}>📎 {doc}</span>
-              <button className="btn-teal" style={{ fontSize: 11, padding: "5px 12px" }}>Upload</button>
+              <label style={{ cursor: "pointer" }}>
+                <span className="btn-teal" style={{ fontSize: 11, padding: "5px 12px", display: "inline-block" }}>{uploading[doc] ? "..." : "Upload"}</span>
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} />
+              </label>
             </div>
           ))}
         </div>
@@ -922,29 +1116,55 @@ function DocumentCenter({ uploadedDocs, setUploadedDocs }) {
   );
 }
 
-function ApplicationsTab() {
+function ApplicationsTab({ user }) {
+  const [apps, setApps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ college: "", course: "", exam: "" });
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+      .then(({ data }) => { setApps(data || []); setLoading(false); });
+  }, [user]);
+
+  const handleAdd = async () => {
+    const { data, error } = await supabase.from("applications").insert({ user_id: user.id, college: form.college, course: form.course, exam: form.exam, status: "pending", created_at: new Date().toISOString() }).select().single();
+    if (!error) { setApps(a => [data, ...a]); setShowForm(false); setForm({ college: "", course: "", exam: "" }); }
+  };
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6" }}>My Applications</h1>
-        <button className="btn-primary">+ New Application</button>
+        <button className="btn-primary" onClick={() => setShowForm(s => !s)}>+ New Application</button>
       </div>
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: `1px solid ${"#F5FAFF"}`, overflow: "hidden" }}>
+      {showForm && (
+        <div className="card" style={{ marginBottom: 20, padding: 20 }}>
+          <h3 style={{ fontWeight: 600, fontSize: 15, marginBottom: 14, color: "#64B5F6" }}>Add New Application</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 16px" }}>
+            <div><label>College Name</label><input placeholder="e.g. COEP Pune" value={form.college} onChange={e => setForm(f => ({ ...f, college: e.target.value }))} /></div>
+            <div><label>Course</label><input placeholder="e.g. B.E. Computer" value={form.course} onChange={e => setForm(f => ({ ...f, course: e.target.value }))} /></div>
+            <div><label>Entrance Exam</label><input placeholder="e.g. JEE Main" value={form.exam} onChange={e => setForm(f => ({ ...f, exam: e.target.value }))} /></div>
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button className="btn-primary" onClick={handleAdd}>Submit Application</button>
+            <button className="btn-navy" style={{ background: "transparent", color: "#64B5F6", border: "1px solid #64B5F6" }} onClick={() => setShowForm(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+      <div style={{ background: "#FFFFFF", borderRadius: 8, border: "1px solid #E3F2FD", overflow: "hidden" }}>
         <table>
-          <thead><tr><th>Application ID</th><th>College</th><th>Course</th><th>Applied On</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Application ID</th><th>College</th><th>Course</th><th>Exam</th><th>Applied On</th><th>Status</th></tr></thead>
           <tbody>
-            {[
-              { id: "APP-001", college: "COEP, Pune", course: "B.E. Computer Science", date: "12 Jan 2025", status: "Under Review", badge: "badge-info" },
-              { id: "APP-002", college: "VJTI Mumbai", course: "B.E. Mechanical", date: "15 Jan 2025", status: "Submitted", badge: "badge-success" },
-              { id: "APP-003", college: "MIT Pune", course: "B.E. Electronics", date: "16 Jan 2025", status: "Docs Pending", badge: "badge-warning" },
-            ].map(a => (
+            {loading ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#6D28D9" }}>Loading...</td></tr>
+            : apps.length === 0 ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#6D28D9" }}>No applications yet.</td></tr>
+            : apps.map(a => (
               <tr key={a.id}>
-                <td style={{ fontWeight: 600, color: "#64B5F6" }}>{a.id}</td>
-                <td>{a.college}</td>
-                <td>{a.course}</td>
-                <td style={{ color: "#6D28D9" }}>{a.date}</td>
-                <td><span className={`badge ${a.badge}`}>{a.status}</span></td>
-                <td><button className="btn-teal" style={{ fontSize: 11, padding: "5px 14px" }}>View Details</button></td>
+                <td style={{ fontWeight: 600, color: "#64B5F6", fontSize: 12 }}>APP-{String(a.id).slice(-4).padStart(4,"0")}</td>
+                <td>{a.college}</td><td>{a.course}</td><td>{a.exam}</td>
+                <td style={{ color: "#6D28D9" }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</td>
+                <td><span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`}>{a.status?.replace("_"," ")}</span></td>
               </tr>
             ))}
           </tbody>
@@ -1570,21 +1790,38 @@ export default function App() {
   const [modal, setModal] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Restore session on page load
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        setIsLoggedIn(true);
+      }
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) { setUser(session.user); setIsLoggedIn(true); }
+      else { setUser(null); setIsLoggedIn(false); setIsAdmin(false); }
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const handleLogin = (admin) => {
-    setIsLoggedIn(true);
     setIsAdmin(admin);
     setModal(null);
     setPage(admin ? "Admin" : "Portal");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setIsLoggedIn(false);
     setIsAdmin(false);
+    setUser(null);
     setPage("Home");
   };
 
-  if (page === "Portal") return <StudentPortal setPage={setPage} />;
+  if (page === "Portal") return <StudentPortal setPage={setPage} user={user} />;
   if (page === "Admin") return <AdminDashboard setPage={setPage} />;
 
   return (
@@ -1613,20 +1850,63 @@ export default function App() {
       {modal === "login" && <LoginModal onClose={() => setModal(null)} onLogin={handleLogin} />}
       {modal === "register" && <RegisterModal onClose={() => setModal(null)} />}
       {modal === "counseling" && (
-        <div className="modal-overlay" onClick={() => setModal(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setModal(null)} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6D28D9" }}>×</button>
-            <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Book Free Counseling</h2>
-            <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>45-minute session with a certified academic counselor — completely free.</p>
-            <label>Full Name</label><input placeholder="Your name" />
-            <label>Mobile Number</label><input placeholder="+91 98765 43210" />
-            <label>Preferred Date</label><input type="date" />
-            <label>Stream of Interest</label>
-            <select><option>Select stream</option><option>Engineering</option><option>Medical</option><option>Law</option><option>Management</option><option>Science/Commerce</option></select>
-            <button className="btn-primary" style={{ width: "100%", padding: 14, marginTop: 4 }} onClick={() => setModal(null)}>Confirm Booking →</button>
-          </div>
-        </div>
+        <CounselingModal onClose={() => setModal(null)} user={user} />
       )}
+    </div>
+  );
+}
+
+function CounselingModal({ onClose, user }) {
+  const [form, setForm] = useState({ name: "", mobile: "", date: "", stream: "" });
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleBook = async () => {
+    setLoading(true);
+    const { error } = await supabase.from("counseling_bookings").insert({
+      user_id: user?.id || null,
+      full_name: form.name,
+      mobile: form.mobile,
+      preferred_date: form.date,
+      stream: form.stream,
+      status: "pending",
+      created_at: new Date().toISOString(),
+    });
+    setLoading(false);
+    if (!error) setDone(true);
+  };
+
+  if (done) return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" style={{ textAlign: "center" }} onClick={e => e.stopPropagation()}>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>📅</div>
+        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#64B5F6", marginBottom: 8 }}>Session Booked!</h2>
+        <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Our counselor will call you on <strong>{form.mobile}</strong> to confirm the appointment.</p>
+        <button className="btn-primary" style={{ width: "100%", padding: 13 }} onClick={onClose}>Done →</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6D28D9" }}>×</button>
+        <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Book Free Counseling</h2>
+        <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>45-minute session with a certified academic counselor — completely free.</p>
+        <label>Full Name</label><input name="name" placeholder="Your name" value={form.name} onChange={handleChange} />
+        <label>Mobile Number</label><input name="mobile" placeholder="+91 98765 43210" value={form.mobile} onChange={handleChange} />
+        <label>Preferred Date</label><input name="date" type="date" value={form.date} onChange={handleChange} />
+        <label>Stream of Interest</label>
+        <select name="stream" value={form.stream} onChange={handleChange}>
+          <option value="">Select stream</option>
+          <option>Engineering</option><option>Medical</option><option>Law</option><option>Management</option><option>Science/Commerce</option>
+        </select>
+        <button className="btn-primary" style={{ width: "100%", padding: 14, marginTop: 4, opacity: loading ? 0.7 : 1 }} onClick={handleBook} disabled={loading}>
+          {loading ? "Booking..." : "Confirm Booking →"}
+        </button>
+      </div>
     </div>
   );
 }
