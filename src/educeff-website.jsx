@@ -8,6 +8,7 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+
 const COLORS = {
   navy: "#64B5F6",
   navyLight: "#A8D4F5",
@@ -1906,7 +1907,138 @@ function ServicesPage() {
   );
 }
 
+// ─── COUNTDOWN HOOK ──────────────────────────────────────────────────────────
+function useCountdown(targetDate) {
+  const [timeLeft, setTimeLeft] = useState({});
+  useEffect(() => {
+    const calc = () => {
+      const diff = new Date(targetDate) - new Date();
+      if (diff <= 0) return setTimeLeft({ expired: true });
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        mins: Math.floor((diff / 1000 / 60) % 60),
+        secs: Math.floor((diff / 1000) % 60),
+      });
+    };
+    calc();
+    const t = setInterval(calc, 1000);
+    return () => clearInterval(t);
+  }, [targetDate]);
+  return timeLeft;
+}
+
+function ExamCard({ exam }) {
+  const countdown = useCountdown(exam.lastDate);
+  const daysLeft = countdown.days;
+  const isUrgent = !countdown.expired && daysLeft !== undefined && daysLeft <= 7;
+  const isExpired = countdown.expired;
+
+  const streamColors = {
+    Engineering: { bg: "#EFF6FF", border: "#BFDBFE", text: "#1D4ED8" },
+    Medical: { bg: "#F0FDF4", border: "#BBF7D0", text: "#15803D" },
+    Law: { bg: "#FFF7ED", border: "#FED7AA", text: "#C2410C" },
+    Management: { bg: "#FDF4FF", border: "#E9D5FF", text: "#7E22CE" },
+    Architecture: { bg: "#FFFBEB", border: "#FDE68A", text: "#B45309" },
+    Science: { bg: "#F0FDFA", border: "#99F6E4", text: "#0F766E" },
+    Commerce: { bg: "#FFF1F2", border: "#FECDD3", text: "#BE123C" },
+    Pharmacy: { bg: "#F5F3FF", border: "#DDD6FE", text: "#6D28D9" },
+  };
+  const sc = streamColors[exam.stream] || { bg: "#F0F7FF", border: "#C8E4FA", text: "#1565C0" };
+
+  return (
+    <div className="card" style={{ border: `1px solid ${isUrgent ? "#FCA5A5" : isExpired ? "#E5E7EB" : "#C8E4FA"}`, background: isExpired ? "#FAFAFA" : "#FFFFFF", opacity: isExpired ? 0.7 : 1, position: "relative", overflow: "hidden" }}>
+      {isUrgent && !isExpired && (
+        <div style={{ position: "absolute", top: 0, right: 0, background: "#DC2626", color: "white", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderBottomLeftRadius: 8 }}>CLOSING SOON</div>
+      )}
+      {isExpired && (
+        <div style={{ position: "absolute", top: 0, right: 0, background: "#6B7280", color: "white", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderBottomLeftRadius: 8 }}>CLOSED</div>
+      )}
+
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+        <div style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 8, padding: "6px 10px" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: sc.text, letterSpacing: "0.05em" }}>{exam.stream}</div>
+        </div>
+        <div style={{ background: "#F0F7FF", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, color: "#64B5F6" }}>{exam.level}</div>
+      </div>
+
+      {/* Exam Name */}
+      <h3 style={{ fontWeight: 700, fontSize: 16, color: "#1A1A2E", marginBottom: 4 }}>{exam.name}</h3>
+      <p style={{ fontSize: 12, color: "#6D28D9", marginBottom: 14 }}>{exam.fullName}</p>
+
+      {/* Dates */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+        <div style={{ background: "#F0F7FF", borderRadius: 6, padding: "8px 10px" }}>
+          <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 600, marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>Form Start</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{exam.formStart}</div>
+        </div>
+        <div style={{ background: isUrgent ? "#FEF2F2" : "#F0F7FF", borderRadius: 6, padding: "8px 10px" }}>
+          <div style={{ fontSize: 10, color: isUrgent ? "#FCA5A5" : "#90CAF9", fontWeight: 600, marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>Last Date</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: isUrgent ? "#DC2626" : "#1A1A2E" }}>{exam.lastDateDisplay}</div>
+        </div>
+      </div>
+
+      {/* Exam Date */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "8px 10px", background: "#F8F4FF", borderRadius: 6 }}>
+        <span style={{ fontSize: 11, color: "#7C3AED", fontWeight: 600 }}>📅 Exam Date</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{exam.examDate}</span>
+      </div>
+
+      {/* Countdown Timer */}
+      {!isExpired ? (
+        <div style={{ background: isUrgent ? "#FEF2F2" : "#EFF6FF", borderRadius: 8, padding: "10px 12px", marginBottom: 14 }}>
+          <div style={{ fontSize: 10, color: isUrgent ? "#DC2626" : "#64B5F6", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>⏱ Time Left to Apply</div>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+            {[
+              { val: countdown.days, label: "Days" },
+              { val: countdown.hours, label: "Hrs" },
+              { val: countdown.mins, label: "Min" },
+              { val: countdown.secs, label: "Sec" },
+            ].map(t => (
+              <div key={t.label} style={{ textAlign: "center", background: "white", borderRadius: 6, padding: "4px 8px", minWidth: 42, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: isUrgent ? "#DC2626" : "#64B5F6", lineHeight: 1.2 }}>{String(t.val ?? 0).padStart(2, "0")}</div>
+                <div style={{ fontSize: 9, color: "#90CAF9", fontWeight: 600, textTransform: "uppercase" }}>{t.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div style={{ background: "#F3F4F6", borderRadius: 8, padding: "10px 12px", marginBottom: 14, textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>Applications Closed</div>
+          <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>Next cycle expected {exam.nextCycle}</div>
+        </div>
+      )}
+
+      {/* Fee & Mode */}
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6D28D9", marginBottom: 14 }}>
+        <span>💰 Fee: <strong style={{ color: "#1A1A2E" }}>{exam.fee}</strong></span>
+        <span>🖥️ Mode: <strong style={{ color: "#1A1A2E" }}>{exam.mode}</strong></span>
+      </div>
+
+      {/* Conducting Body */}
+      <div style={{ fontSize: 11, color: "#90CAF9", marginBottom: 14 }}>Conducted by: <span style={{ color: "#64B5F6", fontWeight: 600 }}>{exam.conductedBy}</span></div>
+
+      {/* Buttons */}
+      <div style={{ display: "flex", gap: 8 }}>
+        <button className="btn-primary" style={{ flex: 1, fontSize: 12, padding: "9px 0", opacity: isExpired ? 0.5 : 1 }}
+          onClick={() => !isExpired && window.open(exam.officialLink, "_blank")}>
+          {isExpired ? "Closed" : "Apply Now →"}
+        </button>
+        <button className="btn-teal" style={{ fontSize: 12, padding: "9px 14px" }}
+          onClick={() => window.open(exam.officialLink, "_blank")}>
+          Info
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CollegesPage() {
+  const [activeStream, setActiveStream] = useState("All");
+  const [activeTab, setActiveTab] = useState("exams");
+  const [search, setSearch] = useState("");
+
   const colleges = [
     { name: "COEP Technological University", city: "Pune", stream: "Engineering", ranking: "#1 Govt. Engineering, Maharashtra", affiliation: "Autonomous" },
     { name: "VJTI Mumbai", city: "Mumbai", stream: "Engineering", ranking: "Top 10 Govt. Engineering, India", affiliation: "University of Mumbai" },
@@ -1915,37 +2047,122 @@ function CollegesPage() {
     { name: "IIM Nagpur", city: "Nagpur", stream: "Management", ranking: "IIM — CAT cutoff 90+", affiliation: "Autonomous" },
     { name: "MIT College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top 20 Private Engineering", affiliation: "Savitribai Phule Pune Univ." },
   ];
+
+  const EXAMS = [
+    { name: "JEE Main", fullName: "Joint Entrance Examination Main", stream: "Engineering", level: "National", formStart: "Nov 2025", lastDateDisplay: "Dec 31, 2025", lastDate: "2025-12-31", examDate: "Jan–Apr 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Nov 2026", officialLink: "https://jeemain.nta.nic.in" },
+    { name: "JEE Advanced", fullName: "Joint Entrance Examination Advanced", stream: "Engineering", level: "National", formStart: "Apr 2026", lastDateDisplay: "May 4, 2026", lastDate: "2026-05-04", examDate: "May 18, 2026", fee: "₹3,500", mode: "Online (CBT)", conductedBy: "IIT Delhi", nextCycle: "Apr 2027", officialLink: "https://jeeadv.ac.in" },
+    { name: "MHT-CET", fullName: "Maharashtra Common Entrance Test", stream: "Engineering", level: "State", formStart: "Jan 2026", lastDateDisplay: "Mar 15, 2026", lastDate: "2026-03-15", examDate: "Apr–May 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "State CET Cell", nextCycle: "Jan 2027", officialLink: "https://cetcell.mahacet.org" },
+    { name: "NEET UG", fullName: "National Eligibility cum Entrance Test", stream: "Medical", level: "National", formStart: "Feb 2026", lastDateDisplay: "Mar 7, 2026", lastDate: "2026-03-07", examDate: "May 3, 2026", fee: "₹1,700", mode: "Offline (OMR)", conductedBy: "NTA", nextCycle: "Feb 2027", officialLink: "https://neet.nta.nic.in" },
+    { name: "NEET PG", fullName: "National Eligibility cum Entrance Test PG", stream: "Medical", level: "National", formStart: "Dec 2025", lastDateDisplay: "Jan 15, 2026", lastDate: "2026-01-15", examDate: "Mar 2026", fee: "₹4,250", mode: "Online (CBT)", conductedBy: "NBE", nextCycle: "Dec 2026", officialLink: "https://nbe.edu.in" },
+    { name: "CLAT", fullName: "Common Law Admission Test", stream: "Law", level: "National", formStart: "Aug 2025", lastDateDisplay: "Oct 15, 2025", lastDate: "2025-10-15", examDate: "Dec 1, 2025", fee: "₹4,000", mode: "Online (CBT)", conductedBy: "Consortium of NLUs", nextCycle: "Aug 2026", officialLink: "https://consortiumofnlus.ac.in" },
+    { name: "AILET", fullName: "All India Law Entrance Test", stream: "Law", level: "National", formStart: "Nov 2025", lastDateDisplay: "Jan 31, 2026", lastDate: "2026-01-31", examDate: "Mar 2026", fee: "₹3,316", mode: "Online (CBT)", conductedBy: "NLU Delhi", nextCycle: "Nov 2026", officialLink: "https://nationallawuniversitydelhi.in" },
+    { name: "CAT", fullName: "Common Admission Test", stream: "Management", level: "National", formStart: "Aug 2026", lastDateDisplay: "Sep 13, 2026", lastDate: "2026-09-13", examDate: "Nov 2026", fee: "₹2,400", mode: "Online (CBT)", conductedBy: "IIMs", nextCycle: "Aug 2026", officialLink: "https://iimcat.ac.in" },
+    { name: "MAH-MBA-CET", fullName: "Maharashtra MBA Common Entrance Test", stream: "Management", level: "State", formStart: "Jan 2026", lastDateDisplay: "Feb 28, 2026", lastDate: "2026-02-28", examDate: "Mar 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "State CET Cell", nextCycle: "Jan 2027", officialLink: "https://cetcell.mahacet.org" },
+    { name: "CUET UG", fullName: "Common University Entrance Test UG", stream: "Science", level: "National", formStart: "Feb 2026", lastDateDisplay: "Mar 22, 2026", lastDate: "2026-03-22", examDate: "May 2026", fee: "₹750", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Feb 2027", officialLink: "https://cuet.samarth.ac.in" },
+    { name: "NATA", fullName: "National Aptitude Test in Architecture", stream: "Architecture", level: "National", formStart: "Jan 2026", lastDateDisplay: "Feb 20, 2026", lastDate: "2026-02-20", examDate: "Apr 2026", fee: "₹2,000", mode: "Online + Offline", conductedBy: "COA", nextCycle: "Jan 2027", officialLink: "https://nata.in" },
+    { name: "GPAT", fullName: "Graduate Pharmacy Aptitude Test", stream: "Pharmacy", level: "National", formStart: "Nov 2025", lastDateDisplay: "Dec 20, 2025", lastDate: "2025-12-20", examDate: "Feb 2026", fee: "₹2,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Nov 2026", officialLink: "https://gpat.nta.nic.in" },
+    { name: "MHT-CET PCB", fullName: "MHT-CET Biology (Pharmacy/Agriculture)", stream: "Pharmacy", level: "State", formStart: "Jan 2026", lastDateDisplay: "Mar 10, 2026", lastDate: "2026-03-10", examDate: "Apr 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "State CET Cell", nextCycle: "Jan 2027", officialLink: "https://cetcell.mahacet.org" },
+    { name: "MHCET Law", fullName: "Maharashtra Law Common Entrance Test", stream: "Law", level: "State", formStart: "Feb 2026", lastDateDisplay: "Mar 25, 2026", lastDate: "2026-03-25", examDate: "May 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "State CET Cell", nextCycle: "Feb 2027", officialLink: "https://cetcell.mahacet.org" },
+    { name: "SNAP", fullName: "Symbiosis National Aptitude Test", stream: "Management", level: "University", formStart: "Aug 2026", lastDateDisplay: "Nov 24, 2026", lastDate: "2026-11-24", examDate: "Dec 2026", fee: "₹2,250", mode: "Online (CBT)", conductedBy: "Symbiosis International", nextCycle: "Aug 2026", officialLink: "https://www.snaptest.org" },
+    { name: "COMEDK", fullName: "Consortium of Medical Engineering & Dental Colleges", stream: "Engineering", level: "State", formStart: "Jan 2026", lastDateDisplay: "Apr 10, 2026", lastDate: "2026-04-10", examDate: "May 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "COMEDK", nextCycle: "Jan 2027", officialLink: "https://comedk.org" },
+  ];
+
+  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Pharmacy"];
+
+  const filteredExams = EXAMS.filter(e =>
+    (activeStream === "All" || e.stream === activeStream) &&
+    (search === "" || e.name.toLowerCase().includes(search.toLowerCase()) || e.fullName.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const filteredColleges = colleges.filter(c =>
+    activeStream === "All" || c.stream === activeStream
+  );
+
+  const openCount = EXAMS.filter(e => !new Date(e.lastDate) < new Date()).length;
+  const urgentCount = EXAMS.filter(e => {
+    const diff = new Date(e.lastDate) - new Date();
+    return diff > 0 && diff <= 7 * 24 * 60 * 60 * 1000;
+  }).length;
+
   return (
     <div>
-      <div style={{ background: "#64B5F6", padding: "64px 0" }}>
+      {/* Hero */}
+      <div style={{ background: "linear-gradient(135deg, #64B5F6 0%, #7C3AED 100%)", padding: "64px 0" }}>
         <div className="container">
-          <div className="tag">Partner Institutions</div>
-          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Colleges & Courses</h1>
-          <p style={{ color: "rgba(255,255,255,0.65)", marginTop: 10, fontSize: 15 }}>340+ partner colleges across Maharashtra and India</p>
+          <div className="tag" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>Colleges & Entrance Exams</div>
+          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Colleges & Exam Calendar</h1>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>340+ partner colleges · Live exam deadlines with countdown timers</p>
+          {/* Summary Pills */}
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "white", fontWeight: 600 }}>📋 {EXAMS.length} Exams Listed</div>
+            <div style={{ background: "rgba(5,150,105,0.3)", border: "1px solid rgba(5,150,105,0.5)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "#6EE7B7", fontWeight: 600 }}>✅ {EXAMS.filter(e => new Date(e.lastDate) > new Date()).length} Open Now</div>
+            {urgentCount > 0 && <div style={{ background: "rgba(220,38,38,0.3)", border: "1px solid rgba(220,38,38,0.5)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "#FCA5A5", fontWeight: 600 }}>⚠️ {urgentCount} Closing This Week</div>}
+          </div>
         </div>
       </div>
-      <section className="section section-alt">
+
+      {/* Tabs */}
+      <div style={{ background: "#FFFFFF", borderBottom: "1px solid #C8E4FA", position: "sticky", top: 64, zIndex: 90 }}>
+        <div className="container" style={{ display: "flex", gap: 0 }}>
+          {[{ id: "exams", label: "📋 Entrance Exams" }, { id: "colleges", label: "🏛️ Partner Colleges" }].map(t => (
+            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ padding: "14px 28px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: activeTab === t.id ? "#64B5F6" : "#6D28D9", borderBottom: activeTab === t.id ? "2px solid #64B5F6" : "2px solid transparent", transition: "all 0.2s" }}>{t.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <section className="section" style={{ background: "#F4F9FF" }}>
         <div className="container">
-          <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
-            {["All", "Engineering", "Medical", "Law", "Management"].map(f => (
-              <button key={f} className="btn-teal" style={{ fontSize: 12, padding: "6px 16px", background: f === "All" ? "#A8D4F5" : "transparent", color: f === "All" ? "white" : "#A8D4F5", border: `1px solid ${"#A8D4F5"}` }}>{f}</button>
-            ))}
+          {/* Filters */}
+          <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {streams.map(s => (
+                <button key={s} onClick={() => setActiveStream(s)} style={{ padding: "6px 14px", border: `1px solid ${activeStream === s ? "#64B5F6" : "#C8E4FA"}`, borderRadius: 20, background: activeStream === s ? "#64B5F6" : "white", color: activeStream === s ? "white" : "#6D28D9", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>{s}</button>
+              ))}
+            </div>
+            {activeTab === "exams" && (
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Search exam..." style={{ width: 220, marginBottom: 0, fontSize: 13 }} />
+            )}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
-            {colleges.map(c => (
-              <div key={c.name} className="card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                  <div style={{ width: 42, height: 42, background: "#64B5F6", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#6D28D9", fontWeight: 700, fontSize: 14 }}>{c.name[0]}</div>
-                  <span className="badge badge-info">{c.stream}</span>
-                </div>
-                <h3 style={{ fontWeight: 600, fontSize: 15, color: "#64B5F6", marginBottom: 4 }}>{c.name}</h3>
-                <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>📍 {c.city}</div>
-                <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 4 }}>{c.ranking}</div>
-                <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 16 }}>Affiliated: {c.affiliation}</div>
-                <button className="btn-teal" style={{ fontSize: 12, width: "100%" }}>Apply Through Educeff →</button>
+
+          {/* EXAMS TAB */}
+          {activeTab === "exams" && (
+            <>
+              <div style={{ fontSize: 13, color: "#6D28D9", marginBottom: 20, fontWeight: 500 }}>
+                Showing <strong>{filteredExams.length}</strong> exams {activeStream !== "All" ? `for ${activeStream}` : ""} — Countdown timers update live every second
               </div>
-            ))}
-          </div>
+              {filteredExams.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "60px 0", color: "#6D28D9" }}>No exams found for "{search}"</div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
+                  {filteredExams.map(exam => <ExamCard key={exam.name} exam={exam} />)}
+                </div>
+              )}
+              <div style={{ marginTop: 32, background: "#FFFFFF", borderRadius: 12, border: "1px solid #C8E4FA", padding: 20 }}>
+                <p style={{ fontSize: 12, color: "#90CAF9", textAlign: "center" }}>
+                  ⚠️ Exam dates are indicative based on previous year cycles. Always verify official dates at the respective exam authority websites before applying. Educeff helps with form filling — <span style={{ color: "#64B5F6", cursor: "pointer", fontWeight: 600 }}>contact us for assistance</span>.
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* COLLEGES TAB */}
+          {activeTab === "colleges" && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+              {filteredColleges.map(c => (
+                <div key={c.name} className="card">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                    <div style={{ width: 42, height: 42, background: "#64B5F6", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 16 }}>{c.name[0]}</div>
+                    <span className="badge badge-info">{c.stream}</span>
+                  </div>
+                  <h3 style={{ fontWeight: 600, fontSize: 15, color: "#1A1A2E", marginBottom: 4 }}>{c.name}</h3>
+                  <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>📍 {c.city}</div>
+                  <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 4 }}>{c.ranking}</div>
+                  <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 16 }}>Affiliated: {c.affiliation}</div>
+                  <button className="btn-primary" style={{ fontSize: 12, width: "100%" }}>Apply Through Educeff →</button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>
