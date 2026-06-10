@@ -1258,7 +1258,7 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
                   </div>
                 ) : (
                   <label className="upload-zone" style={{ padding: "14px", cursor: "pointer", display: "block" }}>
-                    <div style={{ fontSize: 13, color: "#6D28D9" }}>{uploading[doc] ? "Uploading..." : "Click to upload or drag & drop"}</div>
+                    <div style={{ fontSize: 13, color: "#6D28D9" }}>{uploading[doc] ? "Uploading..." : "Click to upload or drag &amp; drop"}</div>
                     <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} />
                   </label>
                 )}
@@ -1616,7 +1616,7 @@ function PaymentsTab({ user, profile }) {
   );
 }
 
-
+function TrackingTab({ user }) {
   const steps = ["Registered", "Documents Verified", "Application Submitted", "Under Review", "Admission Confirmed"];
   const currentStep = 3;
   return (
@@ -2016,7 +2016,7 @@ function AdminReports() {
   ];
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Reports & Analytics</h1>
+      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Reports &amp; Analytics</h1>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
         <div className="card" style={{ padding: 24 }}>
           <h3 style={{ fontWeight: 600, marginBottom: 20, fontSize: 15, color: "#64B5F6" }}>Admissions by Stream (2024–25)</h3>
@@ -2421,9 +2421,9 @@ function CollegesPage() {
       {/* Hero */}
       <div style={{ background: "linear-gradient(135deg, #64B5F6 0%, #7C3AED 100%)", padding: "64px 0" }}>
         <div className="container">
-          <div className="tag" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>Colleges & Entrance Exams</div>
-          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Colleges & Exam Calendar</h1>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>55+ partner colleges · Maharashtra & National · Live exam deadlines with countdown timers</p>
+          <div className="tag" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>Colleges &amp; Entrance Exams</div>
+          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Colleges &amp; Exam Calendar</h1>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>55+ partner colleges · Maharashtra &amp; National · Live exam deadlines with countdown timers</p>
           {/* Summary Pills */}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "white", fontWeight: 600 }}>📋 {EXAMS.length} Exams Listed</div>
