@@ -893,11 +893,31 @@ function LoginModal({ onClose, onLogin }) {
     setError(""); setLoading(true);
     try {
       if (isAdmin) {
-        // Admin: check against admins table after auth
+        // Step 1: Sign in
         const { data, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
         if (authErr) throw authErr;
-        const { data: adminData } = await supabase.from("admins").select("*").eq("user_id", data.user.id).single();
-        if (!adminData) throw new Error("You do not have admin access.");
+
+        // Step 2: Check admins table — use maybeSingle() to avoid error when no row found
+        const { data: adminData, error: adminErr } = await supabase
+          .from("admins")
+          .select("*")
+          .eq("user_id", data.user.id)
+          .maybeSingle();
+
+        // Step 3: If RLS blocks the read, try matching by email instead
+        if (!adminData) {
+          const { data: adminByEmail } = await supabase
+            .from("admins")
+            .select("*")
+            .eq("email", email.toLowerCase().trim())
+            .maybeSingle();
+
+          if (!adminByEmail) {
+            // Sign out since they logged in but aren't admin
+            await supabase.auth.signOut();
+            throw new Error("You do not have admin access. Make sure your email is added to the admins table in Supabase.");
+          }
+        }
         onLogin(true);
       } else {
         // Student login
