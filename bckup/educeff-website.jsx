@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "@supabase/supabase-js";
 
 // ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
 // Replace these with your actual Supabase project URL and anon key
 // Get them from: https://supabase.com → your project → Settings → API
-const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 
 const COLORS = {
   navy: "#64B5F6",
@@ -1039,7 +1040,6 @@ function StudentPortal({ setPage, user }) {
     { id: "profile", label: "My Profile", icon: "👤" },
     { id: "documents", label: "Documents", icon: "📁" },
     { id: "applications", label: "Applications", icon: "📋" },
-    { id: "payments", label: "Payments", icon: "💳" },
     { id: "tracking", label: "Track Status", icon: "📍" },
     { id: "notifications", label: "Notifications", icon: "🔔" },
     { id: "support", label: "Support", icon: "💬" },
@@ -1080,7 +1080,6 @@ function StudentPortal({ setPage, user }) {
         {tab === "profile" && <PortalProfile user={user} profile={profile} onSave={loadProfile} />}
         {tab === "documents" && <DocumentCenter user={user} uploadedDocs={uploadedDocs} onUpload={loadProfile} />}
         {tab === "applications" && <ApplicationsTab user={user} />}
-        {tab === "payments" && <PaymentsTab user={user} profile={profile} />}
         {tab === "tracking" && <TrackingTab user={user} />}
         {tab === "notifications" && <NotificationsTab user={user} />}
         {tab === "support" && <SupportTab user={user} />}
@@ -1345,278 +1344,7 @@ function ApplicationsTab({ user }) {
   );
 }
 
-function PaymentsTab({ user, profile }) {
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedService, setSelectedService] = useState(null);
-  const [paySuccess, setPaySuccess] = useState(null);
-
-  // Razorpay Key — replace with your actual Razorpay Key ID from razorpay.com
-  const RAZORPAY_KEY = "rzp_test_YOUR_KEY_ID";
-
-  const SERVICES = [
-    {
-      id: "counseling_basic",
-      icon: "🎓",
-      title: "Basic Counseling Session",
-      desc: "45-minute one-on-one session with a certified academic counselor. Career guidance, stream selection & college shortlisting.",
-      price: 499,
-      originalPrice: 999,
-      badge: "Most Popular",
-      badgeColor: "#059669",
-      includes: ["45-min video/phone call", "Stream & college shortlist", "Written summary report", "1 follow-up query"],
-    },
-    {
-      id: "counseling_premium",
-      icon: "⭐",
-      title: "Premium Counseling Package",
-      desc: "3 sessions with a senior counselor. Complete roadmap from exam selection to admission including scholarship guidance.",
-      price: 1499,
-      originalPrice: 2999,
-      badge: "Best Value",
-      badgeColor: "#7C3AED",
-      includes: ["3 × 60-min sessions", "Complete admission roadmap", "Scholarship identification", "Document checklist", "Priority support for 30 days"],
-    },
-    {
-      id: "exam_jee",
-      icon: "📋",
-      title: "JEE Main Form Filling",
-      desc: "Expert assistance for JEE Main registration. We handle the complete form filling, photo upload, fee payment & confirmation.",
-      price: 299,
-      originalPrice: null,
-      badge: "Engineering",
-      badgeColor: "#1D4ED8",
-      includes: ["Complete form filling", "Photo & signature upload", "Fee payment assistance", "Confirmation PDF", "Error-free guarantee"],
-    },
-    {
-      id: "exam_neet",
-      icon: "📋",
-      title: "NEET UG Form Filling",
-      desc: "End-to-end NEET UG application assistance including category verification, photo guidelines & payment confirmation.",
-      price: 299,
-      originalPrice: null,
-      badge: "Medical",
-      badgeColor: "#15803D",
-      includes: ["Complete form filling", "Category verification", "Photo guidelines check", "Fee payment assistance", "Confirmation PDF"],
-    },
-    {
-      id: "exam_mhtcet",
-      icon: "📋",
-      title: "MHT-CET Form Filling",
-      desc: "Maharashtra CET form assistance for both PCM and PCB groups. Includes subject selection & hall ticket download support.",
-      price: 199,
-      originalPrice: null,
-      badge: "Maharashtra",
-      badgeColor: "#B45309",
-      includes: ["PCM / PCB form filling", "Subject group selection", "Fee payment assistance", "Hall ticket support", "Confirmation PDF"],
-    },
-    {
-      id: "exam_bundle",
-      icon: "🚀",
-      title: "Exam Form Bundle (3 Exams)",
-      desc: "Get form filling assistance for any 3 entrance exams of your choice at a discounted bundled price.",
-      price: 599,
-      originalPrice: 897,
-      badge: "Save ₹298",
-      badgeColor: "#DC2626",
-      includes: ["Any 3 entrance exams", "Priority processing", "All confirmations", "Dedicated manager", "Free 1 counseling call"],
-    },
-  ];
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("payments").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => setHistory(data || []));
-  }, [user, paySuccess]);
-
-  const loadRazorpay = () => new Promise(resolve => {
-    if (window.Razorpay) return resolve(true);
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-
-  const handlePay = async (service) => {
-    setLoading(true);
-    const loaded = await loadRazorpay();
-    if (!loaded) { alert("Failed to load Razorpay. Check your internet connection."); setLoading(false); return; }
-
-    const fullName = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : "Student";
-    const email = user?.email || "";
-    const mobile = profile?.mobile || "";
-
-    const options = {
-      key: RAZORPAY_KEY,
-      amount: service.price * 100, // paise
-      currency: "INR",
-      name: "Educeff",
-      description: service.title,
-      image: "https://i.imgur.com/n5tjHFD.png",
-      prefill: { name: fullName, email, contact: mobile },
-      notes: { user_id: user?.id, service_id: service.id },
-      theme: { color: "#64B5F6" },
-      handler: async (response) => {
-        // Save payment record to Supabase
-        const { error } = await supabase.from("payments").insert({
-          user_id: user.id,
-          service_id: service.id,
-          service_title: service.title,
-          amount: service.price,
-          currency: "INR",
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_order_id: response.razorpay_order_id || null,
-          status: "success",
-          created_at: new Date().toISOString(),
-        });
-        if (!error) {
-          setPaySuccess({ service, paymentId: response.razorpay_payment_id });
-          setSelectedService(null);
-        }
-      },
-      modal: { ondismiss: () => setLoading(false) },
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", async (resp) => {
-      await supabase.from("payments").insert({
-        user_id: user.id,
-        service_id: service.id,
-        service_title: service.title,
-        amount: service.price,
-        currency: "INR",
-        razorpay_payment_id: resp.error.metadata?.payment_id || null,
-        status: "failed",
-        error_reason: resp.error.reason,
-        created_at: new Date().toISOString(),
-      });
-      alert(`Payment failed: ${resp.error.description}`);
-    });
-    rzp.open();
-    setLoading(false);
-  };
-
-  if (paySuccess) return (
-    <div style={{ maxWidth: 480, margin: "40px auto", textAlign: "center" }}>
-      <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
-      <h2 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Payment Successful!</h2>
-      <p style={{ color: "#6D28D9", fontSize: 15, marginBottom: 8 }}>You've successfully purchased <strong>{paySuccess.service.title}</strong></p>
-      <p style={{ fontSize: 13, color: "#90CAF9", marginBottom: 28 }}>Payment ID: {paySuccess.paymentId}</p>
-      <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 12, padding: 20, marginBottom: 24, textAlign: "left" }}>
-        <div style={{ fontWeight: 600, fontSize: 14, color: "#065F46", marginBottom: 10 }}>✅ What happens next:</div>
-        {paySuccess.service.id.includes("counseling") ? (
-          <ul style={{ paddingLeft: 18, fontSize: 13, color: "#065F46", lineHeight: 2 }}>
-            <li>Our team will contact you within 2 hours</li>
-            <li>Session will be scheduled at your convenience</li>
-            <li>You'll receive a confirmation on your email</li>
-          </ul>
-        ) : (
-          <ul style={{ paddingLeft: 18, fontSize: 13, color: "#065F46", lineHeight: 2 }}>
-            <li>Our team will contact you within 4 hours</li>
-            <li>Share your login credentials securely</li>
-            <li>Form will be filled within 24 hours</li>
-            <li>Confirmation PDF will be sent to your email</li>
-          </ul>
-        )}
-      </div>
-      <button className="btn-primary" style={{ width: "100%", padding: 14 }} onClick={() => setPaySuccess(null)}>Back to Payments →</button>
-    </div>
-  );
-
-  return (
-    <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Payments</h1>
-      <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 28 }}>Secure payments powered by Razorpay — UPI, Cards, NetBanking, Wallets accepted.</p>
-
-      {/* Payment Methods Banner */}
-      <div style={{ background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #C8E4FA", borderRadius: 12, padding: "14px 20px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>🔒 100% Secure Payments</div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {["UPI", "Visa", "Mastercard", "RuPay", "NetBanking", "Wallets"].map(m => (
-            <span key={m} style={{ background: "white", border: "1px solid #C8E4FA", borderRadius: 6, padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#64B5F6" }}>{m}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* Service Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20, marginBottom: 40 }}>
-        {SERVICES.map(service => (
-          <div key={service.id} className="card" style={{ position: "relative", border: selectedService?.id === service.id ? "2px solid #64B5F6" : "1px solid #C8E4FA" }}>
-            {service.badge && (
-              <div style={{ position: "absolute", top: -1, right: 16, background: service.badgeColor, color: "white", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }}>{service.badge}</div>
-            )}
-            <div style={{ fontSize: 32, marginBottom: 12 }}>{service.icon}</div>
-            <h3 style={{ fontWeight: 700, fontSize: 16, color: "#1A1A2E", marginBottom: 6 }}>{service.title}</h3>
-            <p style={{ fontSize: 13, color: "#6D28D9", lineHeight: 1.6, marginBottom: 14 }}>{service.desc}</p>
-
-            {/* Includes */}
-            <ul style={{ paddingLeft: 0, listStyle: "none", marginBottom: 16 }}>
-              {service.includes.map(item => (
-                <li key={item} style={{ fontSize: 12, color: "#1A1A2E", marginBottom: 5, display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ color: "#059669", fontWeight: 700 }}>✓</span> {item}
-                </li>
-              ))}
-            </ul>
-
-            {/* Price */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#64B5F6" }}>₹{service.price}</span>
-              {service.originalPrice && (
-                <span style={{ fontSize: 14, color: "#9CA3AF", textDecoration: "line-through" }}>₹{service.originalPrice}</span>
-              )}
-              {service.originalPrice && (
-                <span style={{ fontSize: 12, color: "#059669", fontWeight: 700 }}>Save ₹{service.originalPrice - service.price}</span>
-              )}
-            </div>
-
-            <button className="btn-primary" style={{ width: "100%", padding: 12, opacity: loading ? 0.7 : 1 }}
-              onClick={() => handlePay(service)} disabled={loading}>
-              {loading ? "Processing..." : `Pay ₹${service.price} →`}
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* Payment History */}
-      <div style={{ background: "#FFFFFF", borderRadius: 12, border: "1px solid #C8E4FA", padding: 24 }}>
-        <h3 style={{ fontWeight: 700, fontSize: 16, color: "#64B5F6", marginBottom: 16 }}>💳 Payment History</h3>
-        {history.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>
-            <div style={{ fontSize: 36, marginBottom: 8 }}>📭</div>
-            <div style={{ fontSize: 14 }}>No payments yet</div>
-          </div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table>
-              <thead>
-                <tr><th>Date</th><th>Service</th><th>Amount</th><th>Payment ID</th><th>Status</th></tr>
-              </thead>
-              <tbody>
-                {history.map(p => (
-                  <tr key={p.id}>
-                    <td style={{ color: "#6D28D9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
-                    <td style={{ fontWeight: 500, color: "#1A1A2E" }}>{p.service_title}</td>
-                    <td style={{ fontWeight: 700, color: "#64B5F6" }}>₹{p.amount}</td>
-                    <td style={{ fontSize: 11, color: "#90CAF9", fontFamily: "monospace" }}>{p.razorpay_payment_id || "—"}</td>
-                    <td><span className={`badge ${p.status === "success" ? "badge-success" : p.status === "failed" ? "badge-danger" : "badge-warning"}`}>{p.status}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Note */}
-      <div style={{ marginTop: 16, padding: "12px 16px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, fontSize: 12, color: "#92400E" }}>
-        ⚠️ <strong>Test Mode:</strong> Replace <code>rzp_test_YOUR_KEY_ID</code> with your live Razorpay Key ID from <a href="https://razorpay.com" target="_blank" style={{ color: "#64B5F6" }}>razorpay.com</a> before going live.
-      </div>
-    </div>
-  );
-}
-
-
+function TrackingTab() {
   const steps = ["Registered", "Documents Verified", "Application Submitted", "Under Review", "Admission Confirmed"];
   const currentStep = 3;
   return (
@@ -2312,71 +2040,12 @@ function CollegesPage() {
   const [search, setSearch] = useState("");
 
   const colleges = [
-    // ── ENGINEERING – Maharashtra ──
-    { name: "COEP Technological University", city: "Pune", stream: "Engineering", ranking: "#1 Govt. Engineering, Maharashtra", affiliation: "Autonomous", type: "Government" },
-    { name: "VJTI Mumbai", city: "Mumbai", stream: "Engineering", ranking: "Top 10 Govt. Engineering, India", affiliation: "University of Mumbai", type: "Government" },
-    { name: "MIT College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top 20 Private Engineering", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "Walchand College of Engineering", city: "Sangli", stream: "Engineering", ranking: "Top 5 Govt. Engineering, Maharashtra", affiliation: "Shivaji University", type: "Government" },
-    { name: "Government College of Engineering Aurangabad", city: "Aurangabad", stream: "Engineering", ranking: "Top Govt. Engineering, Marathwada", affiliation: "Dr. BAMU", type: "Government" },
-    { name: "Pune Institute of Computer Technology", city: "Pune", stream: "Engineering", ranking: "Top Private CS College, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "Sardar Patel College of Engineering", city: "Mumbai", stream: "Engineering", ranking: "Top Private Engineering, Mumbai", affiliation: "University of Mumbai", type: "Private" },
-    { name: "Fr. Conceicao Rodrigues College of Engineering", city: "Mumbai", stream: "Engineering", ranking: "Top Private Engineering, Mumbai", affiliation: "University of Mumbai", type: "Private" },
-    { name: "KIT's College of Engineering", city: "Kolhapur", stream: "Engineering", ranking: "Top Engineering, Kolhapur", affiliation: "Shivaji University", type: "Private" },
-    { name: "Symbiosis Institute of Technology", city: "Pune", stream: "Engineering", ranking: "Top Private Tech, Pune", affiliation: "SIU", type: "Private" },
-    // ── ENGINEERING – National ──
-    { name: "IIT Bombay", city: "Mumbai", stream: "Engineering", ranking: "#3 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "IIT Delhi", city: "Delhi", stream: "Engineering", ranking: "#2 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "NIT Nagpur (VNIT)", city: "Nagpur", stream: "Engineering", ranking: "Top 15 NIT, India", affiliation: "Autonomous (NIT)", type: "Government" },
-    { name: "NIT Surathkal", city: "Karnataka", stream: "Engineering", ranking: "Top 10 NIT, India", affiliation: "Autonomous (NIT)", type: "Government" },
-    { name: "BITS Pilani", city: "Rajasthan", stream: "Engineering", ranking: "Top 5 Private Engineering, India", affiliation: "Autonomous (BITS)", type: "Private" },
-    // ── MEDICAL – Maharashtra ──
-    { name: "BJ Medical College", city: "Pune", stream: "Medical", ranking: "#2 Govt. Medical, Maharashtra", affiliation: "MUHS", type: "Government" },
-    { name: "Grant Medical College", city: "Mumbai", stream: "Medical", ranking: "#1 Govt. Medical, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Seth GS Medical College", city: "Mumbai", stream: "Medical", ranking: "Top 5 Medical, India", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Nagpur Government Medical College", city: "Nagpur", stream: "Medical", ranking: "Top Govt. Medical, Vidarbha", affiliation: "MUHS", type: "Government" },
-    { name: "D.Y. Patil Medical College", city: "Pune", stream: "Medical", ranking: "Top Private Medical, Pune", affiliation: "DPU", type: "Private" },
-    { name: "Krishna Institute of Medical Sciences", city: "Karad", stream: "Medical", ranking: "Top Private Medical, Maharashtra", affiliation: "Krishna University", type: "Private" },
-    // ── MEDICAL – National ──
-    { name: "AIIMS New Delhi", city: "Delhi", stream: "Medical", ranking: "#1 Medical, India (NIRF)", affiliation: "Autonomous (AIIMS)", type: "Government" },
-    { name: "AIIMS Nagpur", city: "Nagpur", stream: "Medical", ranking: "Top AIIMS, Central India", affiliation: "Autonomous (AIIMS)", type: "Government" },
-    { name: "CMC Vellore", city: "Tamil Nadu", stream: "Medical", ranking: "Top 3 Medical, India", affiliation: "Autonomous", type: "Private" },
-    { name: "Kasturba Medical College", city: "Manipal", stream: "Medical", ranking: "Top 10 Private Medical, India", affiliation: "Manipal University", type: "Private" },
-    // ── LAW – Maharashtra ──
-    { name: "Symbiosis Law School", city: "Pune", stream: "Law", ranking: "Top 5 Law Colleges, India", affiliation: "SIU", type: "Private" },
-    { name: "ILS Law College", city: "Pune", stream: "Law", ranking: "Top Govt. Law, Maharashtra", affiliation: "Savitribai Phule Pune Univ.", type: "Government" },
-    { name: "Government Law College Mumbai", city: "Mumbai", stream: "Law", ranking: "#1 Govt. Law, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Maharashtra National Law University", city: "Mumbai", stream: "Law", ranking: "Top NLU, Maharashtra", affiliation: "Autonomous (NLU)", type: "Government" },
-    // ── LAW – National ──
-    { name: "NLSIU Bangalore", city: "Bangalore", stream: "Law", ranking: "#1 Law, India (NIRF)", affiliation: "Autonomous (NLU)", type: "Government" },
-    { name: "NLU Delhi", city: "Delhi", stream: "Law", ranking: "#2 Law, India (NIRF)", affiliation: "Autonomous (NLU)", type: "Government" },
-    { name: "NALSAR Hyderabad", city: "Hyderabad", stream: "Law", ranking: "#3 Law, India (NIRF)", affiliation: "Autonomous (NLU)", type: "Government" },
-    // ── MANAGEMENT – Maharashtra ──
-    { name: "IIM Nagpur", city: "Nagpur", stream: "Management", ranking: "IIM — CAT cutoff 90+", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "Symbiosis Institute of Business Management", city: "Pune", stream: "Management", ranking: "Top 10 MBA, India", affiliation: "SIU", type: "Private" },
-    { name: "Jamnalal Bajaj Institute of Management", city: "Mumbai", stream: "Management", ranking: "Top 5 MBA, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Prin. L. N. Welingkar Institute", city: "Mumbai", stream: "Management", ranking: "Top Private MBA, Mumbai", affiliation: "University of Mumbai", type: "Private" },
-    { name: "PUMBA – Pune University MBA", city: "Pune", stream: "Management", ranking: "Top Govt. MBA, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Government" },
-    // ── MANAGEMENT – National ──
-    { name: "IIM Ahmedabad", city: "Ahmedabad", stream: "Management", ranking: "#1 Management, India (NIRF)", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "IIM Bangalore", city: "Bangalore", stream: "Management", ranking: "#2 Management, India (NIRF)", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "IIM Calcutta", city: "Kolkata", stream: "Management", ranking: "#3 Management, India (NIRF)", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "FMS Delhi", city: "Delhi", stream: "Management", ranking: "Top 5 MBA, India", affiliation: "University of Delhi", type: "Government" },
-    // ── ARCHITECTURE ──
-    { name: "Sir JJ College of Architecture", city: "Mumbai", stream: "Architecture", ranking: "#1 Architecture, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Rachana Sansad Academy of Architecture", city: "Mumbai", stream: "Architecture", ranking: "Top 5 Architecture, India", affiliation: "Autonomous", type: "Private" },
-    { name: "BKPS College of Architecture", city: "Pune", stream: "Architecture", ranking: "Top Architecture, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "CEPT University", city: "Ahmedabad", stream: "Architecture", ranking: "#1 Architecture, India (NIRF)", affiliation: "Autonomous", type: "Private" },
-    // ── SCIENCE & COMMERCE ──
-    { name: "Fergusson College", city: "Pune", stream: "Science", ranking: "Top Arts & Science, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Autonomous" },
-    { name: "St. Xavier's College", city: "Mumbai", stream: "Science", ranking: "Top Science College, Mumbai", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "Ruparel College", city: "Mumbai", stream: "Science", ranking: "Top Science, South Mumbai", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "Elphinstone College", city: "Mumbai", stream: "Commerce", ranking: "Top Commerce, Mumbai", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "H.R. College of Commerce & Economics", city: "Mumbai", stream: "Commerce", ranking: "Top Commerce, India", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "Sydenham College of Commerce", city: "Mumbai", stream: "Commerce", ranking: "Top Govt. Commerce, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    // ── PHARMACY ──
-    { name: "Bombay College of Pharmacy", city: "Mumbai", stream: "Pharmacy", ranking: "#1 Pharmacy, Maharashtra", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "Poona College of Pharmacy", city: "Pune", stream: "Pharmacy", ranking: "Top Pharmacy, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "JSS College of Pharmacy", city: "Mysore", stream: "Pharmacy", ranking: "Top 5 Pharmacy, India", affiliation: "JSS University", type: "Private" },
+    { name: "COEP Technological University", city: "Pune", stream: "Engineering", ranking: "#1 Govt. Engineering, Maharashtra", affiliation: "Autonomous" },
+    { name: "VJTI Mumbai", city: "Mumbai", stream: "Engineering", ranking: "Top 10 Govt. Engineering, India", affiliation: "University of Mumbai" },
+    { name: "BJ Medical College", city: "Pune", stream: "Medical", ranking: "#2 Govt. Medical, Maharashtra", affiliation: "MUHS" },
+    { name: "Symbiosis Law School", city: "Pune", stream: "Law", ranking: "Top 5 Law Colleges, India", affiliation: "SIU" },
+    { name: "IIM Nagpur", city: "Nagpur", stream: "Management", ranking: "IIM — CAT cutoff 90+", affiliation: "Autonomous" },
+    { name: "MIT College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top 20 Private Engineering", affiliation: "Savitribai Phule Pune Univ." },
   ];
 
   const EXAMS = [
@@ -2398,7 +2067,7 @@ function CollegesPage() {
     { name: "COMEDK", fullName: "Consortium of Medical Engineering & Dental Colleges", stream: "Engineering", level: "State", formStart: "Jan 2026", lastDateDisplay: "Apr 10, 2026", lastDate: "2026-04-10", examDate: "May 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "COMEDK", nextCycle: "Jan 2027", officialLink: "https://comedk.org" },
   ];
 
-  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
+  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Pharmacy"];
 
   const filteredExams = EXAMS.filter(e =>
     (activeStream === "All" || e.stream === activeStream) &&
@@ -2406,8 +2075,7 @@ function CollegesPage() {
   );
 
   const filteredColleges = colleges.filter(c =>
-    (activeStream === "All" || c.stream === activeStream) &&
-    (search === "" || c.name.toLowerCase().includes(search.toLowerCase()) || c.city.toLowerCase().includes(search.toLowerCase()))
+    activeStream === "All" || c.stream === activeStream
   );
 
   const openCount = EXAMS.filter(e => !new Date(e.lastDate) < new Date()).length;
@@ -2423,7 +2091,7 @@ function CollegesPage() {
         <div className="container">
           <div className="tag" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>Colleges & Entrance Exams</div>
           <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Colleges & Exam Calendar</h1>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>55+ partner colleges · Maharashtra & National · Live exam deadlines with countdown timers</p>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>340+ partner colleges · Live exam deadlines with countdown timers</p>
           {/* Summary Pills */}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "white", fontWeight: 600 }}>📋 {EXAMS.length} Exams Listed</div>
@@ -2477,30 +2145,23 @@ function CollegesPage() {
             </>
           )}
 
+          {/* COLLEGES TAB */}
           {activeTab === "colleges" && (
-            <>
-              <div style={{ fontSize: 13, color: "#6D28D9", marginBottom: 20, fontWeight: 500 }}>
-                Showing <strong>{filteredColleges.length}</strong> colleges {activeStream !== "All" ? `for ${activeStream}` : "across all streams"}
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
-                {filteredColleges.map(c => (
-                  <div key={c.name} className="card" style={{ borderTop: `3px solid ${c.type === "Government" ? "#059669" : c.type === "Autonomous" ? "#7C3AED" : "#64B5F6"}` }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                      <div style={{ width: 42, height: 42, background: "#64B5F6", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 16 }}>{c.name[0]}</div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
-                        <span className="badge badge-info">{c.stream}</span>
-                        <span style={{ fontSize: 10, fontWeight: 600, color: c.type === "Government" ? "#059669" : c.type === "Autonomous" ? "#7C3AED" : "#64B5F6", background: c.type === "Government" ? "#ECFDF5" : c.type === "Autonomous" ? "#F5F3FF" : "#EFF6FF", padding: "2px 8px", borderRadius: 8 }}>{c.type}</span>
-                      </div>
-                    </div>
-                    <h3 style={{ fontWeight: 600, fontSize: 15, color: "#1A1A2E", marginBottom: 4 }}>{c.name}</h3>
-                    <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>📍 {c.city}</div>
-                    <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 4 }}>🏆 {c.ranking}</div>
-                    <div style={{ fontSize: 12, color: "#90CAF9", marginBottom: 16 }}>Affiliated: {c.affiliation}</div>
-                    <button className="btn-primary" style={{ fontSize: 12, width: "100%" }}>Apply Through Educeff →</button>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+              {filteredColleges.map(c => (
+                <div key={c.name} className="card">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                    <div style={{ width: 42, height: 42, background: "#64B5F6", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 16 }}>{c.name[0]}</div>
+                    <span className="badge badge-info">{c.stream}</span>
                   </div>
-                ))}
-              </div>
-            </>
+                  <h3 style={{ fontWeight: 600, fontSize: 15, color: "#1A1A2E", marginBottom: 4 }}>{c.name}</h3>
+                  <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>📍 {c.city}</div>
+                  <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 4 }}>{c.ranking}</div>
+                  <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 16 }}>Affiliated: {c.affiliation}</div>
+                  <button className="btn-primary" style={{ fontSize: 12, width: "100%" }}>Apply Through Educeff →</button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </section>
