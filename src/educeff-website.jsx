@@ -2659,6 +2659,20 @@ function AdminDocVerification() {
     setLoading(false);
   };
 
+  const viewDoc = async (filePath) => {
+    if (!filePath) return alert("File path not found.");
+    try {
+      const { data, error } = await supabase.storage
+        .from("student-documents")
+        .createSignedUrl(filePath, 60);
+      if (error) throw error;
+      window.open(data.signedUrl, "_blank");
+    } catch (e) {
+      console.warn("View doc error:", e);
+      alert("Could not open file. Make sure the storage bucket exists and policies are set.");
+    }
+  };
+
   const updateStatus = async (id, status) => {
     await supabase.from("student_documents")
       .update({ status, reviewed_at: new Date().toISOString() })
@@ -2725,6 +2739,8 @@ function AdminDocVerification() {
                           </td>
                           <td>
                             <div style={{ display: "flex", gap: 6 }}>
+                              <button style={{ fontSize: 11, padding: "5px 12px", background: "#EFF6FF", border: "none", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 700 }}
+                                onClick={() => viewDoc(d.file_path)}>👁 View</button>
                               <button style={{ fontSize: 11, padding: "5px 12px", background: "#ECFDF5", border: "none", borderRadius: 6, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
                                 onClick={() => updateStatus(d.id, "verified")}>✓ Verify</button>
                               <button style={{ fontSize: 11, padding: "5px 12px", background: "#FEF2F2", border: "none", borderRadius: 6, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
@@ -2767,20 +2783,20 @@ function AdminDocVerification() {
                           <td style={{ fontSize: 11, color: "#90CAF9" }}>
                             {d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString("en-IN") : "—"}
                           </td>
+                          <td><span className={`badge ${d.status === "verified" ? "badge-success" : "badge-danger"}`}>{d.status}</span></td>
                           <td>
-                            <span className={`badge ${d.status === "verified" ? "badge-success" : "badge-danger"}`}>
-                              {d.status}
-                            </span>
-                          </td>
-                          <td>
-                            {d.status === "verified" && (
-                              <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
-                                onClick={() => updateStatus(d.id, "rejected")}>Reject</button>
-                            )}
-                            {d.status === "rejected" && (
-                              <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
-                                onClick={() => updateStatus(d.id, "verified")}>Verify</button>
-                            )}
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <button style={{ fontSize: 11, padding: "5px 12px", background: "#EFF6FF", border: "none", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 700 }}
+                                onClick={() => viewDoc(d.file_path)}>👁 View</button>
+                              {d.status === "verified" && (
+                                <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
+                                  onClick={() => updateStatus(d.id, "rejected")}>Reject</button>
+                              )}
+                              {d.status === "rejected" && (
+                                <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                                  onClick={() => updateStatus(d.id, "verified")}>Verify</button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
