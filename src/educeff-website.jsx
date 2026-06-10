@@ -2189,23 +2189,32 @@ function AdminDashboard({ setPage }) {
 
   const loadAdminStats = async () => {
     try {
+      // Use head:true for efficient counting without fetching all rows
       const [studRes, appRes, docRes, payRes, bookRes] = await Promise.all([
-        supabase.from("students").select("id", { count: "exact" }),
+        supabase.from("students").select("*", { count: "exact", head: true }),
         supabase.from("applications").select("id,status"),
         supabase.from("student_documents").select("id,status").eq("status", "pending_review"),
         supabase.from("payments").select("id,status").eq("status", "success"),
-        supabase.from("counseling_bookings").select("id", { count: "exact" }),
+        supabase.from("counseling_bookings").select("*", { count: "exact", head: true }),
       ]);
+
+      // Log errors for debugging
+      if (studRes.error) console.warn("Students query error:", studRes.error.message);
+      if (appRes.error) console.warn("Applications query error:", appRes.error.message);
+      if (docRes.error) console.warn("Docs query error:", docRes.error.message);
+      if (payRes.error) console.warn("Payments query error:", payRes.error.message);
+      if (bookRes.error) console.warn("Bookings query error:", bookRes.error.message);
+
       setStats({
-        students: studRes.count || (studRes.data?.length) || 0,
-        applications: appRes.data?.length || 0,
-        pending_docs: docRes.data?.length || 0,
-        approved: appRes.data?.filter(a => a.status === "approved").length || 0,
-        rejected: appRes.data?.filter(a => a.status === "rejected").length || 0,
-        payments: payRes.data?.length || 0,
-        counseling: bookRes.count || (bookRes.data?.length) || 0,
+        students: studRes.count ?? studRes.data?.length ?? 0,
+        applications: appRes.data?.length ?? 0,
+        pending_docs: docRes.data?.length ?? 0,
+        approved: appRes.data?.filter(a => a.status === "approved").length ?? 0,
+        rejected: appRes.data?.filter(a => a.status === "rejected").length ?? 0,
+        payments: payRes.data?.length ?? 0,
+        counseling: bookRes.count ?? bookRes.data?.length ?? 0,
       });
-    } catch (e) { console.warn("Admin stats failed", e); }
+    } catch (e) { console.warn("Admin stats failed:", e); }
   };
 
   const navGroups = [
@@ -2616,75 +2625,171 @@ function AdminDocVerification() {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => { loadDocs(); }, []);
+
   const loadDocs = async () => {
     setLoading(true);
     try {
-      const { data } = await supabase.from("student_documents").select("*, students(first_name, last_name, email)").order("uploaded_at", { ascending: false });
-      setDocs(data || []);
-    } catch (e) { console.warn(e); }
+      // Step 1: fetch all documents
+      const { data: docData, error: docErr } = await supabase
+        .from("student_documents")
+        .select("*")
+        .order("uploaded_at", { ascending: false });
+
+      if (docErr) { console.warn("Doc fetch error:", docErr.message); setLoading(false); return; }
+      if (!docData || docData.length === 0) { setDocs([]); setLoading(false); return; }
+
+      // Step 2: fetch matching student profiles by user_id
+      const userIds = [...new Set(docData.map(d => d.user_id))];
+      const { data: studentData } = await supabase
+        .from("students")
+        .select("user_id, first_name, last_name, email")
+        .in("user_id", userIds);
+
+      // Step 3: merge student info into docs
+      const studentMap = {};
+      (studentData || []).forEach(s => { studentMap[s.user_id] = s; });
+
+      const merged = docData.map(d => ({
+        ...d,
+        student: studentMap[d.user_id] || null,
+      }));
+
+      setDocs(merged);
+    } catch (e) { console.warn("loadDocs error:", e); }
     setLoading(false);
   };
+
   const updateStatus = async (id, status) => {
-    await supabase.from("student_documents").update({ status, reviewed_at: new Date().toISOString() }).eq("id", id);
+    await supabase.from("student_documents")
+      .update({ status, reviewed_at: new Date().toISOString() })
+      .eq("id", id);
     setDocs(p => p.map(d => d.id === id ? { ...d, status } : d));
   };
+
   const pending = docs.filter(d => d.status === "pending_review");
   const reviewed = docs.filter(d => d.status !== "pending_review");
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Document Verification</h1>
-          <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{pending.length} documents pending review</div>
+          <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{pending.length} documents pending review · {docs.length} total</div>
         </div>
-        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadDocs}>\u21bb Refresh</button>
+        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadDocs}>↻ Refresh</button>
       </div>
-      {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading documents...</div> : (
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>⏳</div>
+          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading documents...</div>
+        </div>
+      ) : docs.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <div style={{ fontSize: 40, marginBottom: 10 }}>📁</div>
+          <div style={{ color: "#6B7280", fontSize: 15, marginBottom: 6 }}>No documents uploaded yet</div>
+          <div style={{ color: "#90CAF9", fontSize: 13 }}>Documents will appear here once students upload them</div>
+        </div>
+      ) : (
         <>
           {pending.length > 0 && (
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#D97706", marginBottom: 10 }}>\u26a0\ufe0f Pending Review ({pending.length})</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#D97706", marginBottom: 10 }}>
+                ⚠️ Pending Review ({pending.length})
+              </div>
               <div style={{ background: "white", borderRadius: 12, border: "1.5px solid #FCD34D", overflow: "hidden" }}>
-                <div style={{ overflowX: "auto" }}><table>
-                  <thead><tr><th>Student</th><th>Document</th><th>Uploaded</th><th>Actions</th></tr></thead>
-                  <tbody>
-                    {pending.map(d => (
-                      <tr key={d.id}>
-                        <td><div style={{ fontWeight: 600, fontSize: 13 }}>{d.students?.first_name} {d.students?.last_name}</div><div style={{ fontSize: 11, color: "#90CAF9" }}>{d.students?.email}</div></td>
-                        <td style={{ fontSize: 13 }}>{d.doc_name}</td>
-                        <td style={{ fontSize: 11, color: "#90CAF9" }}>{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "\u2014"}</td>
-                        <td><div style={{ display: "flex", gap: 6 }}>
-                          <button style={{ fontSize: 11, padding: "5px 12px", background: "#ECFDF5", border: "none", borderRadius: 6, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => updateStatus(d.id, "verified")}>\u2713 Verify</button>
-                          <button style={{ fontSize: 11, padding: "5px 12px", background: "#FEF2F2", border: "none", borderRadius: 6, cursor: "pointer", color: "#991B1B", fontWeight: 700 }} onClick={() => updateStatus(d.id, "rejected")}>\u2717 Reject</button>
-                        </div></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table></div>
+                <div style={{ overflowX: "auto" }}>
+                  <table>
+                    <thead>
+                      <tr><th>Student</th><th>Document</th><th>Uploaded</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      {pending.map(d => (
+                        <tr key={d.id} className="student-row">
+                          <td>
+                            <div style={{ fontWeight: 600, fontSize: 13 }}>
+                              {d.student ? `${d.student.first_name || ""} ${d.student.last_name || ""}`.trim() : "Unknown Student"}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#90CAF9" }}>
+                              {d.student?.email || d.user_id?.substring(0, 8) + "..."}
+                            </div>
+                          </td>
+                          <td style={{ fontSize: 13, fontWeight: 500 }}>{d.doc_name}</td>
+                          <td style={{ fontSize: 11, color: "#90CAF9" }}>
+                            {d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "—"}
+                          </td>
+                          <td>
+                            <span className="badge badge-warning">
+                              {d.status?.replace("_", " ")}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <button style={{ fontSize: 11, padding: "5px 12px", background: "#ECFDF5", border: "none", borderRadius: 6, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                                onClick={() => updateStatus(d.id, "verified")}>✓ Verify</button>
+                              <button style={{ fontSize: 11, padding: "5px 12px", background: "#FEF2F2", border: "none", borderRadius: 6, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
+                                onClick={() => updateStatus(d.id, "rejected")}>✗ Reject</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
+
           {reviewed.length > 0 && (
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", marginBottom: 10 }}>Reviewed ({reviewed.length})</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", marginBottom: 10 }}>
+                Reviewed Documents ({reviewed.length})
+              </div>
               <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-                <div style={{ overflowX: "auto" }}><table>
-                  <thead><tr><th>Student</th><th>Document</th><th>Uploaded</th><th>Status</th></tr></thead>
-                  <tbody>
-                    {reviewed.map(d => (
-                      <tr key={d.id}>
-                        <td style={{ fontWeight: 600, fontSize: 13 }}>{d.students?.first_name} {d.students?.last_name}</td>
-                        <td style={{ fontSize: 13 }}>{d.doc_name}</td>
-                        <td style={{ fontSize: 11, color: "#90CAF9" }}>{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "\u2014"}</td>
-                        <td><span className={`badge ${d.status === "verified" ? "badge-success" : "badge-danger"}`}>{d.status}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table></div>
+                <div style={{ overflowX: "auto" }}>
+                  <table>
+                    <thead>
+                      <tr><th>Student</th><th>Document</th><th>Uploaded</th><th>Reviewed</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                      {reviewed.map(d => (
+                        <tr key={d.id} className="student-row">
+                          <td>
+                            <div style={{ fontWeight: 600, fontSize: 13 }}>
+                              {d.student ? `${d.student.first_name || ""} ${d.student.last_name || ""}`.trim() : "Unknown"}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#90CAF9" }}>{d.student?.email || "—"}</div>
+                          </td>
+                          <td style={{ fontSize: 13 }}>{d.doc_name}</td>
+                          <td style={{ fontSize: 11, color: "#90CAF9" }}>
+                            {d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "—"}
+                          </td>
+                          <td style={{ fontSize: 11, color: "#90CAF9" }}>
+                            {d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString("en-IN") : "—"}
+                          </td>
+                          <td>
+                            <span className={`badge ${d.status === "verified" ? "badge-success" : "badge-danger"}`}>
+                              {d.status}
+                            </span>
+                          </td>
+                          <td>
+                            {d.status === "verified" && (
+                              <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
+                                onClick={() => updateStatus(d.id, "rejected")}>Reject</button>
+                            )}
+                            {d.status === "rejected" && (
+                              <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                                onClick={() => updateStatus(d.id, "verified")}>Verify</button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
-          {docs.length === 0 && <div style={{ textAlign: "center", padding: "60px 0" }}><div style={{ fontSize: 40, marginBottom: 10 }}>\ud83d\udcc1</div><div style={{ color: "#6B7280" }}>No documents uploaded yet</div></div>}
         </>
       )}
     </div>
@@ -2693,29 +2798,59 @@ function AdminDocVerification() {
 
 function AdminApplications() {
   const [apps, setApps] = useState([]);
+  const [students, setStudents] = useState({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+
   useEffect(() => { loadApps(); }, []);
+
   const loadApps = async () => {
     setLoading(true);
     try {
-      const { data } = await supabase.from("applications").select("*, students(first_name, last_name, email, mobile)").order("created_at", { ascending: false });
-      setApps(data || []);
+      // Fetch applications
+      const { data: appData, error: appErr } = await supabase
+        .from("applications").select("*").order("created_at", { ascending: false });
+      if (appErr) { console.warn("Apps error:", appErr.message); setLoading(false); return; }
+
+      // Fetch student profiles separately
+      const userIds = [...new Set((appData || []).map(a => a.user_id))];
+      if (userIds.length > 0) {
+        const { data: studentData } = await supabase
+          .from("students").select("user_id, first_name, last_name, email, mobile")
+          .in("user_id", userIds);
+        const map = {};
+        (studentData || []).forEach(s => { map[s.user_id] = s; });
+        setStudents(map);
+      }
+      setApps(appData || []);
     } catch (e) { console.warn(e); }
     setLoading(false);
   };
+
   const updateStatus = async (id, status) => {
     await supabase.from("applications").update({ status }).eq("id", id);
     setApps(p => p.map(a => a.id === id ? { ...a, status } : a));
   };
+
   const filtered = filter === "all" ? apps : apps.filter(a => a.status === filter);
-  const counts = { all: apps.length, pending: apps.filter(a => a.status === "pending").length, under_review: apps.filter(a => a.status === "under_review").length, approved: apps.filter(a => a.status === "approved").length, rejected: apps.filter(a => a.status === "rejected").length };
+  const counts = {
+    all: apps.length,
+    pending: apps.filter(a => a.status === "pending").length,
+    under_review: apps.filter(a => a.status === "under_review").length,
+    approved: apps.filter(a => a.status === "approved").length,
+    rejected: apps.filter(a => a.status === "rejected").length,
+  };
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <div><h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Applications</h1><div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} total</div></div>
-        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadApps}>\u21bb Refresh</button>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Applications</h1>
+          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} total applications</div>
+        </div>
+        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadApps}>↻ Refresh</button>
       </div>
+
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         {[["all","All","#1565C0"],["pending","Pending","#D97706"],["under_review","Under Review","#1565C0"],["approved","Approved","#059669"],["rejected","Rejected","#DC2626"]].map(([val,label,color]) => (
           <button key={val} onClick={() => setFilter(val)} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${filter === val ? color : "#E3F2FD"}`, background: filter === val ? color : "white", color: filter === val ? "white" : "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
@@ -2723,31 +2858,47 @@ function AdminApplications() {
           </button>
         ))}
       </div>
-      {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading...</div> : (
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading applications...</div>
+      ) : (
         <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}><table>
-            <thead><tr><th>#</th><th>Student</th><th>College</th><th>Course</th><th>Exam</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
-              {filtered.length === 0 ? <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No applications found</td></tr>
-              : filtered.map((a, i) => (
-                <tr key={a.id} className="student-row">
-                  <td style={{ color: "#90CAF9", fontSize: 12 }}>{i + 1}</td>
-                  <td><div style={{ fontWeight: 600, fontSize: 13 }}>{a.students?.first_name} {a.students?.last_name}</div><div style={{ fontSize: 10, color: "#90CAF9" }}>{a.students?.email}</div></td>
-                  <td style={{ fontSize: 13, fontWeight: 500 }}>{a.college}</td>
-                  <td style={{ fontSize: 12 }}>{a.course}</td>
-                  <td style={{ fontSize: 12 }}>{a.exam || "\u2014"}</td>
-                  <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</td>
-                  <td><span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`}>{a.status?.replace("_"," ")}</span></td>
-                  <td><div style={{ display: "flex", gap: 4 }}>
-                    {(a.status === "pending" || a.status === "under_review") && <>
-                      <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => updateStatus(a.id, "approved")}>\u2713</button>
-                      <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#991B1B", fontWeight: 700 }} onClick={() => updateStatus(a.id, "rejected")}>\u2717</button>
-                    </>}
-                  </div></td>
-                </tr>
-              ))}
-            </tbody>
-          </table></div>
+          <div style={{ overflowX: "auto" }}>
+            <table>
+              <thead>
+                <tr><th>#</th><th>Student</th><th>College</th><th>Course</th><th>Exam</th><th>Applied</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No applications found</td></tr>
+                ) : filtered.map((a, i) => {
+                  const s = students[a.user_id];
+                  return (
+                    <tr key={a.id} className="student-row">
+                      <td style={{ color: "#90CAF9", fontSize: 12 }}>{i + 1}</td>
+                      <td>
+                        <div style={{ fontWeight: 600, fontSize: 13 }}>{s ? `${s.first_name || ""} ${s.last_name || ""}`.trim() : "Unknown"}</div>
+                        <div style={{ fontSize: 10, color: "#90CAF9" }}>{s?.email || "—"}</div>
+                      </td>
+                      <td style={{ fontSize: 13, fontWeight: 500 }}>{a.college}</td>
+                      <td style={{ fontSize: 12 }}>{a.course}</td>
+                      <td style={{ fontSize: 12 }}>{a.exam || "—"}</td>
+                      <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</td>
+                      <td><span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`}>{a.status?.replace("_"," ")}</span></td>
+                      <td>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          {(a.status === "pending" || a.status === "under_review") && <>
+                            <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => updateStatus(a.id, "approved")}>✓</button>
+                            <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#991B1B", fontWeight: 700 }} onClick={() => updateStatus(a.id, "rejected")}>✗</button>
+                          </>}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -2756,19 +2907,48 @@ function AdminApplications() {
 
 function AdminPayments() {
   const [payments, setPayments] = useState([]);
+  const [students, setStudents] = useState({});
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+
   useEffect(() => {
-    supabase.from("payments").select("*, students(first_name, last_name, email)").order("created_at", { ascending: false })
-      .then(({ data }) => { setPayments(data || []); setTotal(data?.filter(p => p.status === "success").reduce((s, p) => s + (p.amount || 0), 0) || 0); setLoading(false); }).catch(e => { console.warn(e); setLoading(false); });
+    const load = async () => {
+      try {
+        const { data: payData } = await supabase
+          .from("payments").select("*").order("created_at", { ascending: false });
+
+        const userIds = [...new Set((payData || []).map(p => p.user_id))];
+        if (userIds.length > 0) {
+          const { data: studentData } = await supabase
+            .from("students").select("user_id, first_name, last_name, email")
+            .in("user_id", userIds);
+          const map = {};
+          (studentData || []).forEach(s => { map[s.user_id] = s; });
+          setStudents(map);
+        }
+        setPayments(payData || []);
+        setTotal((payData || []).filter(p => p.status === "success").reduce((s, p) => s + (p.amount || 0), 0));
+      } catch (e) { console.warn(e); }
+      setLoading(false);
+    };
+    load();
   }, []);
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <div><h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Payment Records</h1><div style={{ fontSize: 12, color: "#059669", marginTop: 2, fontWeight: 600 }}>Total Revenue: \u20b9{total.toLocaleString("en-IN")}</div></div>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Payment Records</h1>
+          <div style={{ fontSize: 12, color: "#059669", marginTop: 2, fontWeight: 600 }}>Total Revenue: ₹{total.toLocaleString("en-IN")}</div>
+        </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 20 }}>
-        {[{label:"Total",val:payments.length,color:"#1565C0"},{label:"Successful",val:payments.filter(p=>p.status==="success").length,color:"#059669"},{label:"Failed",val:payments.filter(p=>p.status==="failed").length,color:"#DC2626"},{label:"Revenue",val:`\u20b9${total.toLocaleString("en-IN")}`,color:"#7C3AED"}].map(s => (
+        {[
+          { label: "Total", val: payments.length, color: "#1565C0" },
+          { label: "Successful", val: payments.filter(p => p.status === "success").length, color: "#059669" },
+          { label: "Failed", val: payments.filter(p => p.status === "failed").length, color: "#DC2626" },
+          { label: "Revenue", val: `₹${total.toLocaleString("en-IN")}`, color: "#7C3AED" },
+        ].map(s => (
           <div key={s.label} className="admin-stat-card" style={{ borderTop: `3px solid ${s.color}` }}>
             <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>{s.label}</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: s.color, fontFamily: "Sora" }}>{s.val}</div>
@@ -2777,22 +2957,31 @@ function AdminPayments() {
       </div>
       {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading payments...</div> : (
         <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}><table>
-            <thead><tr><th>Student</th><th>Service</th><th>Amount</th><th>Payment ID</th><th>Date</th><th>Status</th></tr></thead>
-            <tbody>
-              {payments.length === 0 ? <tr><td colSpan={6} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No payments yet</td></tr>
-              : payments.map(p => (
-                <tr key={p.id} className="student-row">
-                  <td><div style={{ fontWeight: 600, fontSize: 13 }}>{p.students?.first_name} {p.students?.last_name}</div><div style={{ fontSize: 10, color: "#90CAF9" }}>{p.students?.email}</div></td>
-                  <td style={{ fontSize: 12 }}>{p.service_title}</td>
-                  <td style={{ fontSize: 14, fontWeight: 700, color: "#059669" }}>\u20b9{p.amount}</td>
-                  <td style={{ fontSize: 10, color: "#90CAF9", fontFamily: "monospace" }}>{p.razorpay_payment_id || "\u2014"}</td>
-                  <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
-                  <td><span className={`badge ${p.status === "success" ? "badge-success" : "badge-danger"}`}>{p.status}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table></div>
+          <div style={{ overflowX: "auto" }}>
+            <table>
+              <thead><tr><th>Student</th><th>Service</th><th>Amount</th><th>Payment ID</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody>
+                {payments.length === 0 ? (
+                  <tr><td colSpan={6} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No payments yet</td></tr>
+                ) : payments.map(p => {
+                  const s = students[p.user_id];
+                  return (
+                    <tr key={p.id} className="student-row">
+                      <td>
+                        <div style={{ fontWeight: 600, fontSize: 13 }}>{s ? `${s.first_name || ""} ${s.last_name || ""}`.trim() : "Unknown"}</div>
+                        <div style={{ fontSize: 10, color: "#90CAF9" }}>{s?.email || "—"}</div>
+                      </td>
+                      <td style={{ fontSize: 12 }}>{p.service_title}</td>
+                      <td style={{ fontSize: 14, fontWeight: 700, color: "#059669" }}>₹{p.amount}</td>
+                      <td style={{ fontSize: 10, color: "#90CAF9", fontFamily: "monospace" }}>{p.razorpay_payment_id || "—"}</td>
+                      <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
+                      <td><span className={`badge ${p.status === "success" ? "badge-success" : "badge-danger"}`}>{p.status}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
