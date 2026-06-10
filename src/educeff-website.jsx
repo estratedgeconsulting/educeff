@@ -294,130 +294,218 @@ const css = `
     .section { padding: 60px 0; }
   }
 
-  /* ── MOBILE & TABLET NAV (max 768px) ── */
+  /* ── MOBILE & TABLET (max 768px) ── */
   @media (max-width: 768px) {
+    /* Navbar */
     .hamburger { display: flex; }
     .desktop-nav { display: none !important; }
     .desktop-btns { display: none !important; }
     .mobile-menu {
       display: block;
       position: fixed;
-      top: 64px;
-      left: 0;
-      right: 0;
+      top: 64px; left: 0; right: 0;
       background: #64B5F6;
       padding: 16px 20px;
       z-index: 99;
       border-top: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
-    .mobile-menu .nav-link {
-      display: block;
-      padding: 12px 0;
-      font-size: 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .mobile-menu-btns {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 16px;
-    }
+    .mobile-menu .nav-link { display: block; padding: 12px 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .mobile-menu-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 
-    /* sections */
-    .section { padding: 48px 0; }
+    /* General */
+    .section { padding: 40px 0; }
     .container { padding: 0 16px; }
+    .card { padding: 18px !important; }
 
-    /* grids → single column */
-    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+    /* Modal */
+    .modal { padding: 20px 16px !important; margin: 8px; max-width: calc(100vw - 16px) !important; }
+    .modal-overlay { padding: 8px; align-items: flex-end; }
 
-    /* hero */
-    .hero-title { font-size: 32px !important; }
-    .hero-stats { flex-wrap: wrap; gap: 20px !important; }
-    .hero-btns { flex-direction: column; align-items: flex-start; }
+    /* Tables - always scroll */
+    table { min-width: 480px; font-size: 12px; }
+    th, td { padding: 8px 10px !important; }
 
-    /* cards */
-    .card { padding: 20px !important; }
+    /* Hero */
+    .hero-title { font-size: 28px !important; }
+    .hero-stats { flex-wrap: wrap; gap: 16px !important; }
 
-    /* headings */
-    .section-title { font-size: 28px !important; }
+    /* All auto-fit grids already handle themselves */
+    /* Force 1-col on specific layouts */
+    .section-title { font-size: 26px !important; }
 
-    /* process steps → 2 columns on mobile */
-    .process-grid { grid-template-columns: 1fr 1fr !important; }
+    /* Footer */
+    .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
 
-    /* footer grid */
-    .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
+    /* CTA buttons */
+    .cta-btns { flex-direction: column !important; align-items: stretch !important; }
+    .cta-btns button { width: 100% !important; }
 
-    /* about page stat boxes */
+    /* ── STUDENT PORTAL ── */
+    .portal-wrap { flex-direction: column !important; }
+    .portal-sidebar-premium {
+      width: 100% !important;
+      height: auto !important;
+      flex-direction: row !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 50 !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      padding: 0 !important;
+    }
+    .portal-sidebar-top { display: none !important; }
+    .portal-user-card { display: none !important; }
+    .portal-nav-section {
+      display: flex !important;
+      flex-direction: row !important;
+      padding: 4px 8px !important;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .portal-nav-label { display: none !important; }
+    .portal-nav-item {
+      flex-direction: column !important;
+      font-size: 9px !important;
+      gap: 2px !important;
+      padding: 8px 10px !important;
+      min-width: 56px !important;
+      text-align: center !important;
+      border-left: none !important;
+      border-bottom: 3px solid transparent !important;
+      border-radius: 0 !important;
+      white-space: nowrap;
+    }
+    .portal-nav-item.active {
+      background: rgba(255,255,255,0.2) !important;
+      border-bottom-color: white !important;
+      border-left: none !important;
+    }
+    .portal-nav-item .nav-icon {
+      width: 26px !important;
+      height: 26px !important;
+      font-size: 13px !important;
+      margin: 0 auto;
+    }
+    .portal-badge { font-size: 8px !important; padding: 1px 4px !important; }
+    .portal-main { overflow: visible !important; }
+    .portal-topbar { padding: 10px 14px !important; }
+    .portal-topbar > div:first-child > div:first-child { font-size: 15px !important; }
+    .portal-content-area { padding: 16px 14px !important; }
+
+    /* Portal sidebar logout */
+    .portal-wrap > div:first-child > div:last-child { display: none !important; }
+
+    /* ── ADMIN DASHBOARD ── */
+    .admin-wrap { flex-direction: column !important; }
+    .admin-sidebar {
+      width: 100% !important;
+      height: auto !important;
+      flex-direction: row !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 50 !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      padding: 0 !important;
+    }
+    .admin-sidebar-top { display: none !important; }
+    .admin-user-card { display: none !important; }
+    .admin-nav-section {
+      display: flex !important;
+      flex-direction: row !important;
+      padding: 4px 6px !important;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .admin-nav-label { display: none !important; }
+    .admin-nav-item {
+      flex-direction: column !important;
+      font-size: 9px !important;
+      gap: 2px !important;
+      padding: 8px 10px !important;
+      min-width: 52px !important;
+      text-align: center !important;
+      border-left: none !important;
+      border-bottom: 3px solid transparent !important;
+      border-radius: 0 !important;
+    }
+    .admin-nav-item.active {
+      background: rgba(100,181,246,0.2) !important;
+      border-bottom-color: #64B5F6 !important;
+      border-left: none !important;
+    }
+    .admin-nav-icon { width: 24px !important; height: 24px !important; font-size: 13px !important; margin: 0 auto; }
+    .admin-main { overflow: visible !important; }
+    .admin-topbar { padding: 10px 14px !important; }
+    .admin-content { padding: 14px !important; }
+
+    /* Hide back to website in mobile admin */
+    .admin-sidebar > div:last-child { display: none !important; }
+
+    /* Welcome banners */
+    .premium-welcome-banner { padding: 20px 18px !important; border-radius: 14px !important; }
+    .premium-welcome-banner h1 { font-size: 20px !important; }
+
+    /* Stat cards 2-col */
+    .admin-stat-card { padding: 14px !important; }
+    .premium-stat-card { padding: 14px !important; }
+
+    /* Detail modal full screen on mobile */
+    .detail-modal { max-width: 100% !important; margin: 0 !important; border-radius: 12px !important; }
+    .detail-modal-overlay { padding: 10px !important; align-items: flex-end !important; }
+
+    /* Registration modal 2-col grid → 1 col */
+    .modal .grid-2-col { grid-template-columns: 1fr !important; }
+
+    /* Document center */
+    .upload-zone { padding: 18px !important; }
+
+    /* Payments grid */
+    .payments-grid { grid-template-columns: 1fr !important; }
+
+    /* Profile form 2-col → 1 col */
+    .profile-form-inner { grid-template-columns: 1fr !important; }
+
+    /* About page */
+    .about-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
     .about-stats { grid-template-columns: 1fr 1fr !important; }
-
-    /* portal sidebar → bottom nav on mobile */
-    .portal-sidebar { width: 100% !important; flex-direction: row !important; overflow-x: auto; padding: 8px 12px !important; min-height: auto !important; }
-    .portal-sidebar .sidebar-link { flex-direction: column; font-size: 10px !important; gap: 3px !important; padding: 8px 10px !important; white-space: nowrap; min-width: 60px; justify-content: center; text-align: center; }
-    .portal-sidebar .sidebar-user { display: none; }
-    .portal-layout { flex-direction: column !important; }
-    .portal-content { padding: 20px 16px !important; }
-
-    /* stat cards grid */
-    .stats-grid { grid-template-columns: 1fr 1fr !important; }
-
-    /* modal */
-    .modal { padding: 24px 18px !important; margin: 10px; }
-
-    /* table → scroll */
-    .table-wrap { overflow-x: auto; }
-    table { min-width: 500px; }
-
-    /* contact grid */
-    .contact-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-
-    /* why us grid */
-    .whyus-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-    .whyus-reasons { grid-template-columns: 1fr !important; }
-
-    /* testimonials */
-    .testimonials-grid { grid-template-columns: 1fr !important; }
-
-    /* services grid */
-    .services-grid { grid-template-columns: 1fr !important; }
-
-    /* colleges grid */
-    .colleges-grid { grid-template-columns: 1fr !important; }
-
-    /* team grid */
     .team-grid { grid-template-columns: 1fr 1fr !important; }
 
-    /* admin sidebar */
-    .admin-layout { flex-direction: column !important; }
-    .admin-sidebar { width: 100% !important; flex-direction: row !important; overflow-x: auto; padding: 8px !important; }
-    .admin-sidebar .sidebar-link { flex-direction: column; font-size: 10px !important; gap: 2px !important; padding: 8px !important; min-width: 56px; text-align: center; justify-content: center; }
-    .admin-content { padding: 16px !important; }
+    /* Counseling booking form */
+    .booking-inner { grid-template-columns: 1fr !important; }
 
-    /* doc upload grid */
-    .doc-grid { grid-template-columns: 1fr !important; }
+    /* FAQ */
+    .faq-q { font-size: 14px !important; }
 
-    /* profile grid */
-    .profile-grid { grid-template-columns: 1fr !important; }
-    .profile-form-grid { grid-template-columns: 1fr !important; }
+    /* Hero buttons */
+    .hero-btns { flex-direction: column !important; width: 100% !important; }
+    .hero-btns button { width: 100% !important; text-align: center !important; }
 
-    /* CTA section */
-    .cta-btns { flex-direction: column; align-items: center; }
+    /* Exam cards */
+    .exam-countdown { flex-wrap: wrap; gap: 6px !important; }
+    .exam-countdown > div { min-width: 38px !important; }
 
-    /* booking form */
-    .booking-form-grid { grid-template-columns: 1fr !important; }
-
-    /* application form */
-    .app-form-grid { grid-template-columns: 1fr !important; }
+    /* College page tabs */
+    .college-tabs button { padding: 12px 16px !important; font-size: 13px !important; }
+    .stream-filters { gap: 6px !important; }
+    .stream-filters button { font-size: 11px !important; padding: "5px 10px" !important; }
   }
 
   /* ── SMALL MOBILE (max 480px) ── */
   @media (max-width: 480px) {
-    .hero-title { font-size: 26px !important; }
-    .section-title { font-size: 24px !important; }
-    .process-grid { grid-template-columns: 1fr !important; }
+    .container { padding: 0 12px; }
+    .hero-title { font-size: 24px !important; }
+    .section-title { font-size: 22px !important; }
     .footer-grid { grid-template-columns: 1fr !important; }
     .team-grid { grid-template-columns: 1fr !important; }
     .about-stats { grid-template-columns: 1fr 1fr !important; }
-    .stats-grid { grid-template-columns: 1fr 1fr !important; }
+    .modal { padding: 16px 14px !important; }
+    .portal-nav-item { min-width: 48px !important; padding: 6px 8px !important; }
+    .admin-nav-item { min-width: 44px !important; padding: 6px 8px !important; }
+    table { min-width: 420px; font-size: 11px; }
+    .premium-welcome-banner { padding: 16px !important; }
+    .premium-welcome-banner h1 { font-size: 18px !important; }
   }
   tr:hover td { background: #FAFCFF; }
   
@@ -1265,15 +1353,24 @@ const portalCSS = `
   }
 
   @media (max-width: 768px) {
-    .portal-sidebar-premium { width: 100%; height: auto; flex-direction: row; position: relative; overflow-x: auto; }
+    .portal-wrap { flex-direction: column; }
+    .portal-sidebar-premium { width: 100%; height: auto; flex-direction: row; position: sticky; top: 0; overflow-x: auto; overflow-y: hidden; padding: 0; z-index: 50; min-height: 60px; }
+    .portal-sidebar-top { display: none; }
     .portal-user-card { display: none; }
-    .portal-nav-section { display: flex; flex-direction: row; padding: 6px; }
+    .portal-nav-section { display: flex; flex-direction: row; padding: 4px 6px; flex-shrink: 0; }
     .portal-nav-label { display: none; }
-    .portal-nav-item { flex-direction: column; font-size: 9px; gap: 3px; padding: 8px; min-width: 52px; text-align: center; }
-    .portal-nav-item .nav-icon { width: 28px; height: 28px; font-size: 14px; }
+    .portal-nav-item { flex-direction: column; font-size: 9px; gap: 2px; padding: 8px 10px; min-width: 52px; text-align: center; border-left: none !important; border-bottom: 3px solid transparent; border-radius: 0; white-space: nowrap; }
+    .portal-nav-item.active { background: rgba(255,255,255,0.2); border-left: none !important; border-bottom: 3px solid rgba(255,255,255,0.9); }
+    .portal-nav-item .nav-icon { width: 26px; height: 26px; font-size: 13px; margin: 0 auto; }
+    .portal-badge { font-size: 8px; padding: 1px 4px; }
     .portal-main { overflow: visible; }
-    .portal-content-area { padding: 16px; }
-    .portal-topbar { padding: 12px 16px; }
+    .portal-content-area { padding: 14px 12px; }
+    .portal-topbar { padding: 10px 14px; }
+  }
+  @media (max-width: 480px) {
+    .portal-nav-item { min-width: 46px; padding: 6px 8px; font-size: 8px; }
+    .portal-nav-item .nav-icon { width: 22px; height: 22px; font-size: 12px; }
+    .portal-content-area { padding: 10px 8px; }
   }
 `;
 
@@ -1397,7 +1494,7 @@ function StudentPortal({ setPage, user }) {
         {/* Top Bar */}
         <div className="portal-topbar">
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>
+            <div style={{ fontSize: "clamp(14px, 2.5vw, 18px)", fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>
               {navGroups.flatMap(g => g.items).find(i => i.id === tab)?.label || "Dashboard"}
             </div>
             <div style={{ fontSize: 12, color: "#90CAF9" }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
@@ -1510,7 +1607,7 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
       </div>
 
       {/* Stat Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12, marginBottom: 20 }}>
         {statCards.map(s => (
           <div key={s.label} className="premium-stat-card" style={{ "--card-color": s.color }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: s.color, borderRadius: "16px 16px 0 0" }} />
@@ -1653,7 +1750,7 @@ function PortalProfile({ user, profile, onSave }) {
         </div>
         <div className="card" style={{ padding: 28 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: "#64B5F6" }}>Personal Information</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0 16px" }}>
             <div><label>First Name</label><input name="first_name" value={form.first_name || ""} onChange={handleChange} /></div>
             <div><label>Last Name</label><input name="last_name" value={form.last_name || ""} onChange={handleChange} /></div>
             <div><label>Email</label><input value={user?.email || ""} disabled style={{ background: "#F5FAFF" }} /></div>
@@ -1663,7 +1760,7 @@ function PortalProfile({ user, profile, onSave }) {
             <div style={{ gridColumn: "span 2" }}><label>Address</label><input name="address" value={form.address || ""} onChange={handleChange} /></div>
           </div>
           <h3 style={{ fontSize: 16, fontWeight: 600, margin: "20px 0 16px", color: "#64B5F6" }}>Academic Information</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0 16px" }}>
             <div><label>10th Percentage</label><input name="tenth_percent" value={form.tenth_percent || ""} onChange={handleChange} /></div>
             <div><label>12th Percentage</label><input name="twelfth_percent" value={form.twelfth_percent || ""} onChange={handleChange} /></div>
             <div><label>Entrance Exam</label><select name="entrance_exam" value={form.entrance_exam || ""} onChange={handleChange}><option value="">Select</option><option>JEE Main</option><option>MHT-CET</option><option>NEET</option><option>CLAT</option><option>CAT</option></select></div>
@@ -1820,7 +1917,7 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
             <p style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>All 4 must be uploaded to apply for colleges</p>
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
           {REQUIRED_DOCS.map(doc => {
             const uploaded = isUploaded(doc);
             const statusBadge = getStatusBadge(doc);
@@ -2190,7 +2287,7 @@ function PaymentsTab({ user, profile }) {
       </div>
 
       {/* Service Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20, marginBottom: 40 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16, marginBottom: 32 }}>
         {SERVICES.map(service => (
           <div key={service.id} className="card" style={{ position: "relative", border: selectedService?.id === service.id ? "2px solid #64B5F6" : "1px solid #C8E4FA" }}>
             {service.badge && (
@@ -2381,14 +2478,26 @@ const adminCSS = `
   .detail-modal-overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
   .detail-modal { background: white; border-radius: 16px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.2); }
   @media (max-width: 768px) {
-    .admin-sidebar { width: 100%; height: auto; flex-direction: row; position: relative; overflow-x: auto; }
+    .admin-wrap { flex-direction: column; }
+    .admin-sidebar { width: 100%; height: auto; flex-direction: row; position: sticky; top: 0; overflow-x: auto; overflow-y: hidden; padding: 0; z-index: 50; min-height: 58px; }
+    .admin-sidebar-top { display: none; }
     .admin-user-card { display: none; }
-    .admin-nav-section { display: flex; flex-direction: row; padding: 6px; }
+    .admin-nav-section { display: flex; flex-direction: row; padding: 4px 6px; flex-shrink: 0; }
     .admin-nav-label { display: none; }
-    .admin-nav-item { flex-direction: column; font-size: 9px; gap: 2px; padding: 8px; min-width: 52px; text-align: center; border-left: none !important; border-bottom: 3px solid transparent; }
-    .admin-nav-item.active { border-bottom-color: #64B5F6; background: rgba(100,181,246,0.15); }
+    .admin-nav-item { flex-direction: column; font-size: 9px; gap: 2px; padding: 8px 10px; min-width: 50px; text-align: center; border-left: none !important; border-bottom: 3px solid transparent; border-radius: 0; white-space: nowrap; }
+    .admin-nav-item.active { border-bottom-color: #64B5F6; background: rgba(100,181,246,0.2); border-left: none !important; }
+    .admin-nav-icon { width: 24px; height: 24px; font-size: 13px; margin: 0 auto; }
     .admin-main { overflow: visible; }
-    .admin-content { padding: 16px; }
+    .admin-topbar { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+    .admin-content { padding: 14px 12px; }
+    .detail-modal { max-width: 100%; margin: 0; border-radius: 12px 12px 0 0; }
+    .detail-modal-overlay { padding: 0; align-items: flex-end; }
+    .detail-modal > div:first-child { border-radius: 12px 12px 0 0; }
+  }
+  @media (max-width: 480px) {
+    .admin-nav-item { min-width: 44px; padding: 6px 8px; font-size: 8px; }
+    .admin-nav-icon { width: 20px; height: 20px; font-size: 11px; }
+    .admin-content { padding: 10px 8px; }
   }
 `;
 
@@ -2499,7 +2608,7 @@ function AdminDashboard({ setPage }) {
       <div className="admin-main">
         <div className="admin-topbar">
           <div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>
+            <div style={{ fontSize: "clamp(13px, 2.5vw, 17px)", fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>
               {navGroups.flatMap(g => g.items).find(i => i.id === tab)?.label || "Dashboard"}
             </div>
             <div style={{ fontSize: 11, color: "#90CAF9" }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
@@ -2543,7 +2652,7 @@ function AdminOverview({ stats, setTab }) {
         <div style={{ position: "absolute", top: -30, right: -30, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginBottom: 4, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>Admin Dashboard</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", marginBottom: 6, fontFamily: "Sora" }}>Welcome back, Admin!</h1>
+          <h1 style={{ fontSize: "clamp(17px, 3vw, 22px)", fontWeight: 800, color: "white", marginBottom: 6, fontFamily: "Sora" }}>Welcome back, Admin!</h1>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", maxWidth: 440 }}>
             {stats.pending_docs > 0 ? `\u26a0\ufe0f ${stats.pending_docs} documents pending verification.` : `${stats.students} students enrolled, ${stats.applications} applications managed.`}
           </p>
