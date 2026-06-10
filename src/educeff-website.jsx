@@ -1,12 +1,34 @@
 import { useState, useEffect, useRef } from "react";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "@supabase/supabase-js";
 
 // ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
-// Replace these with your actual Supabase project URL and anon key
+// Replace with your actual Supabase project URL and anon key
 // Get them from: https://supabase.com → your project → Settings → API
-const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+
+const supabaseConfigured = SUPABASE_URL && !SUPABASE_URL.includes("YOUR_PROJECT") && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("YOUR_ANON");
+
+const supabase = supabaseConfigured
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : {
+      auth: {
+        getSession: async () => ({ data: { session: null } }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+        signUp: async () => { throw new Error("Supabase not configured. Please add your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to Vercel environment variables."); },
+        signInWithPassword: async () => { throw new Error("Supabase not configured. Please add your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to Vercel environment variables."); },
+        signOut: async () => {},
+        resetPasswordForEmail: async () => {},
+      },
+      from: () => ({
+        select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }), order: () => ({ ascending: () => ({ limit: async () => ({ data: [], error: null }) }), limit: async () => ({ data: [], error: null }) }), limit: async () => ({ data: [], error: null }), data: [], error: null }), data: [], error: null }),
+        insert: async () => ({ data: null, error: new Error("Supabase not configured") }),
+        update: () => ({ eq: async () => ({ error: new Error("Supabase not configured") }) }),
+        delete: () => ({ eq: () => ({ eq: async () => ({ error: null }) }) }),
+        upsert: async () => ({ error: null }),
+      }),
+      storage: { from: () => ({ list: async () => ({ data: [], error: null }), upload: async () => ({ error: new Error("Supabase not configured") }), remove: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: "" } }) }) },
+    };
 
 const COLORS = {
   navy: "#64B5F6",
@@ -1204,14 +1226,25 @@ function StudentPortal({ setPage, user }) {
   useEffect(() => { if (user) loadProfile(); }, [user]);
 
   const loadProfile = async () => {
-    const { data } = await supabase.from("students").select("*").eq("user_id", user.id).single();
-    if (data) setProfile(data);
-    const { data: docs } = await supabase.storage.from("student-documents").list(`${user.id}/`);
-    if (docs) { const m = {}; docs.forEach(d => { m[d.name] = true; }); setUploadedDocs(m); }
-    const { data: apps } = await supabase.from("applications").select("id").eq("user_id", user.id);
-    if (apps) setApplications(apps.length);
-    const { data: notifs } = await supabase.from("notifications").select("id").eq("user_id", user.id).eq("is_read", false);
-    if (notifs) setNotifications(notifs.length);
+    try {
+      const { data, error } = await supabase.from("students").select("*").eq("user_id", user.id).single();
+      if (data) setProfile(data);
+    } catch (e) { console.warn("Profile load failed", e); }
+
+    try {
+      const { data: docs } = await supabase.storage.from("student-documents").list(`${user.id}/`);
+      if (docs) { const m = {}; docs.forEach(d => { m[d.name] = true; }); setUploadedDocs(m); }
+    } catch (e) { console.warn("Docs load failed", e); }
+
+    try {
+      const { data: apps } = await supabase.from("applications").select("id").eq("user_id", user.id);
+      if (apps) setApplications(apps.length);
+    } catch (e) { console.warn("Apps load failed", e); }
+
+    try {
+      const { data: notifs } = await supabase.from("notifications").select("id").eq("user_id", user.id).eq("is_read", false);
+      if (notifs) setNotifications(notifs.length);
+    } catch (e) { console.warn("Notifs load failed", e); }
   };
 
   const initials = profile ? `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`.toUpperCase() : "ST";
@@ -1337,24 +1370,36 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
   const [recentApps, setRecentApps] = useState([]);
   const [recentPayments, setRecentPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [appsRes, docsRes, paymentsRes] = await Promise.all([
-        supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
-        supabase.storage.from("student-documents").list(`${user.id}/`),
-        supabase.from("payments").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
-      ]);
-      if (appsRes.data) {
-        setRecentApps(appsRes.data);
-        setStats(s => ({ ...s, applications: appsRes.data.filter(a => a.status !== "rejected").length, pending: appsRes.data.filter(a => a.status === "pending").length }));
-      }
-      if (docsRes.data) setStats(s => ({ ...s, docs: docsRes.data.length }));
-      if (paymentsRes.data) {
-        setRecentPayments(paymentsRes.data);
-        setStats(s => ({ ...s, payments: paymentsRes.data.filter(p => p.status === "success").length }));
-      }
+      setError(null);
+      try {
+        // Load applications
+        const appsRes = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5);
+        if (appsRes.data) {
+          setRecentApps(appsRes.data);
+          setStats(s => ({ ...s, applications: appsRes.data.filter(a => a.status !== "rejected").length, pending: appsRes.data.filter(a => a.status === "pending").length }));
+        }
+      } catch (e) { console.warn("Apps fetch failed", e); }
+
+      try {
+        // Load documents
+        const docsRes = await supabase.storage.from("student-documents").list(`${user.id}/`);
+        if (docsRes.data) setStats(s => ({ ...s, docs: docsRes.data.length }));
+      } catch (e) { console.warn("Docs fetch failed", e); }
+
+      try {
+        // Load payments
+        const paymentsRes = await supabase.from("payments").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3);
+        if (paymentsRes.data) {
+          setRecentPayments(paymentsRes.data);
+          setStats(s => ({ ...s, payments: paymentsRes.data.filter(p => p.status === "success").length }));
+        }
+      } catch (e) { console.warn("Payments fetch failed", e); }
+
       setLoading(false);
     };
     load();
@@ -3044,12 +3089,10 @@ export default function App() {
 
   // Restore session on page load
   useEffect(() => {
+    if (!supabaseConfigured) return;
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        setIsLoggedIn(true);
-      }
-    });
+      if (session?.user) { setUser(session.user); setIsLoggedIn(true); }
+    }).catch(e => console.warn("Session check failed:", e));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) { setUser(session.user); setIsLoggedIn(true); }
       else { setUser(null); setIsLoggedIn(false); setIsAdmin(false); }
@@ -3077,6 +3120,12 @@ export default function App() {
   return (
     <div>
       <style>{css}</style>
+      {!supabaseConfigured && (
+        <div style={{ background: "#FEF3C7", borderBottom: "1px solid #FCD34D", padding: "10px 24px", fontSize: 13, color: "#92400E", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 16 }}>⚠️</span>
+          <strong>Supabase not configured:</strong> Add <code style={{ background: "#FEF9EE", padding: "1px 6px", borderRadius: 4 }}>VITE_SUPABASE_URL</code> and <code style={{ background: "#FEF9EE", padding: "1px 6px", borderRadius: 4 }}>VITE_SUPABASE_ANON_KEY</code> to your Vercel environment variables, then redeploy. Login and data features are disabled until then.
+        </div>
+      )}
       <Navbar page={page} setPage={setPage} isLoggedIn={isLoggedIn} isAdmin={isAdmin} setModal={(m) => { if (m === null) handleLogout(); else setModal(m); }} />
 
       {page === "Home" && <>
