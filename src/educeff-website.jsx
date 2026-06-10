@@ -1008,138 +1008,512 @@ function RegisterModal({ onClose }) {
   );
 }
 
-// ─── STUDENT PORTAL ──────────────────────────────────────────────────────────
+// ─── PREMIUM PORTAL CSS ──────────────────────────────────────────────────────
+const portalCSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+  .portal-wrap { display: flex; min-height: 100vh; background: #F0F7FF; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+  .portal-sidebar-premium {
+    width: 260px;
+    background: linear-gradient(180deg, #1A237E 0%, #283593 60%, #1565C0 100%);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .portal-sidebar-top {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .portal-user-card {
+    margin: 20px 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .portal-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #64B5F6, #7C3AED);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px; color: white;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(100,181,246,0.4);
+  }
+
+  .portal-nav-section { padding: 8px 12px; margin-top: 4px; }
+  .portal-nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 0 8px; margin: 12px 0 6px; }
+
+  .portal-nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,0.65);
+    cursor: pointer; transition: all 0.2s;
+    margin-bottom: 2px;
+    position: relative;
+  }
+  .portal-nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .portal-nav-item.active {
+    background: rgba(255,255,255,0.15);
+    color: white; font-weight: 600;
+    border-left: 3px solid #64B5F6;
+  }
+  .portal-nav-item .nav-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    background: rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  .portal-nav-item.active .nav-icon { background: rgba(100,181,246,0.2); }
+
+  .portal-badge {
+    margin-left: auto;
+    background: #DC2626;
+    color: white;
+    font-size: 9px; font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px; text-align: center;
+  }
+
+  .portal-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .portal-topbar {
+    background: white;
+    border-bottom: 1px solid #E3F2FD;
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+
+  .portal-content-area { flex: 1; padding: 28px; overflow-y: auto; }
+
+  .premium-stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 22px;
+    border: 1px solid #E3F2FD;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .premium-stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(100,181,246,0.15); }
+  .premium-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .progress-bar-wrap { background: #E3F2FD; border-radius: 20px; height: 6px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 20px; transition: width 1s ease; }
+
+  .activity-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #F0F7FF;
+  }
+  .activity-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
+  }
+
+  .quick-action-card {
+    background: white;
+    border: 1px solid #E3F2FD;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .quick-action-card:hover { border-color: #64B5F6; box-shadow: 0 4px 12px rgba(100,181,246,0.12); transform: translateY(-2px); }
+
+  .exam-reminder-card {
+    background: linear-gradient(135deg, #1565C0, #7C3AED);
+    border-radius: 16px;
+    padding: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .exam-reminder-card::after {
+    content: '📅';
+    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    font-size: 48px; opacity: 0.15;
+  }
+
+  .premium-welcome-banner {
+    background: linear-gradient(135deg, #1565C0 0%, #7C3AED 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .premium-welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .premium-welcome-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: 60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+
+  @media (max-width: 768px) {
+    .portal-sidebar-premium { width: 100%; height: auto; flex-direction: row; position: relative; overflow-x: auto; }
+    .portal-user-card { display: none; }
+    .portal-nav-section { display: flex; flex-direction: row; padding: 6px; }
+    .portal-nav-label { display: none; }
+    .portal-nav-item { flex-direction: column; font-size: 9px; gap: 3px; padding: 8px; min-width: 52px; text-align: center; }
+    .portal-nav-item .nav-icon { width: 28px; height: 28px; font-size: 14px; }
+    .portal-main { overflow: visible; }
+    .portal-content-area { padding: 16px; }
+    .portal-topbar { padding: 12px 16px; }
+  }
+`;
 
 function StudentPortal({ setPage, user }) {
   const [tab, setTab] = useState("dashboard");
   const [profile, setProfile] = useState(null);
   const [uploadedDocs, setUploadedDocs] = useState({});
+  const [notifications, setNotifications] = useState(0);
+  const [applications, setApplications] = useState(0);
 
-  useEffect(() => {
-    if (user) loadProfile();
-  }, [user]);
+  useEffect(() => { if (user) loadProfile(); }, [user]);
 
   const loadProfile = async () => {
     const { data } = await supabase.from("students").select("*").eq("user_id", user.id).single();
     if (data) setProfile(data);
-    // Load uploaded doc names
     const { data: docs } = await supabase.storage.from("student-documents").list(`${user.id}/`);
-    if (docs) {
-      const docMap = {};
-      docs.forEach(d => { docMap[d.name] = true; });
-      setUploadedDocs(docMap);
-    }
+    if (docs) { const m = {}; docs.forEach(d => { m[d.name] = true; }); setUploadedDocs(m); }
+    const { data: apps } = await supabase.from("applications").select("id").eq("user_id", user.id);
+    if (apps) setApplications(apps.length);
+    const { data: notifs } = await supabase.from("notifications").select("id").eq("user_id", user.id).eq("is_read", false);
+    if (notifs) setNotifications(notifs.length);
   };
 
-  const initials = profile ? `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}` : "ST";
-  const fullName = profile ? `${profile.first_name} ${profile.last_name}` : "Student";
+  const initials = profile ? `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`.toUpperCase() : "ST";
+  const fullName = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : "Student";
+  const docCount = Object.keys(uploadedDocs).length;
+  const profileComplete = Math.min(100, Math.round(
+    ([profile?.first_name, profile?.mobile, profile?.date_of_birth, profile?.address, profile?.tenth_percent, profile?.course_interest].filter(Boolean).length / 6) * 100
+  ));
 
-  const tabs = [
-    { id: "dashboard", label: "Dashboard", icon: "📊" },
-    { id: "profile", label: "My Profile", icon: "👤" },
-    { id: "documents", label: "Documents", icon: "📁" },
-    { id: "applications", label: "Applications", icon: "📋" },
-    { id: "payments", label: "Payments", icon: "💳" },
-    { id: "tracking", label: "Track Status", icon: "📍" },
-    { id: "notifications", label: "Notifications", icon: "🔔" },
-    { id: "support", label: "Support", icon: "💬" },
+  const handleLogout = async () => { await supabase.auth.signOut(); setPage("Home"); };
+
+  const navGroups = [
+    { label: "Main", items: [
+      { id: "dashboard", label: "Dashboard", icon: "⚡" },
+      { id: "profile", label: "My Profile", icon: "👤", badge: profileComplete < 100 ? "!" : null },
+    ]},
+    { label: "Admissions", items: [
+      { id: "applications", label: "Applications", icon: "📋", badge: applications > 0 ? applications : null },
+      { id: "tracking", label: "Track Status", icon: "📍" },
+      { id: "documents", label: "Documents", icon: "📁", badge: docCount < 4 ? `${docCount}/4` : null },
+    ]},
+    { label: "Services", items: [
+      { id: "payments", label: "Payments", icon: "💳" },
+      { id: "notifications", label: "Notifications", icon: "🔔", badge: notifications > 0 ? notifications : null },
+      { id: "support", label: "Support", icon: "💬" },
+    ]},
   ];
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setPage("Home");
-  };
-
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#FFFFFF", flexDirection: "column" }}>
-      <div style={{ background: "#64B5F6", padding: "24px 12px", flexShrink: 0, minWidth: 200 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 28, padding: "0 8px" }}>
-          <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="rgba(255,255,255,0.18)"/>
-            <polygon points="30,8 50,19 50,41 30,52 10,41 10,19" fill="none" stroke="white" strokeWidth="2"/>
-            <text x="30" y="38" textAnchor="middle" fontFamily="Sora,sans-serif" fontSize="22" fontWeight="700" fill="white">E</text>
-          </svg>
-          <span className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#FFFFFF" }}>Edu<span style={{color:"#E0D4FC"}}>ceff</span></span>
+    <div className="portal-wrap">
+      <style>{portalCSS}</style>
+
+      {/* Sidebar */}
+      <div className="portal-sidebar-premium">
+        {/* Logo */}
+        <div className="portal-sidebar-top">
+          <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => setPage("Home")}>
+            <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
+              <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="rgba(255,255,255,0.2)"/>
+              <polygon points="30,8 50,19 50,41 30,52 10,41 10,19" fill="none" stroke="white" strokeWidth="2"/>
+              <text x="30" y="38" textAnchor="middle" fontFamily="Sora" fontSize="20" fontWeight="700" fill="white">E</text>
+            </svg>
+            <span style={{ fontSize: 17, fontWeight: 700, color: "white", fontFamily: "Sora" }}>Edu<span style={{ color: "#90CAF9" }}>ceff</span></span>
+          </div>
         </div>
-        <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 8, padding: "12px 14px", marginBottom: 20 }}>
-          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#F5FAFF", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, marginBottom: 8 }}>{initials}</div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>{fullName}</div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>{profile?.course_interest || "Student"}</div>
+
+        {/* User Card */}
+        <div className="portal-user-card">
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div className="portal-avatar">{initials}</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "white" }}>{fullName}</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>{profile?.course_interest || "Student"}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 5 }}>
+                <div style={{ flex: 1, background: "rgba(255,255,255,0.15)", borderRadius: 10, height: 4, overflow: "hidden" }}>
+                  <div style={{ width: `${profileComplete}%`, height: "100%", background: "linear-gradient(90deg, #64B5F6, #A78BFA)", borderRadius: 10 }} />
+                </div>
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", whiteSpace: "nowrap" }}>{profileComplete}%</span>
+              </div>
+            </div>
+          </div>
         </div>
-        {tabs.map(t => (
-          <div key={t.id} className={`sidebar-link ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
-            <span style={{ fontSize: 16 }}>{t.icon}</span>{t.label}
+
+        {/* Nav Groups */}
+        {navGroups.map(group => (
+          <div key={group.label} className="portal-nav-section">
+            <div className="portal-nav-label">{group.label}</div>
+            {group.items.map(item => (
+              <div key={item.id} className={`portal-nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
+                <div className="nav-icon">{item.icon}</div>
+                {item.label}
+                {item.badge && <span className="portal-badge">{item.badge}</span>}
+              </div>
+            ))}
           </div>
         ))}
-        <div className="sidebar-link" onClick={handleLogout} style={{ marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 14 }}>
-          <span style={{ fontSize: 16 }}>🚪</span> Logout
+
+        {/* Logout */}
+        <div style={{ marginTop: "auto", padding: "12px 12px 20px" }}>
+          <div className="portal-nav-item" onClick={handleLogout} style={{ color: "rgba(255,100,100,0.8)" }}>
+            <div className="nav-icon" style={{ background: "rgba(220,38,38,0.15)" }}>🚪</div>
+            Logout
+          </div>
         </div>
       </div>
-      <div style={{ flex: 1, padding: "clamp(16px, 3vw, 32px)", overflowY: "auto", background: "#FAFCFF" }}>
-        {tab === "dashboard" && <PortalDashboard user={user} profile={profile} />}
-        {tab === "profile" && <PortalProfile user={user} profile={profile} onSave={loadProfile} />}
-        {tab === "documents" && <DocumentCenter user={user} uploadedDocs={uploadedDocs} onUpload={loadProfile} />}
-        {tab === "applications" && <ApplicationsTab user={user} />}
-        {tab === "payments" && <PaymentsTab user={user} profile={profile} />}
-        {tab === "tracking" && <TrackingTab user={user} />}
-        {tab === "notifications" && <NotificationsTab user={user} />}
-        {tab === "support" && <SupportTab user={user} />}
+
+      {/* Main Content */}
+      <div className="portal-main">
+        {/* Top Bar */}
+        <div className="portal-topbar">
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>
+              {navGroups.flatMap(g => g.items).find(i => i.id === tab)?.label || "Dashboard"}
+            </div>
+            <div style={{ fontSize: 12, color: "#90CAF9" }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "#F0F7FF", border: "1px solid #E3F2FD", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 600, color: "#64B5F6", cursor: "pointer" }} onClick={() => setTab("notifications")}>
+              🔔 {notifications > 0 ? <span style={{ background: "#DC2626", color: "white", borderRadius: 10, padding: "1px 5px", fontSize: 10, marginLeft: 4 }}>{notifications}</span> : ""}
+            </button>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "white", cursor: "pointer" }} onClick={() => setTab("profile")}>{initials}</div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="portal-content-area">
+          {tab === "dashboard" && <PortalDashboard user={user} profile={profile} setTab={setTab} profileComplete={profileComplete} docCount={docCount} />}
+          {tab === "profile" && <PortalProfile user={user} profile={profile} onSave={loadProfile} />}
+          {tab === "documents" && <DocumentCenter user={user} uploadedDocs={uploadedDocs} onUpload={loadProfile} />}
+          {tab === "applications" && <ApplicationsTab user={user} />}
+          {tab === "payments" && <PaymentsTab user={user} profile={profile} />}
+          {tab === "tracking" && <TrackingTab user={user} />}
+          {tab === "notifications" && <NotificationsTab user={user} />}
+          {tab === "support" && <SupportTab user={user} />}
+        </div>
       </div>
     </div>
   );
 }
 
-function PortalDashboard({ user, profile }) {
-  const [stats, setStats] = useState({ applications: 0, docs: 0, sessions: 0, pending: 0 });
+function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
+  const [stats, setStats] = useState({ applications: 0, docs: 0, sessions: 0, pending: 0, payments: 0 });
   const [recentApps, setRecentApps] = useState([]);
+  const [recentPayments, setRecentPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const { data: apps } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5);
-      if (apps) {
-        setRecentApps(apps);
-        setStats(s => ({ ...s, applications: apps.filter(a => a.status !== "rejected").length, pending: apps.filter(a => a.status === "pending").length }));
+      const [appsRes, docsRes, paymentsRes] = await Promise.all([
+        supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+        supabase.storage.from("student-documents").list(`${user.id}/`),
+        supabase.from("payments").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
+      ]);
+      if (appsRes.data) {
+        setRecentApps(appsRes.data);
+        setStats(s => ({ ...s, applications: appsRes.data.filter(a => a.status !== "rejected").length, pending: appsRes.data.filter(a => a.status === "pending").length }));
       }
-      const { data: docs } = await supabase.storage.from("student-documents").list(`${user.id}/`);
-      if (docs) setStats(s => ({ ...s, docs: docs.length }));
+      if (docsRes.data) setStats(s => ({ ...s, docs: docsRes.data.length }));
+      if (paymentsRes.data) {
+        setRecentPayments(paymentsRes.data);
+        setStats(s => ({ ...s, payments: paymentsRes.data.filter(p => p.status === "success").length }));
+      }
+      setLoading(false);
     };
     load();
   }, [user]);
 
   const firstName = profile?.first_name || "Student";
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
+
+  const statCards = [
+    { label: "Active Applications", val: stats.applications, icon: "📋", color: "#1565C0", bg: "#EFF6FF", bar: "#64B5F6", pct: Math.min(100, stats.applications * 20) },
+    { label: "Documents Uploaded", val: `${stats.docs}/4`, icon: "📁", color: "#059669", bg: "#F0FDF4", bar: "#34D399", pct: (stats.docs / 4) * 100 },
+    { label: "Profile Completion", val: `${profileComplete}%`, icon: "👤", color: "#7C3AED", bg: "#F5F3FF", bar: "#A78BFA", pct: profileComplete },
+    { label: "Services Purchased", val: stats.payments, icon: "💳", color: "#D97706", bg: "#FFFBEB", bar: "#FCD34D", pct: Math.min(100, stats.payments * 33) },
+  ];
+
+  const quickActions = [
+    { icon: "📋", label: "New Application", desc: "Apply to a college", color: "#EFF6FF", action: () => setTab("applications") },
+    { icon: "📁", label: "Upload Documents", desc: `${4 - Math.min(4, stats.docs)} docs pending`, color: "#F0FDF4", action: () => setTab("documents") },
+    { icon: "🎓", label: "Book Counseling", desc: "Free 45-min session", color: "#F5F3FF", action: () => setTab("payments") },
+    { icon: "📍", label: "Track Status", desc: "View application status", color: "#FFFBEB", action: () => setTab("tracking") },
+  ];
+
+  const upcomingExams = [
+    { name: "JEE Main Session 2", date: "Apr 4, 2026", daysLeft: 45, color: "#1565C0" },
+    { name: "MHT-CET 2026", date: "May 2, 2026", daysLeft: 73, color: "#059669" },
+    { name: "NEET UG 2026", date: "May 3, 2026", daysLeft: 74, color: "#DC2626" },
+  ];
 
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Welcome back, {firstName} 👋</h1>
-      <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 28 }}>Here's an overview of your current applications and tasks.</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
-        {[
-          { label: "Active Applications", val: stats.applications, color: "#64B5F6" },
-          { label: "Documents Uploaded", val: `${stats.docs}/4`, color: "#D97706" },
-          { label: "Counseling Sessions", val: stats.sessions, color: "#059669" },
-          { label: "Pending Actions", val: stats.pending, color: "#DC2626" },
-        ].map(s => (
-          <div key={s.label} className="stat-card">
-            <div style={{ fontSize: 13, color: "#6D28D9", marginBottom: 6 }}>{s.label}</div>
-            <div className="font-display" style={{ fontSize: 28, fontWeight: 700, color: s.color }}>{s.val}</div>
+      {/* Welcome Banner */}
+      <div className="premium-welcome-banner">
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 4, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>{greeting} 👋</div>
+          <h1 style={{ fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: "white", marginBottom: 6, fontFamily: "Sora" }}>Welcome back, {firstName}!</h1>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", marginBottom: 20, maxWidth: 420 }}>
+            {stats.applications === 0
+              ? "You haven't applied to any college yet. Start your admission journey today!"
+              : `You have ${stats.applications} active application${stats.applications > 1 ? "s" : ""}. Keep going, you're doing great!`}
+          </p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button style={{ background: "white", color: "#1565C0", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }} onClick={() => setTab("applications")}>+ New Application</button>
+            <button style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer" }} onClick={() => setTab("documents")}>Upload Documents</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 28 }}>
+        {statCards.map(s => (
+          <div key={s.label} className="premium-stat-card" style={{ "--card-color": s.color }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: s.color, borderRadius: "16px 16px 0 0" }} />
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{s.icon}</div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: s.color, fontFamily: "Sora" }}>{loading ? "..." : s.val}</div>
+            </div>
+            <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 500, marginBottom: 10 }}>{s.label}</div>
+            <div className="progress-bar-wrap">
+              <div className="progress-bar-fill" style={{ width: `${s.pct}%`, background: s.bar }} />
+            </div>
           </div>
         ))}
       </div>
-      <div className="card" style={{ padding: 22 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#64B5F6" }}>Recent Applications</h3>
-        {recentApps.length === 0 ? (
-          <p style={{ fontSize: 14, color: "#6D28D9" }}>No applications yet. Click "My Applications" to add one.</p>
-        ) : recentApps.map(a => (
-          <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid #F5FAFF" }}>
-            <span style={{ fontSize: 13, color: "#64B5F6" }}>{a.college} — {a.course}</span>
-            <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`}>{a.status?.replace("_", " ")}</span>
+
+      {/* Main Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 20, marginBottom: 20 }}>
+        {/* Recent Applications */}
+        <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>Recent Applications</h3>
+            <button style={{ fontSize: 12, color: "#64B5F6", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }} onClick={() => setTab("applications")}>View All →</button>
           </div>
-        ))}
+          {recentApps.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "32px 0" }}>
+              <div style={{ fontSize: 40, marginBottom: 10 }}>📭</div>
+              <div style={{ fontSize: 14, color: "#6B7280", marginBottom: 16 }}>No applications yet</div>
+              <button className="btn-primary" style={{ fontSize: 13, padding: "10px 20px" }} onClick={() => setTab("applications")}>Apply to a College</button>
+            </div>
+          ) : recentApps.map((a, i) => (
+            <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: i < recentApps.length - 1 ? "1px solid #F0F7FF" : "none" }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#1565C0", flexShrink: 0 }}>{a.college?.[0] || "C"}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.college}</div>
+                <div style={{ fontSize: 11, color: "#90CAF9" }}>{a.course}</div>
+              </div>
+              <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`} style={{ flexShrink: 0 }}>{a.status?.replace("_", " ")}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Right Column */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Upcoming Exams */}
+          <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 20 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 14 }}>⏰ Upcoming Exams</h3>
+            {upcomingExams.map(e => (
+              <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, padding: "8px 10px", background: "#F8FFFE", borderRadius: 8, border: "1px solid #E3F2FD" }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: e.color, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 11, fontWeight: 700, flexShrink: 0, textAlign: "center", lineHeight: 1.2 }}>{e.daysLeft}d</div>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{e.name}</div>
+                  <div style={{ fontSize: 10, color: "#90CAF9" }}>{e.date}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Profile Completion */}
+          {profileComplete < 100 && (
+            <div style={{ background: "linear-gradient(135deg, #7C3AED, #1565C0)", borderRadius: 14, padding: 18 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 4 }}>Complete Your Profile</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginBottom: 12 }}>{profileComplete}% done — complete it to apply faster</div>
+              <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: 10, height: 6, overflow: "hidden", marginBottom: 12 }}>
+                <div style={{ width: `${profileComplete}%`, height: "100%", background: "white", borderRadius: 10 }} />
+              </div>
+              <button style={{ background: "white", color: "#7C3AED", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer", width: "100%" }} onClick={() => setTab("profile")}>Complete Now →</button>
+            </div>
+          )}
+
+          {/* Recent Payment */}
+          {recentPayments.length > 0 && (
+            <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 18 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 12 }}>💳 Recent Payments</h3>
+              {recentPayments.slice(0, 2).map(p => (
+                <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #F0F7FF" }}>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{p.service_title}</div>
+                    <div style={{ fontSize: 10, color: "#90CAF9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#059669" }}>₹{p.amount}</div>
+                    <span className={`badge ${p.status === "success" ? "badge-success" : "badge-danger"}`} style={{ fontSize: 9 }}>{p.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 16 }}>Quick Actions</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+          {quickActions.map(a => (
+            <div key={a.label} className="quick-action-card" onClick={a.action}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: a.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{a.icon}</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>{a.label}</div>
+                <div style={{ fontSize: 11, color: "#90CAF9" }}>{a.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+
 
 function PortalProfile({ user, profile, onSave }) {
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", mobile: "", date_of_birth: "", gender: "", address: "", tenth_percent: "", twelfth_percent: "", entrance_exam: "", score: "" });
