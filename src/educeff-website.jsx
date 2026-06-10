@@ -971,13 +971,43 @@ function RegisterModal({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+
+  // Calculate max and min date for DOB
+  const today = new Date();
+  const maxDob = new Date(today.getFullYear() - 10, today.getMonth(), today.getDate()).toISOString().split("T")[0]; // must be at least 10 years old
+  const minDob = new Date(today.getFullYear() - 60, today.getMonth(), today.getDate()).toISOString().split("T")[0]; // max 60 years old
 
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
+  const validateForm = () => {
+    if (!form.firstName.trim()) return "First name is required.";
+    if (!form.lastName.trim()) return "Last name is required.";
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return "Enter a valid email address.";
+    if (!form.mobile.trim() || form.mobile.replace(/\D/g, "").length < 10) return "Enter a valid 10-digit mobile number.";
+    if (!form.dob) return "Date of birth is required.";
+
+    // Date of birth validations
+    const dob = new Date(form.dob);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+
+    if (dob >= todayDate) return "Date of birth cannot be today or a future date.";
+    if (form.dob > maxDob) return "You must be at least 10 years old to register.";
+    if (form.dob < minDob) return "Please enter a valid date of birth.";
+
+    if (!form.course) return "Please select your course of interest.";
+    if (!form.password || form.password.length < 6) return "Password must be at least 6 characters.";
+    if (!agreed) return "Please agree to the Terms of Service.";
+    return null;
+  };
+
   const handleRegister = async () => {
+    const validationError = validateForm();
+    if (validationError) { setError(validationError); return; }
+
     setError(""); setLoading(true);
     try {
-      // 1. Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -985,7 +1015,6 @@ function RegisterModal({ onClose }) {
       });
       if (authError) throw authError;
 
-      // 2. Save student profile to 'students' table
       const { error: profileError } = await supabase.from("students").insert({
         user_id: authData.user.id,
         first_name: form.firstName,
@@ -1024,14 +1053,26 @@ function RegisterModal({ onClose }) {
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6D28D9" }}>×</button>
         <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Create Your Account</h2>
         <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Join Educeff — your academic journey starts here.</p>
-        {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
+        {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>⚠️ {error}</div>}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
           <div><label>First Name</label><input name="firstName" placeholder="Rahul" value={form.firstName} onChange={handleChange} /></div>
           <div><label>Last Name</label><input name="lastName" placeholder="Sharma" value={form.lastName} onChange={handleChange} /></div>
         </div>
         <label>Email Address</label><input name="email" placeholder="rahul@email.com" type="email" value={form.email} onChange={handleChange} />
         <label>Mobile Number</label><input name="mobile" placeholder="+91 98765 43210" value={form.mobile} onChange={handleChange} />
-        <label>Date of Birth</label><input name="dob" type="date" value={form.dob} onChange={handleChange} />
+        <label>Date of Birth <span style={{ color: "#90CAF9", fontSize: 11, fontWeight: 400 }}>(cannot be today or future)</span></label>
+        <input
+          name="dob"
+          type="date"
+          value={form.dob}
+          max={maxDob}
+          min={minDob}
+          onChange={handleChange}
+          style={{ borderColor: form.dob && form.dob >= new Date().toISOString().split("T")[0] ? "#DC2626" : undefined }}
+        />
+        {form.dob && form.dob >= new Date().toISOString().split("T")[0] && (
+          <div style={{ fontSize: 11, color: "#DC2626", marginTop: -10, marginBottom: 10 }}>⚠️ Date of birth cannot be today or a future date</div>
+        )}
         <label>Course Interested In</label>
         <select name="course" value={form.course} onChange={handleChange}>
           <option value="">Select your field</option>
@@ -1039,7 +1080,7 @@ function RegisterModal({ onClose }) {
         </select>
         <label>Password</label><input name="password" type="password" placeholder="Create a strong password (min 6 chars)" value={form.password} onChange={handleChange} />
         <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 16 }}>
-          <input type="checkbox" style={{ width: "auto", marginTop: 3, marginBottom: 0 }} />
+          <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width: "auto", marginTop: 3, marginBottom: 0 }} />
           <span style={{ fontSize: 12, color: "#6D28D9" }}>I agree to the <span style={{ color: "#64B5F6" }}>Terms of Service</span> and <span style={{ color: "#64B5F6" }}>Privacy Policy</span>.</span>
         </div>
         <button className="btn-primary" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }} onClick={handleRegister} disabled={loading}>
@@ -1617,7 +1658,7 @@ function PortalProfile({ user, profile, onSave }) {
             <div><label>Last Name</label><input name="last_name" value={form.last_name || ""} onChange={handleChange} /></div>
             <div><label>Email</label><input value={user?.email || ""} disabled style={{ background: "#F5FAFF" }} /></div>
             <div><label>Mobile</label><input name="mobile" value={form.mobile || ""} onChange={handleChange} /></div>
-            <div><label>Date of Birth</label><input name="date_of_birth" type="date" value={form.date_of_birth || ""} onChange={handleChange} /></div>
+            <div><label>Date of Birth</label><input name="date_of_birth" type="date" value={form.date_of_birth || ""} onChange={handleChange} max={new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split("T")[0]} min={new Date(new Date().setFullYear(new Date().getFullYear() - 60)).toISOString().split("T")[0]} /></div>
             <div><label>Gender</label><select name="gender" value={form.gender || ""} onChange={handleChange}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
             <div style={{ gridColumn: "span 2" }}><label>Address</label><input name="address" value={form.address || ""} onChange={handleChange} /></div>
           </div>
