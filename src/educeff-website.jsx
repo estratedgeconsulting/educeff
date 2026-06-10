@@ -2121,352 +2121,774 @@ function SupportTab() {
 
 // ─── ADMIN DASHBOARD ─────────────────────────────────────────────────────────
 
+// ─── ADMIN CSS ───────────────────────────────────────────────────────────────
+const adminCSS = `
+  .admin-wrap { display: flex; min-height: 100vh; background: #F0F7FF; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .admin-sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #0D1B4B 0%, #1A237E 50%, #283593 100%);
+    display: flex; flex-direction: column;
+    padding: 0; flex-shrink: 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .admin-sidebar-top { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .admin-user-card { margin: 16px; padding: 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
+  .admin-nav-section { padding: 4px 12px; }
+  .admin-nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 8px; margin: 12px 0 4px; }
+  .admin-nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; margin-bottom: 1px; }
+  .admin-nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .admin-nav-item.active { background: rgba(100,181,246,0.2); color: white; font-weight: 600; border-left: 3px solid #64B5F6; }
+  .admin-nav-icon { width: 30px; height: 30px; border-radius: 7px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .admin-nav-item.active .admin-nav-icon { background: rgba(100,181,246,0.2); }
+  .admin-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .admin-topbar { background: white; border-bottom: 1px solid #E3F2FD; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .admin-content { flex: 1; padding: 28px; overflow-y: auto; }
+  .admin-stat-card { background: white; border-radius: 14px; padding: 20px; border: 1px solid #E3F2FD; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+  .admin-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(21,101,192,0.1); }
+  .student-row { transition: background 0.15s; }
+  .student-row:hover { background: #F0F7FF !important; }
+  .detail-modal-overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .detail-modal { background: white; border-radius: 16px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.2); }
+  @media (max-width: 768px) {
+    .admin-sidebar { width: 100%; height: auto; flex-direction: row; position: relative; overflow-x: auto; }
+    .admin-user-card { display: none; }
+    .admin-nav-section { display: flex; flex-direction: row; padding: 6px; }
+    .admin-nav-label { display: none; }
+    .admin-nav-item { flex-direction: column; font-size: 9px; gap: 2px; padding: 8px; min-width: 52px; text-align: center; border-left: none !important; border-bottom: 3px solid transparent; }
+    .admin-nav-item.active { border-bottom-color: #64B5F6; background: rgba(100,181,246,0.15); }
+    .admin-main { overflow: visible; }
+    .admin-content { padding: 16px; }
+  }
+`;
+
 function AdminDashboard({ setPage }) {
   const [tab, setTab] = useState("overview");
+  const [stats, setStats] = useState({ students: 0, applications: 0, pending_docs: 0, approved: 0, rejected: 0, payments: 0, counseling: 0 });
 
-  const adminTabs = [
-    { id: "overview", label: "Overview", icon: "📊" },
-    { id: "students", label: "Students", icon: "👥" },
-    { id: "documents", label: "Doc Verification", icon: "🔍" },
-    { id: "applications", label: "Applications", icon: "📋" },
-    { id: "counseling", label: "Counseling", icon: "🎓" },
-    { id: "notifications", label: "Notifications", icon: "🔔" },
-    { id: "reports", label: "Reports & Analytics", icon: "📈" },
-    { id: "settings", label: "Settings", icon: "⚙️" },
+  useEffect(() => { loadAdminStats(); }, []);
+
+  const loadAdminStats = async () => {
+    try {
+      const [studRes, appRes, docRes, payRes, bookRes] = await Promise.all([
+        supabase.from("students").select("id", { count: "exact" }),
+        supabase.from("applications").select("id,status"),
+        supabase.from("student_documents").select("id,status").eq("status", "pending_review"),
+        supabase.from("payments").select("id,status").eq("status", "success"),
+        supabase.from("counseling_bookings").select("id", { count: "exact" }),
+      ]);
+      setStats({
+        students: studRes.count || (studRes.data?.length) || 0,
+        applications: appRes.data?.length || 0,
+        pending_docs: docRes.data?.length || 0,
+        approved: appRes.data?.filter(a => a.status === "approved").length || 0,
+        rejected: appRes.data?.filter(a => a.status === "rejected").length || 0,
+        payments: payRes.data?.length || 0,
+        counseling: bookRes.count || (bookRes.data?.length) || 0,
+      });
+    } catch (e) { console.warn("Admin stats failed", e); }
+  };
+
+  const navGroups = [
+    { label: "Overview", items: [{ id: "overview", label: "Dashboard", icon: "\u26a1" }] },
+    { label: "Students", items: [{ id: "students", label: "All Students", icon: "\ud83d\udc65" }] },
+    { label: "Operations", items: [
+      { id: "applications", label: "Applications", icon: "\ud83d\udccb" },
+      { id: "documents", label: "Doc Verification", icon: "\ud83d\udd0d" },
+      { id: "payments_admin", label: "Payments", icon: "\ud83d\udcb3" },
+      { id: "counseling", label: "Counseling", icon: "\ud83c\udf93" },
+    ]},
+    { label: "Communication", items: [{ id: "notifications", label: "Notifications", icon: "\ud83d\udd14" }] },
+    { label: "System", items: [
+      { id: "reports", label: "Reports", icon: "\ud83d\udcc8" },
+      { id: "settings", label: "Settings", icon: "\u2699\ufe0f" },
+    ]},
   ];
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#FFFFFF", flexDirection: "column" }}>
-      <div style={{ background: "#64B5F6", padding: "24px 12px", flexShrink: 0, minWidth: 200 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, padding: "0 8px" }}>
-          <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="rgba(255,255,255,0.18)"/>
-            <polygon points="30,8 50,19 50,41 30,52 10,41 10,19" fill="none" stroke="white" strokeWidth="2"/>
-            <text x="30" y="38" textAnchor="middle" fontFamily="Sora,sans-serif" fontSize="22" fontWeight="700" fill="white">E</text>
-          </svg>
-          <span className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#FFFFFF" }}>Edu<span style={{color:"#E0D4FC"}}>ceff</span></span>
+    <div className="admin-wrap">
+      <style>{adminCSS}</style>
+      <div className="admin-sidebar">
+        <div className="admin-sidebar-top">
+          <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => setPage("Home")}>
+            <svg width="26" height="26" viewBox="0 0 60 60" fill="none">
+              <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="rgba(255,255,255,0.2)"/>
+              <polygon points="30,8 50,19 50,41 30,52 10,41 10,19" fill="none" stroke="white" strokeWidth="2"/>
+              <text x="30" y="38" textAnchor="middle" fontFamily="Sora" fontSize="20" fontWeight="700" fill="white">E</text>
+            </svg>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "white", fontFamily: "Sora" }}>Educeff</div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Admin Panel</div>
+            </div>
+          </div>
         </div>
-        <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", padding: "0 8px", marginBottom: 20, letterSpacing: "0.1em", textTransform: "uppercase" }}>Admin Panel</div>
-        <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: "12px 14px", marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>Meena Desai</div>
-          <div style={{ fontSize: 11, color: "#64B5F6" }}>Super Admin</div>
+        <div className="admin-user-card">
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "white" }}>AD</div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "white" }}>Admin</div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.45)" }}>Super Administrator</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            {[{val: stats.students, label: "Students", color: "#64B5F6"}, {val: stats.applications, label: "Apps", color: "#34D399"}, {val: stats.pending_docs, label: "Pending", color: "#FCD34D"}].map(s => (
+              <div key={s.label} style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 6, padding: "5px 8px", textAlign: "center" }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: s.color }}>{s.val}</div>
+                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        {adminTabs.map(t => (
-          <div key={t.id} className={`sidebar-link ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
-            <span style={{ fontSize: 16 }}>{t.icon}</span>
-            {t.label}
+        {navGroups.map(group => (
+          <div key={group.label} className="admin-nav-section">
+            <div className="admin-nav-label">{group.label}</div>
+            {group.items.map(item => (
+              <div key={item.id} className={`admin-nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
+                <div className="admin-nav-icon">{item.icon}</div>
+                {item.label}
+              </div>
+            ))}
           </div>
         ))}
-        <div className="sidebar-link" onClick={() => setPage("Home")} style={{ marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 14 }}>
-          <span>🚪</span> Back to Website
+        <div style={{ marginTop: "auto", padding: "12px 12px 20px" }}>
+          <div className="admin-nav-item" onClick={() => setPage("Home")} style={{ color: "rgba(100,181,246,0.8)" }}>
+            <div className="admin-nav-icon">\ud83c\udf10</div> Back to Website
+          </div>
         </div>
       </div>
 
-      <div style={{ flex: 1, padding: "28px 32px", overflowY: "auto", background: "#FFFFFF" }}>
-        {tab === "overview" && <AdminOverview />}
-        {tab === "students" && <AdminStudents />}
-        {tab === "documents" && <AdminDocVerification />}
-        {tab === "applications" && <AdminApplications />}
-        {tab === "counseling" && <AdminCounseling />}
-        {tab === "notifications" && <AdminNotifications />}
-        {tab === "reports" && <AdminReports />}
-        {tab === "settings" && <AdminSettings />}
+      <div className="admin-main">
+        <div className="admin-topbar">
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>
+              {navGroups.flatMap(g => g.items).find(i => i.id === tab)?.label || "Dashboard"}
+            </div>
+            <div style={{ fontSize: 11, color: "#90CAF9" }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
+          </div>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 600, color: "#1565C0", cursor: "pointer" }} onClick={loadAdminStats}>\u21bb Refresh</button>
+            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12, color: "white" }}>AD</div>
+          </div>
+        </div>
+        <div className="admin-content">
+          {tab === "overview" && <AdminOverview stats={stats} setTab={setTab} />}
+          {tab === "students" && <AdminStudents />}
+          {tab === "applications" && <AdminApplications />}
+          {tab === "documents" && <AdminDocVerification />}
+          {tab === "payments_admin" && <AdminPayments />}
+          {tab === "counseling" && <AdminCounseling />}
+          {tab === "notifications" && <AdminNotifications />}
+          {tab === "reports" && <AdminReports stats={stats} />}
+          {tab === "settings" && <AdminSettings />}
+        </div>
       </div>
     </div>
   );
 }
 
-function AdminOverview() {
-  const metrics = [
-    { label: "Total Students", val: "12,418", delta: "+124 this month", color: "#64B5F6" },
-    { label: "Active Applications", val: "1,284", delta: "+47 today", color: "#64B5F6" },
-    { label: "Pending Verifications", val: "89", delta: "Needs attention", color: "#D97706" },
-    { label: "Approved Applications", val: "10,942", delta: "All time", color: "#059669" },
-    { label: "Rejected Applications", val: "192", delta: "1.5% rejection rate", color: "#DC2626" },
-    { label: "Admission Success Rate", val: "98.2%", delta: "+0.4% vs last year", color: "#64B5F6" },
-    { label: "Counseling Sessions", val: "3,891", delta: "+128 this month", color: "#7C3AED" },
-    { label: "Active Counselors", val: "14", delta: "Online today: 8", color: "#64B5F6" },
+function AdminOverview({ stats, setTab }) {
+  const statCards = [
+    { label: "Total Students", val: stats.students, icon: "\ud83d\udc65", color: "#1565C0", bg: "#EFF6FF" },
+    { label: "Total Applications", val: stats.applications, icon: "\ud83d\udccb", color: "#059669", bg: "#F0FDF4" },
+    { label: "Pending Doc Review", val: stats.pending_docs, icon: "\ud83d\udd0d", color: "#D97706", bg: "#FFFBEB", urgent: stats.pending_docs > 0 },
+    { label: "Approved Applications", val: stats.approved, icon: "\u2705", color: "#059669", bg: "#F0FDF4" },
+    { label: "Rejected Applications", val: stats.rejected, icon: "\u274c", color: "#DC2626", bg: "#FEF2F2" },
+    { label: "Successful Payments", val: stats.payments, icon: "\ud83d\udcb3", color: "#7C3AED", bg: "#F5F3FF" },
+    { label: "Counseling Booked", val: stats.counseling, icon: "\ud83c\udf93", color: "#0891B2", bg: "#ECFEFF" },
+    { label: "Success Rate", val: stats.applications > 0 ? `${Math.round((stats.approved / stats.applications) * 100)}%` : "\u2014", icon: "\ud83d\udcc8", color: "#059669", bg: "#F0FDF4" },
   ];
+
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Dashboard Overview</h1>
-      <p style={{ color: "#6D28D9", fontSize: 13, marginBottom: 28 }}>Last updated: {new Date().toLocaleString("en-IN")}</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
-        {metrics.map(m => (
-          <div key={m.label} className="stat-card">
-            <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 6 }}>{m.label}</div>
-            <div className="font-display" style={{ fontSize: 26, fontWeight: 700, color: m.color, marginBottom: 4 }}>{m.val}</div>
-            <div style={{ fontSize: 11, color: "#6D28D9" }}>{m.delta}</div>
+      <div style={{ background: "linear-gradient(135deg, #0D1B4B, #1565C0)", borderRadius: 16, padding: "24px 28px", marginBottom: 24, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: -30, right: -30, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginBottom: 4, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>Admin Dashboard</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "white", marginBottom: 6, fontFamily: "Sora" }}>Welcome back, Admin!</h1>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", maxWidth: 440 }}>
+            {stats.pending_docs > 0 ? `\u26a0\ufe0f ${stats.pending_docs} documents pending verification.` : `${stats.students} students enrolled, ${stats.applications} applications managed.`}
+          </p>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 14, marginBottom: 24 }}>
+        {statCards.map(s => (
+          <div key={s.label} className="admin-stat-card" style={{ borderTop: `3px solid ${s.color}`, cursor: "pointer" }} onClick={() => s.urgent && setTab("documents")}>
+            {s.urgent && <div style={{ position: "absolute", top: 8, right: 8, width: 8, height: 8, borderRadius: "50%", background: "#DC2626" }} />}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 9, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{s.icon}</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: s.color, fontFamily: "Sora" }}>{s.val}</div>
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#374151" }}>{s.label}</div>
           </div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
-        <div className="card" style={{ padding: 22 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#64B5F6" }}>Recent Registrations</h3>
-          <table>
-            <thead><tr><th>Name</th><th>Course</th><th>Date</th><th>Status</th></tr></thead>
-            <tbody>
-              {MOCK_STUDENTS.slice(0, 5).map(s => (
-                <tr key={s.id}>
-                  <td style={{ fontWeight: 500 }}>{s.name}</td>
-                  <td style={{ color: "#6D28D9" }}>{s.course}</td>
-                  <td style={{ color: "#6D28D9" }}>{s.date}</td>
-                  <td><span className={`badge ${s.status === "Active" ? "badge-success" : "badge-warning"}`}>{s.status}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="card" style={{ padding: 22 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#64B5F6" }}>Quick Actions</h3>
+      <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 22, marginBottom: 20 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", marginBottom: 14, fontFamily: "Sora" }}>Quick Actions</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
           {[
-            { label: "Review Pending Documents (89)", icon: "🔍", color: "#D97706" },
-            { label: "Process New Applications (23)", icon: "📋", color: "#64B5F6" },
-            { label: "Assign Counselor Sessions (12)", icon: "🎓", color: "#64B5F6" },
-            { label: "Send Bulk Notifications", icon: "📢", color: "#64B5F6" },
-            { label: "Generate Monthly Report", icon: "📈", color: "#059669" },
+            { icon: "\ud83d\udc65", label: "View All Students", color: "#EFF6FF", action: () => setTab("students") },
+            { icon: "\ud83d\udd0d", label: "Review Documents", color: "#FFFBEB", action: () => setTab("documents"), count: stats.pending_docs },
+            { icon: "\ud83d\udccb", label: "Manage Applications", color: "#F0FDF4", action: () => setTab("applications") },
+            { icon: "\ud83d\udd14", label: "Send Notification", color: "#F5F3FF", action: () => setTab("notifications") },
           ].map(a => (
-            <div key={a.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderBottom: `1px solid ${"#F5FAFF"}`, cursor: "pointer" }}>
-              <span>{a.icon}</span>
-              <span style={{ fontSize: 13, color: a.color, fontWeight: 500 }}>{a.label}</span>
-              <span style={{ marginLeft: "auto", color: "#6D28D9" }}>→</span>
+            <div key={a.label} onClick={a.action} style={{ background: a.color, borderRadius: 10, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, transition: "transform 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "none"}>
+              <span style={{ fontSize: 20 }}>{a.icon}</span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{a.label}</div>
+                {a.count > 0 && <div style={{ fontSize: 10, color: "#D97706", fontWeight: 700 }}>{a.count} pending</div>}
+              </div>
             </div>
           ))}
         </div>
+      </div>
+      <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 22 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", marginBottom: 14, fontFamily: "Sora" }}>Admissions by Stream</h3>
+        {[
+          { label: "Engineering", pct: 42, color: "#1565C0" },
+          { label: "Medical", pct: 28, color: "#059669" },
+          { label: "Management", pct: 14, color: "#7C3AED" },
+          { label: "Law", pct: 9, color: "#D97706" },
+          { label: "Architecture", pct: 4, color: "#0891B2" },
+          { label: "Others", pct: 3, color: "#6B7280" },
+        ].map(b => (
+          <div key={b.label} style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "#374151" }}>{b.label}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: b.color }}>{b.pct}%</span>
+            </div>
+            <div style={{ background: "#E3F2FD", borderRadius: 10, height: 7, overflow: "hidden" }}>
+              <div style={{ width: `${b.pct}%`, height: "100%", background: b.color, borderRadius: 10 }} />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 function AdminStudents() {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const filtered = MOCK_STUDENTS.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.course.toLowerCase().includes(search.toLowerCase()));
+  const [filter, setFilter] = useState("All");
+  const [selected, setSelected] = useState(null);
+
+  useEffect(() => { loadStudents(); }, []);
+
+  const loadStudents = async () => {
+    setLoading(true);
+    try {
+      const { data } = await supabase.from("students").select("*").order("created_at", { ascending: false });
+      setStudents(data || []);
+    } catch (e) { console.warn(e); }
+    setLoading(false);
+  };
+
+  const filtered = students.filter(s => {
+    const name = `${s.first_name || ""} ${s.last_name || ""}`.toLowerCase();
+    const matchSearch = name.includes(search.toLowerCase()) || (s.email || "").toLowerCase().includes(search.toLowerCase()) || (s.mobile || "").includes(search);
+    const matchFilter = filter === "All" || s.course_interest === filter;
+    return matchSearch && matchFilter;
+  });
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6" }}>Student Management</h1>
-        <button className="btn-primary">+ Add Student</button>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>All Students</h1>
+          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{students.length} students enrolled</div>
+        </div>
+        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadStudents}>\u21bb Refresh</button>
       </div>
-      <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search students..." style={{ maxWidth: 300, marginBottom: 0 }} />
-        <select style={{ width: 160, marginBottom: 0 }}><option>All Courses</option><option>Engineering</option><option>Medical</option><option>Law</option><option>MBA</option></select>
-        <select style={{ width: 140, marginBottom: 0 }}><option>All Status</option><option>Active</option><option>Pending</option></select>
+      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="\ud83d\udd0d Search name, email, mobile..." style={{ flex: 1, minWidth: 200, marginBottom: 0, fontSize: 13 }} />
+        <select value={filter} onChange={e => setFilter(e.target.value)} style={{ width: 180, marginBottom: 0, fontSize: 13 }}>
+          <option>All</option>
+          <option>Engineering</option><option>Medical</option><option>Law</option>
+          <option>Management</option><option>Architecture</option><option>Science / Commerce</option>
+        </select>
       </div>
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: `1px solid ${"#F5FAFF"}`, overflow: "hidden" }}>
-        <table>
-          <thead><tr><th>Student ID</th><th>Name</th><th>Email</th><th>Course</th><th>Status</th><th>Documents</th><th>Registered</th><th>Actions</th></tr></thead>
-          <tbody>
-            {filtered.map(s => (
-              <tr key={s.id}>
-                <td style={{ fontWeight: 600, color: "#64B5F6", fontSize: 12 }}>{s.id}</td>
-                <td style={{ fontWeight: 500 }}>{s.name}</td>
-                <td style={{ color: "#6D28D9" }}>{s.email}</td>
-                <td>{s.course}</td>
-                <td><span className={`badge ${s.status === "Active" ? "badge-success" : "badge-warning"}`}>{s.status}</span></td>
-                <td><span className={`badge ${s.docs === "Verified" ? "badge-success" : s.docs === "Pending" ? "badge-warning" : "badge-danger"}`}>{s.docs}</span></td>
-                <td style={{ color: "#6D28D9", fontSize: 12 }}>{s.date}</td>
-                <td>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button className="btn-teal" style={{ fontSize: 11, padding: "4px 10px" }}>View</button>
-                    <button style={{ fontSize: 11, padding: "4px 10px", background: "none", border: `1px solid ${"#F5FAFF"}`, borderRadius: 4, cursor: "pointer" }}>Edit</button>
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>\u23f3</div>
+          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading students from Supabase...</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <div style={{ fontSize: 40, marginBottom: 10 }}>\ud83d\udc65</div>
+          <div style={{ color: "#6B7280", fontSize: 15, marginBottom: 8 }}>{students.length === 0 ? "No students registered yet" : "No results found"}</div>
+          <div style={{ fontSize: 13, color: "#90CAF9" }}>{students.length === 0 ? "Students appear here once they register on the website" : "Try a different search"}</div>
+        </div>
+      ) : (
+        <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}>
+            <table>
+              <thead>
+                <tr><th>#</th><th>Student</th><th>Contact</th><th>Course</th><th>10th %</th><th>12th %</th><th>Entrance Exam</th><th>Registered</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                {filtered.map((s, i) => (
+                  <tr key={s.id} className="student-row" style={{ background: selected?.id === s.id ? "#EFF6FF" : "white" }}>
+                    <td style={{ color: "#90CAF9", fontSize: 12 }}>{i + 1}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 11, color: "white", flexShrink: 0 }}>
+                          {(s.first_name?.[0] || "").toUpperCase()}{(s.last_name?.[0] || "").toUpperCase()}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{s.first_name} {s.last_name}</div>
+                          <div style={{ fontSize: 10, color: "#90CAF9" }}>{s.gender || "\u2014"} {s.date_of_birth ? `\u00b7 ${new Date(s.date_of_birth).toLocaleDateString("en-IN")}` : ""}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: 12, color: "#374151" }}>{s.email}</div>
+                      <div style={{ fontSize: 11, color: "#90CAF9" }}>{s.mobile || "\u2014"}</div>
+                    </td>
+                    <td><span className="badge badge-info" style={{ fontSize: 10 }}>{s.course_interest || "\u2014"}</span></td>
+                    <td style={{ fontSize: 12, color: "#374151" }}>{s.tenth_percent || "\u2014"}</td>
+                    <td style={{ fontSize: 12, color: "#374151" }}>{s.twelfth_percent || "\u2014"}</td>
+                    <td style={{ fontSize: 12, color: "#374151" }}>{s.entrance_exam || "\u2014"} {s.score ? `(${s.score})` : ""}</td>
+                    <td style={{ fontSize: 11, color: "#90CAF9", whiteSpace: "nowrap" }}>{s.created_at ? new Date(s.created_at).toLocaleDateString("en-IN") : "\u2014"}</td>
+                    <td>
+                      <button style={{ background: "#EFF6FF", border: "none", borderRadius: 6, padding: "5px 12px", fontSize: 11, fontWeight: 600, color: "#1565C0", cursor: "pointer" }} onClick={() => setSelected(s)}>View \u2192</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {selected && (
+        <div className="detail-modal-overlay" onClick={() => setSelected(null)}>
+          <div className="detail-modal" onClick={e => e.stopPropagation()}>
+            <div style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", padding: "24px 28px", borderRadius: "16px 16px 0 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 18, color: "white" }}>
+                    {(selected.first_name?.[0] || "").toUpperCase()}{(selected.last_name?.[0] || "").toUpperCase()}
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  <div>
+                    <h2 style={{ fontSize: 20, fontWeight: 800, color: "white", fontFamily: "Sora" }}>{selected.first_name} {selected.last_name}</h2>
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>{selected.email} \u00b7 {selected.mobile || "No mobile"}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>Registered {selected.created_at ? new Date(selected.created_at).toLocaleDateString("en-IN") : "\u2014"}</div>
+                  </div>
+                </div>
+                <button onClick={() => setSelected(null)} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "white", width: 30, height: 30, borderRadius: "50%", cursor: "pointer", fontSize: 16 }}>\u00d7</button>
+              </div>
+            </div>
+            <div style={{ padding: 24 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+                {[
+                  ["Course Interest", selected.course_interest],
+                  ["Date of Birth", selected.date_of_birth ? new Date(selected.date_of_birth).toLocaleDateString("en-IN") : null],
+                  ["Gender", selected.gender],
+                  ["Address", selected.address],
+                  ["10th Percentage", selected.tenth_percent],
+                  ["12th Percentage", selected.twelfth_percent],
+                  ["Entrance Exam", selected.entrance_exam],
+                  ["Score / Percentile", selected.score],
+                ].map(([k, v]) => (
+                  <div key={k} style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 14px" }}>
+                    <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3 }}>{k}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>{v || "\u2014"}</div>
+                  </div>
+                ))}
+              </div>
+              <StudentApplicationsAdmin userId={selected.user_id} />
+              <StudentDocsAdmin userId={selected.user_id} />
+              <StudentPaymentsAdmin userId={selected.user_id} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StudentApplicationsAdmin({ userId }) {
+  const [apps, setApps] = useState([]);
+  useEffect(() => {
+    supabase.from("applications").select("*").eq("user_id", userId).then(({ data }) => setApps(data || [])).catch(() => {});
+  }, [userId]);
+  if (apps.length === 0) return <div style={{ fontSize: 13, color: "#90CAF9", marginBottom: 12 }}>No applications submitted.</div>;
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <h4 style={{ fontSize: 13, fontWeight: 700, color: "#1565C0", marginBottom: 8 }}>\ud83d\udccb Applications ({apps.length})</h4>
+      {apps.map(a => (
+        <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#F8FAFF", borderRadius: 8, marginBottom: 6 }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{a.college} \u2014 {a.course}</div>
+            <div style={{ fontSize: 10, color: "#90CAF9" }}>{a.exam} \u00b7 {new Date(a.created_at).toLocaleDateString("en-IN")}</div>
+          </div>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : "badge-warning"}`}>{a.status}</span>
+            {a.status === "pending" && (
+              <button style={{ fontSize: 10, padding: "3px 8px", background: "#ECFDF5", border: "none", borderRadius: 4, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                onClick={async () => { await supabase.from("applications").update({ status: "approved" }).eq("id", a.id); setApps(p => p.map(x => x.id === a.id ? { ...x, status: "approved" } : x)); }}>Approve</button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StudentDocsAdmin({ userId }) {
+  const [docs, setDocs] = useState([]);
+  useEffect(() => {
+    supabase.from("student_documents").select("*").eq("user_id", userId).then(({ data }) => setDocs(data || [])).catch(() => {});
+  }, [userId]);
+  if (docs.length === 0) return <div style={{ fontSize: 13, color: "#90CAF9", marginBottom: 12 }}>No documents uploaded.</div>;
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <h4 style={{ fontSize: 13, fontWeight: 700, color: "#059669", marginBottom: 8 }}>\ud83d\udcc1 Documents ({docs.length})</h4>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        {docs.map(d => (
+          <div key={d.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#F8FAFF", borderRadius: 8 }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{d.doc_name}</div>
+              <div style={{ fontSize: 10, color: "#90CAF9" }}>{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "\u2014"}</div>
+            </div>
+            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+              <span className={`badge ${d.status === "verified" ? "badge-success" : d.status === "rejected" ? "badge-danger" : "badge-warning"}`} style={{ fontSize: 9 }}>{d.status?.replace("_", " ")}</span>
+              {d.status === "pending_review" && (
+                <button style={{ fontSize: 10, padding: "2px 6px", background: "#ECFDF5", border: "none", borderRadius: 4, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                  onClick={async () => { await supabase.from("student_documents").update({ status: "verified" }).eq("id", d.id); setDocs(p => p.map(x => x.id === d.id ? { ...x, status: "verified" } : x)); }}>\u2713</button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
+    </div>
+  );
+}
+
+function StudentPaymentsAdmin({ userId }) {
+  const [payments, setPayments] = useState([]);
+  useEffect(() => {
+    supabase.from("payments").select("*").eq("user_id", userId).then(({ data }) => setPayments(data || [])).catch(() => {});
+  }, [userId]);
+  if (payments.length === 0) return null;
+  return (
+    <div>
+      <h4 style={{ fontSize: 13, fontWeight: 700, color: "#7C3AED", marginBottom: 8 }}>\ud83d\udcb3 Payments ({payments.length})</h4>
+      {payments.map(p => (
+        <div key={p.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: "#F8FAFF", borderRadius: 8, marginBottom: 6 }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{p.service_title}</div>
+            <div style={{ fontSize: 10, color: "#90CAF9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#059669" }}>\u20b9{p.amount}</div>
+            <span className={`badge ${p.status === "success" ? "badge-success" : "badge-danger"}`} style={{ fontSize: 9 }}>{p.status}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
 
 function AdminDocVerification() {
+  const [docs, setDocs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { loadDocs(); }, []);
+  const loadDocs = async () => {
+    setLoading(true);
+    try {
+      const { data } = await supabase.from("student_documents").select("*, students(first_name, last_name, email)").order("uploaded_at", { ascending: false });
+      setDocs(data || []);
+    } catch (e) { console.warn(e); }
+    setLoading(false);
+  };
+  const updateStatus = async (id, status) => {
+    await supabase.from("student_documents").update({ status, reviewed_at: new Date().toISOString() }).eq("id", id);
+    setDocs(p => p.map(d => d.id === id ? { ...d, status } : d));
+  };
+  const pending = docs.filter(d => d.status === "pending_review");
+  const reviewed = docs.filter(d => d.status !== "pending_review");
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Document Verification</h1>
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: `1px solid ${"#F5FAFF"}`, overflow: "hidden" }}>
-        <table>
-          <thead><tr><th>Student</th><th>Document Type</th><th>Uploaded On</th><th>File Size</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody>
-            {[
-              { name: "Sneha Joshi", doc: "Aadhaar Card", date: "14 Jan", size: "1.2 MB", status: "Pending" },
-              { name: "Rahul More", doc: "12th Marksheet", date: "15 Jan", size: "2.1 MB", status: "Pending" },
-              { name: "Pooja Bane", doc: "10th Marksheet", date: "16 Jan", size: "0.8 MB", status: "Pending" },
-              { name: "Amit Kulkarni", doc: "Caste Certificate", date: "12 Jan", size: "1.5 MB", status: "Verified" },
-              { name: "Vishal Shinde", doc: "Domicile Certificate", date: "18 Jan", size: "0.9 MB", status: "Rejected" },
-            ].map((r, i) => (
-              <tr key={i}>
-                <td style={{ fontWeight: 500 }}>{r.name}</td>
-                <td>{r.doc}</td>
-                <td style={{ color: "#6D28D9" }}>{r.date}</td>
-                <td style={{ color: "#6D28D9" }}>{r.size}</td>
-                <td><span className={`badge ${r.status === "Verified" ? "badge-success" : r.status === "Rejected" ? "badge-danger" : "badge-warning"}`}>{r.status}</span></td>
-                <td>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button className="btn-teal" style={{ fontSize: 11, padding: "4px 10px" }}>Review</button>
-                    {r.status === "Pending" && <>
-                      <button style={{ fontSize: 11, padding: "4px 10px", background: "#ECFDF5", border: "none", borderRadius: 4, cursor: "pointer", color: "#065F46", fontWeight: 600 }}>Approve</button>
-                      <button style={{ fontSize: 11, padding: "4px 10px", background: "#FEF2F2", border: "none", borderRadius: 4, cursor: "pointer", color: "#991B1B", fontWeight: 600 }}>Reject</button>
-                    </>}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Document Verification</h1>
+          <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{pending.length} documents pending review</div>
+        </div>
+        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadDocs}>\u21bb Refresh</button>
       </div>
+      {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading documents...</div> : (
+        <>
+          {pending.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#D97706", marginBottom: 10 }}>\u26a0\ufe0f Pending Review ({pending.length})</div>
+              <div style={{ background: "white", borderRadius: 12, border: "1.5px solid #FCD34D", overflow: "hidden" }}>
+                <div style={{ overflowX: "auto" }}><table>
+                  <thead><tr><th>Student</th><th>Document</th><th>Uploaded</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    {pending.map(d => (
+                      <tr key={d.id}>
+                        <td><div style={{ fontWeight: 600, fontSize: 13 }}>{d.students?.first_name} {d.students?.last_name}</div><div style={{ fontSize: 11, color: "#90CAF9" }}>{d.students?.email}</div></td>
+                        <td style={{ fontSize: 13 }}>{d.doc_name}</td>
+                        <td style={{ fontSize: 11, color: "#90CAF9" }}>{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "\u2014"}</td>
+                        <td><div style={{ display: "flex", gap: 6 }}>
+                          <button style={{ fontSize: 11, padding: "5px 12px", background: "#ECFDF5", border: "none", borderRadius: 6, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => updateStatus(d.id, "verified")}>\u2713 Verify</button>
+                          <button style={{ fontSize: 11, padding: "5px 12px", background: "#FEF2F2", border: "none", borderRadius: 6, cursor: "pointer", color: "#991B1B", fontWeight: 700 }} onClick={() => updateStatus(d.id, "rejected")}>\u2717 Reject</button>
+                        </div></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table></div>
+              </div>
+            </div>
+          )}
+          {reviewed.length > 0 && (
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", marginBottom: 10 }}>Reviewed ({reviewed.length})</div>
+              <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+                <div style={{ overflowX: "auto" }}><table>
+                  <thead><tr><th>Student</th><th>Document</th><th>Uploaded</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {reviewed.map(d => (
+                      <tr key={d.id}>
+                        <td style={{ fontWeight: 600, fontSize: 13 }}>{d.students?.first_name} {d.students?.last_name}</td>
+                        <td style={{ fontSize: 13 }}>{d.doc_name}</td>
+                        <td style={{ fontSize: 11, color: "#90CAF9" }}>{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "\u2014"}</td>
+                        <td><span className={`badge ${d.status === "verified" ? "badge-success" : "badge-danger"}`}>{d.status}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table></div>
+              </div>
+            </div>
+          )}
+          {docs.length === 0 && <div style={{ textAlign: "center", padding: "60px 0" }}><div style={{ fontSize: 40, marginBottom: 10 }}>\ud83d\udcc1</div><div style={{ color: "#6B7280" }}>No documents uploaded yet</div></div>}
+        </>
+      )}
     </div>
   );
 }
 
 function AdminApplications() {
+  const [apps, setApps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  useEffect(() => { loadApps(); }, []);
+  const loadApps = async () => {
+    setLoading(true);
+    try {
+      const { data } = await supabase.from("applications").select("*, students(first_name, last_name, email, mobile)").order("created_at", { ascending: false });
+      setApps(data || []);
+    } catch (e) { console.warn(e); }
+    setLoading(false);
+  };
+  const updateStatus = async (id, status) => {
+    await supabase.from("applications").update({ status }).eq("id", id);
+    setApps(p => p.map(a => a.id === id ? { ...a, status } : a));
+  };
+  const filtered = filter === "all" ? apps : apps.filter(a => a.status === filter);
+  const counts = { all: apps.length, pending: apps.filter(a => a.status === "pending").length, under_review: apps.filter(a => a.status === "under_review").length, approved: apps.filter(a => a.status === "approved").length, rejected: apps.filter(a => a.status === "rejected").length };
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Exam Application Management</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 24 }}>
-        {[{ l: "Total Applications", v: "1,284", b: "badge-info" }, { l: "Pending", v: "89", b: "badge-warning" }, { l: "Approved", v: "1,103", b: "badge-success" }, { l: "Rejected", v: "92", b: "badge-danger" }].map(s => (
-          <div key={s.l} className="stat-card">
-            <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 4 }}>{s.l}</div>
-            <div className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6" }}>{s.v}</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div><h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Applications</h1><div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} total</div></div>
+        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadApps}>\u21bb Refresh</button>
+      </div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        {[["all","All","#1565C0"],["pending","Pending","#D97706"],["under_review","Under Review","#1565C0"],["approved","Approved","#059669"],["rejected","Rejected","#DC2626"]].map(([val,label,color]) => (
+          <button key={val} onClick={() => setFilter(val)} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${filter === val ? color : "#E3F2FD"}`, background: filter === val ? color : "white", color: filter === val ? "white" : "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+            {label} ({counts[val]})
+          </button>
+        ))}
+      </div>
+      {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading...</div> : (
+        <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}><table>
+            <thead><tr><th>#</th><th>Student</th><th>College</th><th>Course</th><th>Exam</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {filtered.length === 0 ? <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No applications found</td></tr>
+              : filtered.map((a, i) => (
+                <tr key={a.id} className="student-row">
+                  <td style={{ color: "#90CAF9", fontSize: 12 }}>{i + 1}</td>
+                  <td><div style={{ fontWeight: 600, fontSize: 13 }}>{a.students?.first_name} {a.students?.last_name}</div><div style={{ fontSize: 10, color: "#90CAF9" }}>{a.students?.email}</div></td>
+                  <td style={{ fontSize: 13, fontWeight: 500 }}>{a.college}</td>
+                  <td style={{ fontSize: 12 }}>{a.course}</td>
+                  <td style={{ fontSize: 12 }}>{a.exam || "\u2014"}</td>
+                  <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</td>
+                  <td><span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`}>{a.status?.replace("_"," ")}</span></td>
+                  <td><div style={{ display: "flex", gap: 4 }}>
+                    {(a.status === "pending" || a.status === "under_review") && <>
+                      <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => updateStatus(a.id, "approved")}>\u2713</button>
+                      <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#991B1B", fontWeight: 700 }} onClick={() => updateStatus(a.id, "rejected")}>\u2717</button>
+                    </>}
+                  </div></td>
+                </tr>
+              ))}
+            </tbody>
+          </table></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AdminPayments() {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    supabase.from("payments").select("*, students(first_name, last_name, email)").order("created_at", { ascending: false })
+      .then(({ data }) => { setPayments(data || []); setTotal(data?.filter(p => p.status === "success").reduce((s, p) => s + (p.amount || 0), 0) || 0); setLoading(false); }).catch(e => { console.warn(e); setLoading(false); });
+  }, []);
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div><h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Payment Records</h1><div style={{ fontSize: 12, color: "#059669", marginTop: 2, fontWeight: 600 }}>Total Revenue: \u20b9{total.toLocaleString("en-IN")}</div></div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 20 }}>
+        {[{label:"Total",val:payments.length,color:"#1565C0"},{label:"Successful",val:payments.filter(p=>p.status==="success").length,color:"#059669"},{label:"Failed",val:payments.filter(p=>p.status==="failed").length,color:"#DC2626"},{label:"Revenue",val:`\u20b9${total.toLocaleString("en-IN")}`,color:"#7C3AED"}].map(s => (
+          <div key={s.label} className="admin-stat-card" style={{ borderTop: `3px solid ${s.color}` }}>
+            <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>{s.label}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: s.color, fontFamily: "Sora" }}>{s.val}</div>
           </div>
         ))}
       </div>
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: `1px solid ${"#F5FAFF"}`, overflow: "hidden" }}>
-        <table>
-          <thead><tr><th>App ID</th><th>Student</th><th>Exam</th><th>College</th><th>Applied</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody>
-            {[
-              { id: "APP-001", name: "Rahul Kulkarni", exam: "JEE Main", college: "COEP Pune", date: "12 Jan", status: "Under Review", b: "badge-info" },
-              { id: "APP-002", name: "Amit Kulkarni", exam: "MHT-CET", college: "VJTI Mumbai", date: "12 Jan", status: "Approved", b: "badge-success" },
-              { id: "APP-003", name: "Sneha Joshi", exam: "NEET", college: "BJ Medical Pune", date: "14 Jan", status: "Pending Docs", b: "badge-warning" },
-              { id: "APP-004", name: "Pooja Bane", exam: "CAT", college: "SIBM Pune", date: "16 Jan", status: "Rejected", b: "badge-danger" },
-            ].map(a => (
-              <tr key={a.id}>
-                <td style={{ fontWeight: 600, color: "#64B5F6", fontSize: 12 }}>{a.id}</td>
-                <td style={{ fontWeight: 500 }}>{a.name}</td>
-                <td>{a.exam}</td>
-                <td>{a.college}</td>
-                <td style={{ color: "#6D28D9" }}>{a.date}</td>
-                <td><span className={`badge ${a.b}`}>{a.status}</span></td>
-                <td><button className="btn-teal" style={{ fontSize: 11, padding: "4px 10px" }}>Manage</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading payments...</div> : (
+        <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}><table>
+            <thead><tr><th>Student</th><th>Service</th><th>Amount</th><th>Payment ID</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              {payments.length === 0 ? <tr><td colSpan={6} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No payments yet</td></tr>
+              : payments.map(p => (
+                <tr key={p.id} className="student-row">
+                  <td><div style={{ fontWeight: 600, fontSize: 13 }}>{p.students?.first_name} {p.students?.last_name}</div><div style={{ fontSize: 10, color: "#90CAF9" }}>{p.students?.email}</div></td>
+                  <td style={{ fontSize: 12 }}>{p.service_title}</td>
+                  <td style={{ fontSize: 14, fontWeight: 700, color: "#059669" }}>\u20b9{p.amount}</td>
+                  <td style={{ fontSize: 10, color: "#90CAF9", fontFamily: "monospace" }}>{p.razorpay_payment_id || "\u2014"}</td>
+                  <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
+                  <td><span className={`badge ${p.status === "success" ? "badge-success" : "badge-danger"}`}>{p.status}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table></div>
+        </div>
+      )}
     </div>
   );
 }
 
 function AdminCounseling() {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    supabase.from("counseling_bookings").select("*").order("created_at", { ascending: false })
+      .then(({ data }) => { setBookings(data || []); setLoading(false); }).catch(e => { console.warn(e); setLoading(false); });
+  }, []);
+  const updateStatus = async (id, status) => {
+    await supabase.from("counseling_bookings").update({ status }).eq("id", id);
+    setBookings(p => p.map(b => b.id === id ? { ...b, status } : b));
+  };
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Counseling Management</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
-        <div className="card" style={{ padding: 22 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: 16, fontSize: 15, color: "#64B5F6" }}>Upcoming Sessions</h3>
-          {[
-            { student: "Rahul Kulkarni", counselor: "Dr. Priya M.", time: "Today, 11:00 AM", type: "Career Counseling" },
-            { student: "Sneha Joshi", counselor: "Mr. Arun K.", time: "Today, 2:30 PM", type: "Admission Guidance" },
-            { student: "Vishal Shinde", counselor: "Dr. Priya M.", time: "Tomorrow, 10:00 AM", type: "Scholarship Help" },
-          ].map(s => (
-            <div key={s.student} style={{ border: `1px solid ${"#F5FAFF"}`, borderRadius: 6, padding: "12px 14px", marginBottom: 10 }}>
-              <div style={{ fontWeight: 600, fontSize: 14, color: "#64B5F6" }}>{s.student}</div>
-              <div style={{ fontSize: 12, color: "#64B5F6" }}>{s.counselor} · {s.type}</div>
-              <div style={{ fontSize: 12, color: "#6D28D9" }}>{s.time}</div>
-            </div>
-          ))}
-        </div>
-        <div className="card" style={{ padding: 22 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: 16, fontSize: 15, color: "#64B5F6" }}>Counselor Status</h3>
-          {[
-            { name: "Dr. Priya Mehta", specialty: "Engineering & Architecture", sessions: 24, status: "Online" },
-            { name: "Mr. Arun Kumar", specialty: "Medical & Life Sciences", sessions: 18, status: "Online" },
-            { name: "Ms. Rekha Patil", specialty: "Management & Law", sessions: 31, status: "Away" },
-            { name: "Dr. Sanjay Rao", specialty: "Arts & Science", sessions: 15, status: "Offline" },
-          ].map(c => (
-            <div key={c.name} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid ${"#F5FAFF"}` }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#64B5F6", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>{c.name[0]}{c.name.split(" ")[1][0]}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#64B5F6" }}>{c.name}</div>
-                <div style={{ fontSize: 11, color: "#6D28D9" }}>{c.specialty} · {c.sessions} sessions</div>
-              </div>
-              <span className={`badge ${c.status === "Online" ? "badge-success" : c.status === "Away" ? "badge-warning" : "badge-gray"}`}>{c.status}</span>
-            </div>
-          ))}
-        </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div><h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Counseling Sessions</h1><div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{bookings.filter(b => b.status === "pending").length} pending sessions</div></div>
       </div>
+      {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading...</div> : (
+        <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}><table>
+            <thead><tr><th>Student</th><th>Mobile</th><th>Stream</th><th>Preferred Date</th><th>Booked</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {bookings.length === 0 ? <tr><td colSpan={7} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No sessions booked yet</td></tr>
+              : bookings.map(b => (
+                <tr key={b.id} className="student-row">
+                  <td style={{ fontWeight: 600, fontSize: 13 }}>{b.full_name}</td>
+                  <td style={{ fontSize: 12 }}>{b.mobile}</td>
+                  <td><span className="badge badge-info" style={{ fontSize: 10 }}>{b.stream || "\u2014"}</span></td>
+                  <td style={{ fontSize: 12 }}>{b.preferred_date ? new Date(b.preferred_date).toLocaleDateString("en-IN") : "\u2014"}</td>
+                  <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(b.created_at).toLocaleDateString("en-IN")}</td>
+                  <td><span className={`badge ${b.status === "confirmed" ? "badge-success" : b.status === "completed" ? "badge-gray" : "badge-warning"}`}>{b.status}</span></td>
+                  <td>{b.status === "pending" && <div style={{ display: "flex", gap: 4 }}>
+                    <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => updateStatus(b.id, "confirmed")}>Confirm</button>
+                    <button style={{ fontSize: 10, padding: "4px 8px", background: "#EFF6FF", border: "none", borderRadius: 5, cursor: "pointer", color: "#1565C0", fontWeight: 700 }} onClick={() => updateStatus(b.id, "completed")}>Done</button>
+                  </div>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table></div>
+        </div>
+      )}
     </div>
   );
 }
 
 function AdminNotifications() {
+  const [form, setForm] = useState({ title: "", message: "" });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const handleSend = async () => {
+    if (!form.title || !form.message) return alert("Fill in title and message.");
+    setSending(true);
+    try {
+      const { data: students } = await supabase.from("students").select("user_id");
+      if (students) {
+        await supabase.from("notifications").insert(students.map(s => ({ user_id: s.user_id, title: form.title, message: form.message, type: "info", is_read: false, created_at: new Date().toISOString() })));
+        setSent(true); setForm({ title: "", message: "" }); setTimeout(() => setSent(false), 4000);
+      }
+    } catch (e) { console.warn(e); }
+    setSending(false);
+  };
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6" }}>Notification Center</h1>
-        <button className="btn-primary">+ Send Notification</button>
-      </div>
-      <div className="card" style={{ marginBottom: 24, padding: 24 }}>
-        <h3 style={{ fontWeight: 600, marginBottom: 16, color: "#64B5F6" }}>Send Bulk Notification</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-          <div><label>Target Group</label>
-            <select><option>All Students</option><option>Active Students</option><option>Pending Verification</option><option>Engineering Students</option><option>Medical Students</option></select>
-          </div>
-          <div><label>Notification Type</label>
-            <select><option>In-App</option><option>SMS</option><option>Email</option><option>All Channels</option></select>
-          </div>
-        </div>
-        <label>Title</label><input placeholder="Notification title" />
-        <label>Message</label><textarea rows={3} placeholder="Enter your message..." style={{ resize: "vertical" }} />
-        <button className="btn-primary">Send to 12,418 Students</button>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 20 }}>Notification Center</h1>
+      {sent && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "12px 16px", marginBottom: 16, fontSize: 13, color: "#065F46" }}>\u2705 Sent to all students!</div>}
+      <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 24 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>Send Bulk Notification</h3>
+        <label>Title</label><input placeholder="e.g. JEE Main 2026 Registration Open" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+        <label>Message</label><textarea rows={4} placeholder="Type your message..." style={{ resize: "vertical" }} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
+        <button className="btn-primary" style={{ opacity: sending ? 0.7 : 1 }} onClick={handleSend} disabled={sending}>{sending ? "Sending..." : "\ud83d\udce2 Send to All Students"}</button>
       </div>
     </div>
   );
 }
 
-function AdminReports() {
-  const bars = [
-    { label: "Engineering", val: 5840, pct: 90 },
-    { label: "Medical", val: 3120, pct: 75 },
-    { label: "Management", val: 1890, pct: 55 },
-    { label: "Law", val: 980, pct: 35 },
-    { label: "Architecture", val: 588, pct: 22 },
-  ];
+function AdminReports({ stats }) {
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Reports &amp; Analytics</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 20 }}>Reports &amp; Analytics</h1>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
-        <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: 20, fontSize: 15, color: "#64B5F6" }}>Admissions by Stream (2024–25)</h3>
-          {bars.map(b => (
-            <div key={b.label} style={{ marginBottom: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                <span style={{ fontSize: 13, color: "#64B5F6" }}>{b.label}</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#64B5F6" }}>{b.val.toLocaleString()}</span>
+        <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 22 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>Admissions by Stream</h3>
+          {[{label:"Engineering",pct:42,color:"#1565C0"},{label:"Medical",pct:28,color:"#059669"},{label:"Management",pct:14,color:"#7C3AED"},{label:"Law",pct:9,color:"#D97706"},{label:"Architecture",pct:4,color:"#0891B2"},{label:"Others",pct:3,color:"#6B7280"}].map(b => (
+            <div key={b.label} style={{ marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ fontSize: 12, fontWeight: 500, color: "#374151" }}>{b.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: b.color }}>{b.pct}%</span>
               </div>
-              <div style={{ background: "#F5FAFF", borderRadius: 4, height: 8 }}>
-                <div style={{ width: `${b.pct}%`, background: "#64B5F6", borderRadius: 4, height: "100%", transition: "width 1s" }} />
+              <div style={{ background: "#E3F2FD", borderRadius: 10, height: 7, overflow: "hidden" }}>
+                <div style={{ width: `${b.pct}%`, background: b.color, borderRadius: 10, height: "100%" }} />
               </div>
             </div>
           ))}
         </div>
-        <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: 20, fontSize: 15, color: "#64B5F6" }}>Key Performance Metrics</h3>
+        <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 22 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>Live Metrics from Database</h3>
           {[
-            { label: "Avg. Time to Admission", val: "14.2 days", color: "#64B5F6" },
-            { label: "Document Approval Rate", val: "94.3%", color: "#059669" },
-            { label: "Student Satisfaction Score", val: "4.8 / 5.0", color: "#64B5F6" },
-            { label: "Scholarship Success Rate", val: "67%", color: "#64B5F6" },
-            { label: "Counseling Conversion Rate", val: "81%", color: "#7C3AED" },
-            { label: "Application Rejection Rate", val: "1.5%", color: "#DC2626" },
+            {label:"Total Students Enrolled",val:stats.students,color:"#1565C0"},
+            {label:"Total Applications",val:stats.applications,color:"#059669"},
+            {label:"Approved Applications",val:stats.approved,color:"#059669"},
+            {label:"Rejected Applications",val:stats.rejected,color:"#DC2626"},
+            {label:"Documents Pending Review",val:stats.pending_docs,color:"#D97706"},
+            {label:"Counseling Sessions Booked",val:stats.counseling,color:"#7C3AED"},
+            {label:"Successful Payments",val:stats.payments,color:"#059669"},
+            {label:"Admission Success Rate",val:stats.applications>0?`${Math.round((stats.approved/stats.applications)*100)}%`:"\u2014",color:"#059669"},
           ].map(m => (
-            <div key={m.label} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${"#F5FAFF"}` }}>
-              <span style={{ fontSize: 13, color: "#6D28D9" }}>{m.label}</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: m.color }}>{m.val}</span>
+            <div key={m.label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #F0F7FF" }}>
+              <span style={{ fontSize: 12, color: "#374151" }}>{m.label}</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: m.color }}>{m.val}</span>
             </div>
           ))}
-          <button className="btn-teal" style={{ marginTop: 16, width: "100%" }}>Export Full Report (PDF)</button>
         </div>
       </div>
     </div>
@@ -2474,32 +2896,24 @@ function AdminReports() {
 }
 
 function AdminSettings() {
+  const [saved, setSaved] = useState(false);
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Settings</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }}>
-        {[
-          { title: "Organization Profile", fields: ["Organization Name: Educeff", "Registration No.: U80900MH2015PTC123456", "Email: admin@educeff.com", "Phone: +91 98765 43210"] },
-          { title: "Security Settings", fields: ["OTP Validity: 10 minutes", "JWT Expiry: 24 hours", "Max Login Attempts: 5", "Session Timeout: 60 minutes"] },
-          { title: "Notification Settings", fields: ["SMS Notifications: Enabled", "Email Notifications: Enabled", "In-App Notifications: Enabled", "Bulk SMS Limit: 500/day"] },
-        ].map(s => (
-          <div key={s.title} className="card" style={{ padding: 24 }}>
-            <h3 style={{ fontWeight: 600, fontSize: 16, marginBottom: 16, color: "#64B5F6" }}>{s.title}</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-              {s.fields.map(f => {
-                const [k, v] = f.split(": ");
-                return (
-                  <div key={k} style={{ marginBottom: 14 }}>
-                    <label>{k}</label>
-                    <input defaultValue={v} />
-                  </div>
-                );
-              })}
-            </div>
-            <button className="btn-teal">Save {s.title}</button>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 20 }}>Settings</h1>
+      {saved && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 16px", marginBottom: 16, fontSize: 13, color: "#065F46" }}>\u2705 Settings saved!</div>}
+      {[
+        { title: "\ud83c\udfe2 Organization Profile", fields: [["Organization Name","Educeff"],["Registration No.","U80900MH2015PTC123456"],["Email","admin@educeff.com"],["Phone","+91 98765 43210"],["Address","123 Pimpri Road, Pune 411018"]] },
+        { title: "\ud83d\udd12 Security Settings", fields: [["OTP Validity","10 minutes"],["JWT Expiry","24 hours"],["Max Login Attempts","5"],["Session Timeout","60 minutes"]] },
+        { title: "\ud83d\udd14 Notification Settings", fields: [["SMS Notifications","Enabled"],["Email Notifications","Enabled"],["In-App Notifications","Enabled"],["Bulk SMS Limit","500/day"]] },
+      ].map(s => (
+        <div key={s.title} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 24, marginBottom: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 18 }}>{s.title}</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0 20px" }}>
+            {s.fields.map(([k, v]) => (<div key={k} style={{ marginBottom: 14 }}><label>{k}</label><input defaultValue={v} /></div>))}
           </div>
-        ))}
-      </div>
+          <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 3000); }}>Save Changes</button>
+        </div>
+      ))}
     </div>
   );
 }
