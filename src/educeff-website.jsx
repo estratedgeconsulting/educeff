@@ -1640,65 +1640,190 @@ function PortalProfile({ user, profile, onSave }) {
 function DocumentCenter({ user, uploadedDocs, onUpload }) {
   const [uploading, setUploading] = useState({});
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [docStatuses, setDocStatuses] = useState({});
+  const [docPaths, setDocPaths] = useState({});
+  const [previewDoc, setPreviewDoc] = useState(null); // { name, url, type }
+
+  // Load doc statuses and file paths from student_documents table
+  useEffect(() => {
+    if (!user) return;
+    const loadStatuses = async () => {
+      const { data } = await supabase
+        .from("student_documents")
+        .select("doc_name, status, file_path, uploaded_at")
+        .eq("user_id", user.id);
+      if (data) {
+        const statusMap = {}, pathMap = {};
+        data.forEach(d => { statusMap[d.doc_name] = d.status; pathMap[d.doc_name] = d.file_path; });
+        setDocStatuses(statusMap);
+        setDocPaths(pathMap);
+      }
+    };
+    loadStatuses();
+  }, [user, uploadedDocs]);
 
   const handleUpload = async (docName, file) => {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { setError(`${docName}: File too large. Max 5MB.`); return; }
-    setError(""); setUploading(u => ({ ...u, [docName]: true }));
-    const ext = file.name.split(".").pop();
+    const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
+    if (!allowed.includes(file.type)) { setError(`${docName}: Only PDF, JPG, PNG allowed.`); return; }
+
+    setError(""); setSuccess("");
+    setUploading(u => ({ ...u, [docName]: true }));
+
+    const ext = file.name.split(".").pop().toLowerCase();
     const path = `${user.id}/${docName}.${ext}`;
-    const { error: uploadErr } = await supabase.storage.from("student-documents").upload(path, file, { upsert: true });
+
+    const { error: uploadErr } = await supabase.storage
+      .from("student-documents")
+      .upload(path, file, { upsert: true, contentType: file.type });
+
     if (!uploadErr) {
-      await supabase.from("student_documents").upsert({ user_id: user.id, doc_name: docName, file_path: path, uploaded_at: new Date().toISOString(), status: "pending_review" });
+      await supabase.from("student_documents").upsert({
+        user_id: user.id,
+        doc_name: docName,
+        file_path: path,
+        uploaded_at: new Date().toISOString(),
+        status: "pending_review",
+      }, { onConflict: "user_id,doc_name" });
+      setSuccess(`${docName} uploaded successfully!`);
+      setTimeout(() => setSuccess(""), 3000);
       onUpload();
-    } else setError(uploadErr.message);
+    } else {
+      setError(`Upload failed: ${uploadErr.message}`);
+    }
     setUploading(u => ({ ...u, [docName]: false }));
   };
 
   const handleView = async (docName) => {
-    const { data } = await supabase.storage.from("student-documents").list(`${user.id}/`, { search: docName });
-    if (data && data.length > 0) {
-      const { data: url } = supabase.storage.from("student-documents").getPublicUrl(`${user.id}/${data[0].name}`);
-      window.open(url.publicUrl, "_blank");
+    const filePath = docPaths[docName];
+    if (!filePath) { setError("File path not found. Try re-uploading."); return; }
+    try {
+      const { data, error: urlErr } = await supabase.storage
+        .from("student-documents")
+        .createSignedUrl(filePath, 120);
+      if (urlErr) throw urlErr;
+      // Check if PDF or image to decide preview vs new tab
+      const isPdf = filePath.toLowerCase().endsWith(".pdf");
+      if (isPdf) {
+        window.open(data.signedUrl, "_blank");
+      } else {
+        setPreviewDoc({ name: docName, url: data.signedUrl, type: "image" });
+      }
+    } catch (e) {
+      console.warn("View error:", e);
+      setError("Could not open file. Please try again.");
     }
   };
 
   const handleRemove = async (docName) => {
-    const { data } = await supabase.storage.from("student-documents").list(`${user.id}/`, { search: docName });
-    if (data && data.length > 0) {
-      await supabase.storage.from("student-documents").remove([`${user.id}/${data[0].name}`]);
+    if (!window.confirm(`Remove ${docName}? You will need to re-upload it.`)) return;
+    const filePath = docPaths[docName];
+    try {
+      if (filePath) await supabase.storage.from("student-documents").remove([filePath]);
       await supabase.from("student_documents").delete().eq("user_id", user.id).eq("doc_name", docName);
+      setSuccess(`${docName} removed.`);
+      setTimeout(() => setSuccess(""), 3000);
       onUpload();
-    }
+    } catch (e) { setError("Remove failed. Please try again."); }
   };
+
+  const isUploaded = (doc) =>
+    !!uploadedDocs[doc] || Object.keys(uploadedDocs).some(k => k.startsWith(doc));
+
+  const getStatusBadge = (doc) => {
+    const status = docStatuses[doc];
+    if (!status) return null;
+    const map = {
+      verified: { label: "✓ Verified", cls: "badge-success" },
+      pending_review: { label: "⏳ Under Review", cls: "badge-warning" },
+      rejected: { label: "✗ Rejected", cls: "badge-danger" },
+    };
+    return map[status] || null;
+  };
+
+  const uploadedCount = REQUIRED_DOCS.filter(d => isUploaded(d)).length;
 
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Document Upload Center</h1>
-      <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 28 }}>All documents are encrypted and stored securely. Accepted formats: PDF, JPG, PNG (max 5MB each).</p>
-      {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 4 }}>Document Upload Center</h1>
+        <p style={{ color: "#6D28D9", fontSize: 13 }}>Accepted formats: PDF, JPG, PNG · Max 5MB per file · All files encrypted</p>
+      </div>
 
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: "1px solid #E3F2FD", padding: 24, marginBottom: 24 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, color: "#64B5F6", marginBottom: 4 }}>Required Documents</h3>
-        <p style={{ fontSize: 13, color: "#DC2626", marginBottom: 20 }}>All 4 documents must be uploaded to proceed with applications.</p>
+      {/* Alerts */}
+      {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 16px", marginBottom: 14, fontSize: 13, color: "#DC2626", display: "flex", justifyContent: "space-between" }}>{error}<span style={{ cursor: "pointer" }} onClick={() => setError("")}>×</span></div>}
+      {success && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 16px", marginBottom: 14, fontSize: 13, color: "#065F46" }}>✅ {success}</div>}
+
+      {/* Progress Bar */}
+      <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", padding: "16px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>Required Documents Progress</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: uploadedCount === 4 ? "#059669" : "#D97706" }}>{uploadedCount}/4 uploaded</span>
+          </div>
+          <div style={{ background: "#E3F2FD", borderRadius: 10, height: 8, overflow: "hidden" }}>
+            <div style={{ width: `${(uploadedCount / 4) * 100}%`, height: "100%", background: uploadedCount === 4 ? "#059669" : "#64B5F6", borderRadius: 10, transition: "width 0.5s" }} />
+          </div>
+        </div>
+        {uploadedCount === 4 && <span style={{ fontSize: 20 }}>🎉</span>}
+      </div>
+
+      {/* Required Documents */}
+      <div style={{ background: "#FFFFFF", borderRadius: 12, border: "1px solid #E3F2FD", padding: 24, marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E" }}>Required Documents</h3>
+            <p style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>All 4 must be uploaded to apply for colleges</p>
+          </div>
+        </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
           {REQUIRED_DOCS.map(doc => {
-            const isUploaded = !!uploadedDocs[doc] || Object.keys(uploadedDocs).some(k => k.startsWith(doc));
+            const uploaded = isUploaded(doc);
+            const statusBadge = getStatusBadge(doc);
+            const isRejected = docStatuses[doc] === "rejected";
             return (
-              <div key={doc} style={{ border: `1px solid ${isUploaded ? "#059669" : "#E3F2FD"}`, borderRadius: 8, padding: 16, background: isUploaded ? "#F0FDF4" : "#FFFFFF" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: "#64B5F6" }}>📄 {doc}</span>
-                  <span className={`badge ${isUploaded ? "badge-success" : "badge-danger"}`}>{isUploaded ? "✓ Uploaded" : "Required"}</span>
+              <div key={doc} style={{ border: `1.5px solid ${isRejected ? "#FCA5A5" : uploaded ? "#6EE7B7" : "#E3F2FD"}`, borderRadius: 12, padding: 16, background: isRejected ? "#FFF5F5" : uploaded ? "#F0FDF4" : "#FAFCFF", transition: "all 0.2s" }}>
+                {/* Doc header */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 22 }}>{uploaded ? "📄" : "📋"}</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>{doc}</div>
+                      <div style={{ fontSize: 10, color: "#90CAF9", marginTop: 1 }}>Required</div>
+                    </div>
+                  </div>
+                  {statusBadge && <span className={`badge ${statusBadge.cls}`} style={{ fontSize: 10 }}>{statusBadge.label}</span>}
+                  {!uploaded && <span className="badge badge-danger" style={{ fontSize: 10 }}>Missing</span>}
                 </div>
-                {isUploaded ? (
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button className="btn-teal" style={{ fontSize: 11, padding: "5px 12px" }} onClick={() => handleView(doc)}>View</button>
-                    <button style={{ fontSize: 11, padding: "5px 12px", background: "none", border: "1px solid #E3F2FD", borderRadius: 4, cursor: "pointer", color: "#DC2626" }} onClick={() => handleRemove(doc)}>Remove</button>
+
+                {/* Rejection message */}
+                {isRejected && (
+                  <div style={{ background: "#FEE2E2", borderRadius: 6, padding: "8px 10px", marginBottom: 10, fontSize: 11, color: "#991B1B" }}>
+                    ⚠️ Document rejected by admin. Please re-upload a clearer copy.
+                  </div>
+                )}
+
+                {/* Buttons */}
+                {uploaded ? (
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button style={{ fontSize: 11, padding: "6px 12px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
+                      onClick={() => handleView(doc)}>👁 View</button>
+                    <label style={{ fontSize: 11, padding: "6px 12px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 6, cursor: "pointer", color: "#92400E", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                      🔄 Replace
+                      <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} />
+                    </label>
+                    <button style={{ fontSize: 11, padding: "6px 12px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", color: "#DC2626", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
+                      onClick={() => handleRemove(doc)}>🗑 Remove</button>
                   </div>
                 ) : (
-                  <label className="upload-zone" style={{ padding: "14px", cursor: "pointer", display: "block" }}>
-                    <div style={{ fontSize: 13, color: "#6D28D9" }}>{uploading[doc] ? "Uploading..." : "Click to upload or drag &amp; drop"}</div>
-                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} />
+                  <label className="upload-zone" style={{ padding: "14px 12px", cursor: "pointer", display: "block", marginTop: 4 }}>
+                    <div style={{ fontSize: 18, marginBottom: 4 }}>☁️</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1565C0" }}>{uploading[doc] ? "Uploading..." : "Click to Upload"}</div>
+                    <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>PDF, JPG or PNG · Max 5MB</div>
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} disabled={uploading[doc]} />
                   </label>
                 )}
               </div>
@@ -1707,21 +1832,66 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
         </div>
       </div>
 
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: "1px solid #E3F2FD", padding: 24 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, color: "#64B5F6", marginBottom: 4 }}>Optional Documents</h3>
-        <p style={{ fontSize: 13, color: "#6D28D9", marginBottom: 20 }}>These may be required depending on your category and scholarship application.</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-          {OPTIONAL_DOCS.map(doc => (
-            <div key={doc} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", border: "1px solid #E3F2FD", borderRadius: 6, padding: "12px 16px" }}>
-              <span style={{ fontSize: 13, color: "#64B5F6" }}>📎 {doc}</span>
-              <label style={{ cursor: "pointer" }}>
-                <span className="btn-teal" style={{ fontSize: 11, padding: "5px 12px", display: "inline-block" }}>{uploading[doc] ? "..." : "Upload"}</span>
-                <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} />
-              </label>
-            </div>
-          ))}
+      {/* Optional Documents */}
+      <div style={{ background: "#FFFFFF", borderRadius: 12, border: "1px solid #E3F2FD", padding: 24 }}>
+        <div style={{ marginBottom: 16 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E" }}>Optional Documents</h3>
+          <p style={{ fontSize: 12, color: "#6D28D9", marginTop: 2 }}>Upload based on your category, scholarship, or college requirement</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+          {OPTIONAL_DOCS.map(doc => {
+            const uploaded = isUploaded(doc);
+            const statusBadge = getStatusBadge(doc);
+            return (
+              <div key={doc} style={{ border: `1px solid ${uploaded ? "#6EE7B7" : "#E3F2FD"}`, borderRadius: 10, padding: "12px 14px", background: uploaded ? "#F0FDF4" : "#FAFCFF", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>{uploaded ? "📄" : "📎"}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{doc}</div>
+                    {statusBadge && <span className={`badge ${statusBadge.cls}`} style={{ fontSize: 9, marginTop: 2 }}>{statusBadge.label}</span>}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                  {uploaded && (
+                    <button style={{ fontSize: 10, padding: "5px 10px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 600 }}
+                      onClick={() => handleView(doc)}>👁</button>
+                  )}
+                  <label style={{ fontSize: 10, padding: "5px 10px", background: uploaded ? "#FFFBEB" : "#EFF6FF", border: `1px solid ${uploaded ? "#FDE68A" : "#BFDBFE"}`, borderRadius: 6, cursor: "pointer", color: uploaded ? "#92400E" : "#1565C0", fontWeight: 600 }}>
+                    {uploading[doc] ? "..." : uploaded ? "🔄" : "Upload"}
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} disabled={uploading[doc]} />
+                  </label>
+                  {uploaded && (
+                    <button style={{ fontSize: 10, padding: "5px 10px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", color: "#DC2626", fontWeight: 600 }}
+                      onClick={() => handleRemove(doc)}>🗑</button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewDoc && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: 20 }}
+          onClick={() => setPreviewDoc(null)}>
+          <div style={{ background: "white", borderRadius: 12, overflow: "hidden", maxWidth: 700, maxHeight: "90vh", width: "100%" }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ background: "#1565C0", padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ color: "white", fontWeight: 600, fontSize: 14 }}>📄 {previewDoc.name}</span>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "white", borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+                  onClick={() => window.open(previewDoc.url, "_blank")}>⬇ Download</button>
+                <button style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "white", borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+                  onClick={() => setPreviewDoc(null)}>✕ Close</button>
+              </div>
+            </div>
+            <div style={{ padding: 16, overflowY: "auto", maxHeight: "80vh", textAlign: "center", background: "#F8FAFF" }}>
+              <img src={previewDoc.url} alt={previewDoc.name} style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 8, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
