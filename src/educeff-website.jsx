@@ -2377,6 +2377,76 @@ function CollegesPage() {
     { name: "Bombay College of Pharmacy", city: "Mumbai", stream: "Pharmacy", ranking: "#1 Pharmacy, Maharashtra", affiliation: "University of Mumbai", type: "Autonomous" },
     { name: "Poona College of Pharmacy", city: "Pune", stream: "Pharmacy", ranking: "Top Pharmacy, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
     { name: "JSS College of Pharmacy", city: "Mysore", stream: "Pharmacy", ranking: "Top 5 Pharmacy, India", affiliation: "JSS University", type: "Private" },
+    // ── ENGINEERING – Additional Maharashtra ──
+    { name: "Government College of Engineering Pune", city: "Pune", stream: "Engineering", ranking: "Top Govt. Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Government" },
+    { name: "Vishwakarma Institute of Technology", city: "Pune", stream: "Engineering", ranking: "Top Private Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
+    { name: "Shri Guru Gobind Singhji Institute", city: "Nanded", stream: "Engineering", ranking: "Top Govt. Engineering, Marathwada", affiliation: "SRTMUN", type: "Government" },
+    { name: "Maharashtra Institute of Technology", city: "Aurangabad", stream: "Engineering", ranking: "Top Private Engineering, Aurangabad", affiliation: "Dr. BAMU", type: "Private" },
+    { name: "Pune Vidyarthi Griha College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
+    { name: "Cummins College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top Women Engineering College, India", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
+    { name: "DY Patil College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top Private Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
+    { name: "Sinhgad College of Engineering", city: "Pune", stream: "Engineering", ranking: "Popular Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
+    // ── ENGINEERING – Additional National ──
+    { name: "IIT Madras", city: "Chennai", stream: "Engineering", ranking: "#1 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
+    { name: "IIT Kharagpur", city: "West Bengal", stream: "Engineering", ranking: "#5 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
+    { name: "IIT Kanpur", city: "Kanpur", stream: "Engineering", ranking: "#4 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
+    { name: "IIT Roorkee", city: "Roorkee", stream: "Engineering", ranking: "#7 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
+    { name: "IIT Hyderabad", city: "Hyderabad", stream: "Engineering", ranking: "Top 10 IIT, India", affiliation: "Autonomous (IIT)", type: "Government" },
+    { name: "IIT Pune (COEP)", city: "Pune", stream: "Engineering", ranking: "#1 Govt. Engineering, Maharashtra", affiliation: "Autonomous", type: "Government" },
+    { name: "NIT Trichy", city: "Tamil Nadu", stream: "Engineering", ranking: "#8 NIT, India (NIRF)", affiliation: "Autonomous (NIT)", type: "Government" },
+    { name: "NIT Warangal", city: "Telangana", stream: "Engineering", ranking: "#5 NIT, India (NIRF)", affiliation: "Autonomous (NIT)", type: "Government" },
+    { name: "NIT Calicut", city: "Kerala", stream: "Engineering", ranking: "#6 NIT, India (NIRF)", affiliation: "Autonomous (NIT)", type: "Government" },
+    { name: "VIT Vellore", city: "Vellore", stream: "Engineering", ranking: "Top 5 Private Engineering, India", affiliation: "VIT University", type: "Private" },
+    { name: "SRM Institute of Science", city: "Chennai", stream: "Engineering", ranking: "Top 10 Private Engineering, India", affiliation: "SRM University", type: "Private" },
+    { name: "Thapar Institute", city: "Patiala", stream: "Engineering", ranking: "Top 15 Engineering, India", affiliation: "Autonomous", type: "Private" },
+    { name: "PES University", city: "Bangalore", stream: "Engineering", ranking: "Top Private Engineering, Bangalore", affiliation: "Autonomous", type: "Private" },
+    { name: "RV College of Engineering", city: "Bangalore", stream: "Engineering", ranking: "Top Private Engineering, Karnataka", affiliation: "VTU", type: "Private" },
+    { name: "BMS College of Engineering", city: "Bangalore", stream: "Engineering", ranking: "Top Private Engineering, Bangalore", affiliation: "VTU", type: "Autonomous" },
+    { name: "Amity University", city: "Noida", stream: "Engineering", ranking: "Top Private University, North India", affiliation: "Autonomous", type: "Private" },
+    { name: "Chandigarh University", city: "Chandigarh", stream: "Engineering", ranking: "Top Private University, Punjab", affiliation: "Autonomous", type: "Private" },
+    { name: "LPU - Lovely Professional University", city: "Punjab", stream: "Engineering", ranking: "Top Private University, North India", affiliation: "Autonomous", type: "Private" },
+    // ── MEDICAL – Additional ──
+    { name: "Maulana Azad Medical College", city: "Delhi", stream: "Medical", ranking: "Top Govt. Medical, Delhi", affiliation: "University of Delhi", type: "Government" },
+    { name: "Lady Hardinge Medical College", city: "Delhi", stream: "Medical", ranking: "Top Women Medical, India", affiliation: "University of Delhi", type: "Government" },
+    { name: "King George Medical University", city: "Lucknow", stream: "Medical", ranking: "Top Govt. Medical, UP", affiliation: "Autonomous", type: "Government" },
+    { name: "Madras Medical College", city: "Chennai", stream: "Medical", ranking: "Top Govt. Medical, Tamil Nadu", affiliation: "Tamil Nadu MGR Univ.", type: "Government" },
+    { name: "Amrita School of Medicine", city: "Coimbatore", stream: "Medical", ranking: "Top Private Medical, South India", affiliation: "Amrita University", type: "Private" },
+    { name: "Sri Ramachandra Medical College", city: "Chennai", stream: "Medical", ranking: "Top Private Medical, Tamil Nadu", affiliation: "SRMC University", type: "Private" },
+    { name: "Jawaharlal Nehru Medical College", city: "Belgaum", stream: "Medical", ranking: "Top Medical, Karnataka", affiliation: "KLE University", type: "Private" },
+    // ── LAW – Additional ──
+    { name: "Gujarat National Law University", city: "Gandhinagar", stream: "Law", ranking: "Top NLU, West India", affiliation: "Autonomous (NLU)", type: "Government" },
+    { name: "Rajiv Gandhi National Law University", city: "Patiala", stream: "Law", ranking: "Top NLU, North India", affiliation: "Autonomous (NLU)", type: "Government" },
+    { name: "National Law University Jodhpur", city: "Jodhpur", stream: "Law", ranking: "Top 5 NLU, India", affiliation: "Autonomous (NLU)", type: "Government" },
+    { name: "Hidayatullah National Law University", city: "Raipur", stream: "Law", ranking: "Top NLU, Central India", affiliation: "Autonomous (NLU)", type: "Government" },
+    { name: "School of Law, Christ University", city: "Bangalore", stream: "Law", ranking: "Top Private Law, South India", affiliation: "Christ University", type: "Private" },
+    // ── MANAGEMENT – Additional ──
+    { name: "IIM Lucknow", city: "Lucknow", stream: "Management", ranking: "Top 5 IIM, India", affiliation: "Autonomous (IIM)", type: "Government" },
+    { name: "IIM Kozhikode", city: "Kozhikode", stream: "Management", ranking: "Top 7 IIM, India", affiliation: "Autonomous (IIM)", type: "Government" },
+    { name: "IIM Indore", city: "Indore", stream: "Management", ranking: "Top 6 IIM, India", affiliation: "Autonomous (IIM)", type: "Government" },
+    { name: "SPJIMR Mumbai", city: "Mumbai", stream: "Management", ranking: "Top 5 MBA, India", affiliation: "S.P. Jain Institute", type: "Private" },
+    { name: "MDI Gurgaon", city: "Gurgaon", stream: "Management", ranking: "Top 10 MBA, India", affiliation: "Autonomous", type: "Private" },
+    { name: "IMT Ghaziabad", city: "Ghaziabad", stream: "Management", ranking: "Top 15 MBA, India", affiliation: "Autonomous", type: "Private" },
+    { name: "Great Lakes Institute", city: "Chennai", stream: "Management", ranking: "Top MBA, South India", affiliation: "Autonomous", type: "Private" },
+    { name: "XIMB - Xavier Institute", city: "Bhubaneswar", stream: "Management", ranking: "Top 15 MBA, India", affiliation: "Xavier University", type: "Private" },
+    { name: "KJ Somaiya Institute of Management", city: "Mumbai", stream: "Management", ranking: "Top MBA, Mumbai", affiliation: "Somaiya University", type: "Private" },
+    // ── SCIENCE – Additional ──
+    { name: "Indian Institute of Science", city: "Bangalore", stream: "Science", ranking: "#1 Research University, India (NIRF)", affiliation: "Autonomous (IISc)", type: "Government" },
+    { name: "Tata Institute of Fundamental Research", city: "Mumbai", stream: "Science", ranking: "Top Research Institute, India", affiliation: "Autonomous (TIFR)", type: "Government" },
+    { name: "IISER Pune", city: "Pune", stream: "Science", ranking: "Top Science Research, India", affiliation: "Autonomous (IISER)", type: "Government" },
+    { name: "IISER Kolkata", city: "Kolkata", stream: "Science", ranking: "Top Science Research, India", affiliation: "Autonomous (IISER)", type: "Government" },
+    { name: "Miranda House", city: "Delhi", stream: "Science", ranking: "#1 College, India (NIRF)", affiliation: "University of Delhi", type: "Government" },
+    { name: "Presidency College", city: "Chennai", stream: "Science", ranking: "Top Govt. Science, Tamil Nadu", affiliation: "University of Madras", type: "Government" },
+    { name: "Loyola College", city: "Chennai", stream: "Science", ranking: "Top Private Science, South India", affiliation: "University of Madras", type: "Private" },
+    // ── COMMERCE – Additional ──
+    { name: "Shri Ram College of Commerce", city: "Delhi", stream: "Commerce", ranking: "#1 Commerce, India (NIRF)", affiliation: "University of Delhi", type: "Government" },
+    { name: "Lady Shri Ram College", city: "Delhi", stream: "Commerce", ranking: "Top Women Commerce, India", affiliation: "University of Delhi", type: "Government" },
+    { name: "Narsee Monjee College", city: "Mumbai", stream: "Commerce", ranking: "Top Commerce, Mumbai", affiliation: "University of Mumbai", type: "Autonomous" },
+    { name: "St. Xavier College Commerce", city: "Kolkata", stream: "Commerce", ranking: "Top Commerce, Kolkata", affiliation: "University of Calcutta", type: "Autonomous" },
+    // ── ARCHITECTURE – Additional ──
+    { name: "School of Planning and Architecture", city: "Delhi", stream: "Architecture", ranking: "#2 Architecture, India (NIRF)", affiliation: "Autonomous (SPA)", type: "Government" },
+    { name: "School of Planning and Architecture", city: "Bhopal", stream: "Architecture", ranking: "Top Architecture, Central India", affiliation: "Autonomous (SPA)", type: "Government" },
+    { name: "Faculty of Architecture, Manipal", city: "Manipal", stream: "Architecture", ranking: "Top Private Architecture, India", affiliation: "Manipal University", type: "Private" },
+    { name: "Kamla Raheja College of Architecture", city: "Mumbai", stream: "Architecture", ranking: "Top Private Architecture, Mumbai", affiliation: "University of Mumbai", type: "Private" },
   ];
 
   const EXAMS = [
@@ -2439,6 +2509,44 @@ function CollegesPage() {
     // ── DESIGN / ARTS ──
     { name: "UCEED", fullName: "Undergraduate Common Entrance Exam for Design", stream: "Architecture", level: "Govt · National", formStart: "Sep 2025", lastDateDisplay: "Oct 20, 2025", lastDate: "2025-10-20", examDate: "Jan 19, 2026", fee: "₹3,000", mode: "Online (CBT)", conductedBy: "IIT Bombay", nextCycle: "Sep 2026", officialLink: "https://uceed.iitb.ac.in" },
     { name: "AIAPGET", fullName: "All India Ayush PG Entrance Test", stream: "Medical", level: "Govt · National", formStart: "Mar 2026", lastDateDisplay: "Apr 20, 2026", lastDate: "2026-04-20", examDate: "Jun 2026", fee: "₹2,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Mar 2027", officialLink: "https://aiapget.nta.nic.in" },
+    // ── ENGINEERING – Additional State ──
+    { name: "OJEE", fullName: "Odisha Joint Entrance Examination", stream: "Engineering", level: "Govt · State", formStart: "Feb 2026", lastDateDisplay: "Apr 5, 2026", lastDate: "2026-04-05", examDate: "May 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "OJEE Board", nextCycle: "Feb 2027", officialLink: "https://ojee.nic.in" },
+    { name: "KEAM", fullName: "Kerala Engineering Architecture Medical", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 10, 2026", lastDate: "2026-03-10", examDate: "Apr 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "CEE Kerala", nextCycle: "Jan 2027", officialLink: "https://cee.kerala.gov.in" },
+    { name: "TANCET", fullName: "Tamil Nadu Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Feb 20, 2026", lastDate: "2026-02-20", examDate: "Mar 2026", fee: "₹500", mode: "Offline (OMR)", conductedBy: "Anna University", nextCycle: "Jan 2027", officialLink: "https://tancet.annauniv.edu" },
+    { name: "REAP", fullName: "Rajasthan Engineering Admission Process", stream: "Engineering", level: "Govt · State", formStart: "Jun 2026", lastDateDisplay: "Jul 15, 2026", lastDate: "2026-07-15", examDate: "Based on JEE", fee: "₹500", mode: "Online (CBT)", conductedBy: "Board of Technical Education Rajasthan", nextCycle: "Jun 2027", officialLink: "https://www.techedu.rajasthan.gov.in" },
+    { name: "GCET Goa", fullName: "Goa Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Feb 2026", lastDateDisplay: "Apr 10, 2026", lastDate: "2026-04-10", examDate: "May 2026", fee: "₹500", mode: "Offline (OMR)", conductedBy: "DHEQ Goa", nextCycle: "Feb 2027", officialLink: "https://www.dhegoa.gov.in" },
+    { name: "TSECET", fullName: "Telangana State Engineering Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 25, 2026", lastDate: "2026-03-25", examDate: "May 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "JNTU Hyderabad", nextCycle: "Jan 2027", officialLink: "https://tsecet.nic.in" },
+    { name: "BCECE", fullName: "Bihar Combined Entrance Competitive Examination", stream: "Engineering", level: "Govt · State", formStart: "Feb 2026", lastDateDisplay: "Mar 31, 2026", lastDate: "2026-03-31", examDate: "May 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "BCECEB", nextCycle: "Feb 2027", officialLink: "https://bceceboard.bihar.gov.in" },
+    // ── ENGINEERING – Additional Private ──
+    { name: "AMUEEE", fullName: "Aligarh Muslim University Engineering Entrance Exam", stream: "Engineering", level: "Govt · University", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "AMU", nextCycle: "Jan 2027", officialLink: "https://amucontrollerexams.com" },
+    { name: "JUET", fullName: "Jaypee University Entrance Test", stream: "Engineering", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Apr 30, 2026", lastDate: "2026-04-30", examDate: "May 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "Jaypee University", nextCycle: "Nov 2026", officialLink: "https://juet.ac.in" },
+    { name: "LPUNEST", fullName: "LPU National Entrance and Scholarship Test", stream: "Engineering", level: "Private · National", formStart: "Oct 2025", lastDateDisplay: "Apr 25, 2026", lastDate: "2026-04-25", examDate: "Jan–May 2026", fee: "₹0", mode: "Online (CBT)", conductedBy: "LPU", nextCycle: "Oct 2026", officialLink: "https://lpunest.lpu.in" },
+    { name: "CUSAT CAT", fullName: "Cochin University Science Technology CAT", stream: "Engineering", level: "Govt · University", formStart: "Jan 2026", lastDateDisplay: "Mar 15, 2026", lastDate: "2026-03-15", examDate: "Apr 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "CUSAT", nextCycle: "Jan 2027", officialLink: "https://admissions.cusat.ac.in" },
+    // ── MEDICAL – Additional ──
+    { name: "AIIMS Nursing", fullName: "AIIMS BSc Nursing Entrance Exam", stream: "Medical", level: "Govt · National", formStart: "Feb 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "AIIMS", nextCycle: "Feb 2027", officialLink: "https://aiimsexams.ac.in" },
+    { name: "BHU PMT", fullName: "Banaras Hindu University Pre Medical Test", stream: "Medical", level: "Govt · University", formStart: "Mar 2026", lastDateDisplay: "Apr 15, 2026", lastDate: "2026-04-15", examDate: "Jun 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "BHU", nextCycle: "Mar 2027", officialLink: "https://bhuonline.in" },
+    { name: "VMMC MBBS", fullName: "Vardhman Mahavir Medical College MBBS", stream: "Medical", level: "Govt · University", formStart: "Feb 2026", lastDateDisplay: "Mar 5, 2026", lastDate: "2026-03-05", examDate: "May 2026", fee: "₹1,700", mode: "Offline (OMR)", conductedBy: "NTA / VMMC", nextCycle: "Feb 2027", officialLink: "https://vmmc-safdarjung.org" },
+    // ── MANAGEMENT – Additional ──
+    { name: "IBSAT", fullName: "ICFAI Business School Aptitude Test", stream: "Management", level: "Private · National", formStart: "Jul 2025", lastDateDisplay: "Dec 20, 2025", lastDate: "2025-12-20", examDate: "Dec 2025", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "ICFAI", nextCycle: "Jul 2026", officialLink: "https://ibsindia.org" },
+    { name: "ATMA", fullName: "AIMS Test for Management Admissions", stream: "Management", level: "Private · National", formStart: "Monthly", lastDateDisplay: "Rolling Dates", lastDate: "2026-12-31", examDate: "Monthly 2026", fee: "₹1,290", mode: "Online (CBT)", conductedBy: "AIMS", nextCycle: "Monthly", officialLink: "https://atmaaims.com" },
+    { name: "MICAT", fullName: "MICA Admission Test", stream: "Management", level: "Private · National", formStart: "Sep 2025", lastDateDisplay: "Nov 25, 2025", lastDate: "2025-11-25", examDate: "Dec 2025", fee: "₹2,006", mode: "Online (CBT)", conductedBy: "MICA Ahmedabad", nextCycle: "Sep 2026", officialLink: "https://mica.ac.in" },
+    { name: "IRMASAT", fullName: "Institute of Rural Management Anand Test", stream: "Management", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Jan 5, 2026", lastDate: "2026-01-05", examDate: "Feb 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "IRMA Anand", nextCycle: "Nov 2026", officialLink: "https://irma.ac.in" },
+    { name: "TISS BAT", fullName: "TISS Bachelor Admission Test", stream: "Management", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Jan 15, 2026", lastDate: "2026-01-15", examDate: "Feb 2026", fee: "₹1,030", mode: "Online (CBT)", conductedBy: "TISS Mumbai", nextCycle: "Nov 2026", officialLink: "https://tiss.edu" },
+    // ── LAW – Additional ──
+    { name: "CULEE", fullName: "Christ University Law Entrance Examination", stream: "Law", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Feb 15, 2026", lastDate: "2026-02-15", examDate: "Mar 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "Christ University", nextCycle: "Nov 2026", officialLink: "https://christuniversity.in" },
+    { name: "BHU LLB", fullName: "BHU BA LLB Entrance Test", stream: "Law", level: "Govt · University", formStart: "Mar 2026", lastDateDisplay: "Apr 20, 2026", lastDate: "2026-04-20", examDate: "Jun 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "BHU", nextCycle: "Mar 2027", officialLink: "https://bhuonline.in" },
+    { name: "AMU Law", fullName: "Aligarh Muslim University Law Entrance", stream: "Law", level: "Govt · University", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "AMU", nextCycle: "Jan 2027", officialLink: "https://amucontrollerexams.com" },
+    // ── SCIENCE – Additional ──
+    { name: "IISER Aptitude Test", fullName: "IISER Aptitude Test for BS-MS Program", stream: "Science", level: "Govt · National", formStart: "Mar 2026", lastDateDisplay: "May 1, 2026", lastDate: "2026-05-01", examDate: "Jun 2026", fee: "₹2,000", mode: "Online (CBT)", conductedBy: "IISER", nextCycle: "Mar 2027", officialLink: "https://iiseradmission.in" },
+    { name: "JEST", fullName: "Joint Entrance Screening Test", stream: "Science", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 20, 2025", lastDate: "2025-12-20", examDate: "Feb 2026", fee: "₹0", mode: "Online (CBT)", conductedBy: "JEST Committee", nextCycle: "Nov 2026", officialLink: "https://www.jest.org.in" },
+    { name: "JAM", fullName: "Joint Admission Test for MSc", stream: "Science", level: "Govt · National", formStart: "Aug 2025", lastDateDisplay: "Oct 11, 2025", lastDate: "2025-10-11", examDate: "Feb 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "IIT Delhi", nextCycle: "Aug 2026", officialLink: "https://jam.iitd.ac.in" },
+    { name: "NEST", fullName: "National Entrance Screening Test", stream: "Science", level: "Govt · National", formStart: "Jan 2026", lastDateDisplay: "Mar 31, 2026", lastDate: "2026-03-31", examDate: "Jun 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "NISER / CEBS", nextCycle: "Jan 2027", officialLink: "https://www.nestexam.in" },
+    // ── ARCHITECTURE – Additional ──
+    { name: "HITSEEE", fullName: "Hindustan Institute of Technology Science Entrance", stream: "Architecture", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Apr 15, 2026", lastDate: "2026-04-15", examDate: "Apr–May 2026", fee: "₹500", mode: "Online (CBT)", conductedBy: "HITS Chennai", nextCycle: "Nov 2026", officialLink: "https://hindustanuniv.ac.in" },
+    { name: "Amity JEE", fullName: "Amity Joint Entrance Examination", stream: "Architecture", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Apr 20, 2026", lastDate: "2026-04-20", examDate: "May 2026", fee: "₹1,100", mode: "Online (CBT)", conductedBy: "Amity University", nextCycle: "Nov 2026", officialLink: "https://amity.edu" },
+    // ── PHARMACY – Additional ──
+    { name: "TS EAMCET Pharmacy", fullName: "Telangana State EAMCET for Pharmacy", stream: "Pharmacy", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "JNTU Hyderabad", nextCycle: "Jan 2027", officialLink: "https://tseamcet.nic.in" },
+    { name: "AP EAMCET Pharmacy", fullName: "Andhra Pradesh EAMCET for Pharmacy", stream: "Pharmacy", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "JNTU Kakinada", nextCycle: "Jan 2027", officialLink: "https://sche.ap.gov.in/eamcet" },
   ];
 
   const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
@@ -2466,7 +2574,7 @@ function CollegesPage() {
         <div className="container">
           <div className="tag" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>Colleges &amp; Entrance Exams</div>
           <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Colleges &amp; Exam Calendar</h1>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>55+ partner colleges · Maharashtra &amp; National · Live exam deadlines with countdown timers</p>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>120+ partner colleges · Maharashtra &amp; National · Live exam deadlines with countdown timers</p>
           {/* Summary Pills */}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "white", fontWeight: 600 }}>📋 {EXAMS.length} Exams Listed</div>
