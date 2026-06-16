@@ -514,6 +514,27 @@ const css = `
   ::-webkit-scrollbar-thumb { background: #DDD6FE; border-radius: 3px; }
 `;
 
+
+// ─── INPUT SANITIZER ─────────────────────────────────────────────────────────
+const sanitize = (str) => {
+  if (!str) return str;
+  return String(str)
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;")
+    .replace(/\//g, "&#x2F;")
+    .trim();
+};
+
+const sanitizeForm = (obj) => {
+  const clean = {};
+  Object.keys(obj).forEach(k => {
+    clean[k] = typeof obj[k] === "string" ? sanitize(obj[k]) : obj[k];
+  });
+  return clean;
+};
+
 // ─── DATA ───────────────────────────────────────────────────────────────────
 
 const SERVICES = [
@@ -843,11 +864,11 @@ function ContactForm() {
     setError(""); setLoading(true);
     try {
       const { error: err } = await supabase.from("contact_messages").insert({
-        full_name: form.name,
-        email: form.email,
-        phone: form.phone,
-        subject: form.subject,
-        message: form.message,
+        full_name: sanitize(form.name),
+        email: form.email.toLowerCase().trim(),
+        phone: form.phone.trim(),
+        subject: sanitize(form.subject),
+        message: sanitize(form.message),
         created_at: new Date().toISOString(),
       });
       if (err) throw err;
@@ -1107,10 +1128,10 @@ function RegisterModal({ onClose }) {
 
       const { error: profileError } = await supabase.from("students").insert({
         user_id: authData.user.id,
-        first_name: form.firstName,
-        last_name: form.lastName,
-        email: form.email,
-        mobile: form.mobile,
+        first_name: sanitize(form.firstName),
+        last_name: sanitize(form.lastName),
+        email: form.email.toLowerCase().trim(),
+        mobile: form.mobile.trim(),
         date_of_birth: form.dob,
         course_interest: form.course,
         status: "active",
@@ -1806,11 +1827,19 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
     loadStatuses();
   }, [user, uploadedDocs]);
 
+  const [lastUpload, setLastUpload] = useState(0);
   const handleUpload = async (docName, file) => {
     if (!file) return;
+    // Rate limit: 1 upload per 3 seconds
+    const now = Date.now();
+    if (now - lastUpload < 3000) { setError("Please wait a moment before uploading again."); return; }
+    setLastUpload(now);
     if (file.size > 5 * 1024 * 1024) { setError(`${docName}: File too large. Max 5MB.`); return; }
     const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
     if (!allowed.includes(file.type)) { setError(`${docName}: Only PDF, JPG, PNG allowed.`); return; }
+    // Validate file name
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    if (safeName !== file.name) console.info("File name sanitized:", safeName);
 
     setError(""); setSuccess("");
     setUploading(u => ({ ...u, [docName]: true }));
@@ -2111,7 +2140,7 @@ function PaymentsTab({ user, profile }) {
   const [paySuccess, setPaySuccess] = useState(null);
 
   // Razorpay Key — replace with your actual Razorpay Key ID from razorpay.com
-  const RAZORPAY_KEY = "rzp_test_YOUR_KEY_ID";
+  const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY || "rzp_test_YOUR_KEY_ID";
 
   const SERVICES = [
     {
@@ -2582,8 +2611,8 @@ function SupportTab({ user }) {
     try {
       const { error: err } = await supabase.from("support_tickets").insert({
         user_id: user.id,
-        category: form.category,
-        description: form.description,
+        category: sanitize(form.category),
+        description: sanitize(form.description),
         status: "open",
         created_at: new Date().toISOString(),
       });
