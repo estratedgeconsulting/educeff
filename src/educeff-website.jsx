@@ -1039,8 +1039,10 @@ function LoginModal({ onClose, onLogin }) {
         <div style={{ textAlign: "right", marginTop: -8, marginBottom: 16 }}>
           <span style={{ fontSize: 12, color: "#64B5F6", cursor: "pointer" }} onClick={async () => {
             if (!email) { alert("Enter your email first"); return; }
-            await supabase.auth.resetPasswordForEmail(email);
-            alert("Password reset email sent!");
+            try {
+              await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+              alert("Password reset email sent! Check your inbox.");
+            } catch(e) { alert("Failed to send reset email: " + e.message); }
           }}>Forgot password?</span>
         </div>
         <button className="btn-navy" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }} onClick={handleLogin} disabled={loading}>
@@ -1412,7 +1414,7 @@ function StudentPortal({ setPage, user }) {
     ([profile?.first_name, profile?.mobile, profile?.date_of_birth, profile?.address, profile?.tenth_percent, profile?.course_interest].filter(Boolean).length / 6) * 100
   ));
 
-  const handleLogout = async () => { await supabase.auth.signOut(); setPage("Home"); };
+  const handleLogout = async () => { try { await supabase.auth.signOut(); } catch(e){} setPage("Home"); };
 
   const navGroups = [
     { label: "Main", items: [
@@ -1729,9 +1731,12 @@ function PortalProfile({ user, profile, onSave }) {
 
   const handleSave = async () => {
     setLoading(true); setSaved(false);
-    const { error } = await supabase.from("students").update({ ...form, updated_at: new Date().toISOString() }).eq("user_id", user.id);
+    try {
+      const { error } = await supabase.from("students").update({ ...form, updated_at: new Date().toISOString() }).eq("user_id", user.id);
+      if (!error) { setSaved(true); onSave(); setTimeout(() => setSaved(false), 3000); }
+      else console.warn("Profile update error:", error.message);
+    } catch(e) { console.warn("Profile update failed:", e); }
     setLoading(false);
-    if (!error) { setSaved(true); onSave(); setTimeout(() => setSaved(false), 3000); }
   };
 
   const initials = `${form.first_name?.[0] || ""}${form.last_name?.[0] || ""}` || "ST";
@@ -1813,23 +1818,27 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
     const ext = file.name.split(".").pop().toLowerCase();
     const path = `${user.id}/${docName}.${ext}`;
 
-    const { error: uploadErr } = await supabase.storage
-      .from("student-documents")
-      .upload(path, file, { upsert: true, contentType: file.type });
+    try {
+      const { error: uploadErr } = await supabase.storage
+        .from("student-documents")
+        .upload(path, file, { upsert: true, contentType: file.type });
 
-    if (!uploadErr) {
-      await supabase.from("student_documents").upsert({
-        user_id: user.id,
-        doc_name: docName,
-        file_path: path,
-        uploaded_at: new Date().toISOString(),
-        status: "pending_review",
-      }, { onConflict: "user_id,doc_name" });
-      setSuccess(`${docName} uploaded successfully!`);
-      setTimeout(() => setSuccess(""), 3000);
-      onUpload();
-    } else {
-      setError(`Upload failed: ${uploadErr.message}`);
+      if (!uploadErr) {
+        await supabase.from("student_documents").upsert({
+          user_id: user.id,
+          doc_name: docName,
+          file_path: path,
+          uploaded_at: new Date().toISOString(),
+          status: "pending_review",
+        }, { onConflict: "user_id,doc_name" });
+        setSuccess(`${docName} uploaded successfully!`);
+        setTimeout(() => setSuccess(""), 3000);
+        onUpload();
+      } else {
+        setError(`Upload failed: ${uploadErr.message}`);
+      }
+    } catch (e) {
+      setError(`Upload error: ${e.message || "Please try again."}`);
     }
     setUploading(u => ({ ...u, [docName]: false }));
   };
@@ -2047,8 +2056,11 @@ function ApplicationsTab({ user }) {
   }, [user]);
 
   const handleAdd = async () => {
-    const { data, error } = await supabase.from("applications").insert({ user_id: user.id, college: form.college, course: form.course, exam: form.exam, status: "pending", created_at: new Date().toISOString() }).select().single();
-    if (!error) { setApps(a => [data, ...a]); setShowForm(false); setForm({ college: "", course: "", exam: "" }); }
+    try {
+      const { data, error } = await supabase.from("applications").insert({ user_id: user.id, college: form.college, course: form.course, exam: form.exam, status: "pending", created_at: new Date().toISOString() }).select().single();
+      if (!error && data) { setApps(a => [data, ...a]); setShowForm(false); setForm({ college: "", course: "", exam: "" }); }
+      else if (error) console.warn("Insert app error:", error.message);
+    } catch(e) { console.warn("App insert failed:", e); }
   };
 
   return (
@@ -2205,39 +2217,42 @@ function PaymentsTab({ user, profile }) {
       notes: { user_id: user?.id, service_id: service.id },
       theme: { color: "#64B5F6" },
       handler: async (response) => {
-        // Save payment record to Supabase
-        const { error } = await supabase.from("payments").insert({
-          user_id: user.id,
-          service_id: service.id,
-          service_title: service.title,
-          amount: service.price,
-          currency: "INR",
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_order_id: response.razorpay_order_id || null,
-          status: "success",
-          created_at: new Date().toISOString(),
-        });
-        if (!error) {
-          setPaySuccess({ service, paymentId: response.razorpay_payment_id });
-          setSelectedService(null);
-        }
+        try {
+          const { error } = await supabase.from("payments").insert({
+            user_id: user.id,
+            service_id: service.id,
+            service_title: service.title,
+            amount: service.price,
+            currency: "INR",
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id || null,
+            status: "success",
+            created_at: new Date().toISOString(),
+          });
+          if (!error) {
+            setPaySuccess({ service, paymentId: response.razorpay_payment_id });
+            setSelectedService(null);
+          } else console.warn("Payment save error:", error.message);
+        } catch(e) { console.warn("Payment save failed:", e); }
       },
       modal: { ondismiss: () => setLoading(false) },
     };
 
     const rzp = new window.Razorpay(options);
     rzp.on("payment.failed", async (resp) => {
-      await supabase.from("payments").insert({
-        user_id: user.id,
-        service_id: service.id,
-        service_title: service.title,
-        amount: service.price,
-        currency: "INR",
-        razorpay_payment_id: resp.error.metadata?.payment_id || null,
-        status: "failed",
-        error_reason: resp.error.reason,
-        created_at: new Date().toISOString(),
-      });
+      try {
+        await supabase.from("payments").insert({
+          user_id: user.id,
+          service_id: service.id,
+          service_title: service.title,
+          amount: service.price,
+          currency: "INR",
+          razorpay_payment_id: resp.error.metadata?.payment_id || null,
+          status: "failed",
+          error_reason: resp.error.reason,
+          created_at: new Date().toISOString(),
+        });
+      } catch(e) { console.warn("Failed payment save error:", e); }
       alert(`Payment failed: ${resp.error.description}`);
     });
     rzp.open();
@@ -2364,84 +2379,290 @@ function PaymentsTab({ user, profile }) {
 }
 
 function TrackingTab({ user }) {
-  const steps = ["Registered", "Documents Verified", "Application Submitted", "Under Review", "Admission Confirmed"];
-  const currentStep = 3;
+  const [apps, setApps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+      .then(({ data }) => { setApps(data || []); if (data?.length > 0) setSelected(data[0]); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [user]);
+
+  const STEPS = ["Registered", "Documents Verified", "Application Submitted", "Under Review", "Admission Confirmed"];
+
+  const getStep = (status) => {
+    switch (status) {
+      case "pending": return 2;
+      case "under_review": return 3;
+      case "approved": return 4;
+      case "rejected": return 1;
+      default: return 2;
+    }
+  };
+
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 28 }}>Application Tracking</h1>
-      <div className="card" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontWeight: 600, marginBottom: 20, color: "#64B5F6" }}>COEP Pune — B.E. Computer Science (APP-001)</h3>
-        <div style={{ display: "flex", justifyContent: "space-between", position: "relative", marginBottom: 8 }}>
-          <div style={{ position: "absolute", top: 18, left: 0, right: 0, height: 2, background: "#F5FAFF" }} />
-          <div style={{ position: "absolute", top: 18, left: 0, width: `${(currentStep / (steps.length - 1)) * 100}%`, height: 2, background: "#64B5F6", transition: "width 0.5s" }} />
-          {steps.map((s, i) => (
-            <div key={s} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, zIndex: 1, maxWidth: 90, textAlign: "center" }}>
-              <div style={{ width: 36, height: 36, borderRadius: "50%", background: i <= currentStep ? "#A8D4F5" : "#F5FAFF", color: i <= currentStep ? "white" : "#F5FAFF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 600 }}>
-                {i < currentStep ? "✓" : i + 1}
-              </div>
-              <span style={{ fontSize: 11, color: i <= currentStep ? "#64B5F6" : "#F5FAFF", fontWeight: i === currentStep ? 600 : 400 }}>{s}</span>
-            </div>
-          ))}
+      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", marginBottom: 6, fontFamily: "Sora" }}>Application Tracking</h1>
+      <p style={{ color: "#6D28D9", fontSize: 13, marginBottom: 24 }}>Track the real-time status of all your college applications.</p>
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "60px 0" }}><div style={{ fontSize: 32 }}>⏳</div><div style={{ color: "#90CAF9", fontSize: 14, marginTop: 8 }}>Loading applications...</div></div>
+      ) : apps.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 16, border: "1px solid #E3F2FD" }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📋</div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: "#1A1A2E", marginBottom: 8 }}>No Applications Yet</div>
+          <div style={{ fontSize: 13, color: "#90CAF9", marginBottom: 20 }}>Submit your first application to track its status here</div>
+          <button className="btn-primary" style={{ fontSize: 13 }}>+ New Application</button>
         </div>
-      </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+          {/* Application List */}
+          <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid #E3F2FD", background: "#F8FAFF" }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E" }}>Your Applications ({apps.length})</div>
+            </div>
+            {apps.map(a => (
+              <div key={a.id} onClick={() => setSelected(a)} style={{ padding: "14px 20px", borderBottom: "1px solid #F0F7FF", cursor: "pointer", background: selected?.id === a.id ? "#EFF6FF" : "white", transition: "background 0.15s" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E", marginBottom: 3 }}>{a.college}</div>
+                    <div style={{ fontSize: 11, color: "#90CAF9" }}>{a.course} {a.exam ? `· ${a.exam}` : ""}</div>
+                    <div style={{ fontSize: 10, color: "#C8E4FA", marginTop: 2 }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</div>
+                  </div>
+                  <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`} style={{ fontSize: 10 }}>
+                    {a.status?.replace("_", " ")}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Tracking Detail */}
+          {selected && (
+            <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 4 }}>{selected.college}</div>
+                <div style={{ fontSize: 12, color: "#90CAF9" }}>{selected.course} {selected.exam ? `· ${selected.exam}` : ""}</div>
+              </div>
+
+              {selected.status === "rejected" && (
+                <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "12px 16px", marginBottom: 20 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#DC2626", marginBottom: 4 }}>❌ Application Rejected</div>
+                  <div style={{ fontSize: 12, color: "#991B1B" }}>Please contact our counselors for assistance with re-application.</div>
+                </div>
+              )}
+
+              {/* Progress Steps */}
+              <div style={{ position: "relative", padding: "8px 0" }}>
+                {STEPS.map((step, i) => {
+                  const currentStep = getStep(selected.status);
+                  const isDone = i < currentStep;
+                  const isCurrent = i === currentStep;
+                  const isPending = i > currentStep;
+                  return (
+                    <div key={step} style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: i < STEPS.length - 1 ? 0 : 0 }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: isDone ? "#059669" : isCurrent ? "#64B5F6" : "#E3F2FD", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: isDone || isCurrent ? "white" : "#90CAF9", flexShrink: 0, zIndex: 1, transition: "all 0.3s" }}>
+                          {isDone ? "✓" : i + 1}
+                        </div>
+                        {i < STEPS.length - 1 && <div style={{ width: 2, height: 28, background: isDone ? "#059669" : "#E3F2FD", margin: "2px 0", transition: "background 0.3s" }} />}
+                      </div>
+                      <div style={{ paddingBottom: i < STEPS.length - 1 ? 20 : 0, paddingTop: 4 }}>
+                        <div style={{ fontSize: 13, fontWeight: isCurrent ? 700 : 500, color: isDone ? "#059669" : isCurrent ? "#1565C0" : "#9CA3AF" }}>{step}</div>
+                        {isCurrent && !selected.status === "rejected" && (
+                          <div style={{ fontSize: 11, color: "#64B5F6", marginTop: 2 }}>Current status</div>
+                        )}
+                        {isDone && i === 0 && <div style={{ fontSize: 10, color: "#90CAF9", marginTop: 1 }}>{new Date(selected.created_at).toLocaleDateString("en-IN")}</div>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ marginTop: 20, padding: "12px 16px", background: "#F8FAFF", borderRadius: 10 }}>
+                <div style={{ fontSize: 11, color: "#90CAF9", marginBottom: 4 }}>Application ID</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E", fontFamily: "monospace" }}>APP-{String(selected.id).slice(-8).toUpperCase()}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function NotificationsTab() {
-  const notifs = [
-    { title: "Document Verification Required", msg: "Please upload your Passport Size Photo and Signature to proceed.", time: "2 hours ago", type: "warning", unread: true },
-    { title: "Application Submitted Successfully", msg: "Your application APP-002 to VJTI Mumbai has been submitted.", time: "1 day ago", type: "success", unread: true },
-    { title: "Counseling Session Scheduled", msg: "Your free counseling session is scheduled for 20 Jan at 11AM.", time: "2 days ago", type: "info", unread: false },
-    { title: "Welcome to Educeff!", msg: "Your account has been created. Complete your profile to get started.", time: "5 days ago", type: "info", unread: false },
-  ];
+function NotificationsTab({ user }) {
+  const [notifs, setNotifs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    loadNotifs();
+  }, [user]);
+
+  const loadNotifs = async () => {
+    setLoading(true);
+    try {
+      const { data } = await supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+      setNotifs(data || []);
+    } catch (e) { console.warn(e); }
+    setLoading(false);
+  };
+
+  const markRead = async (id) => {
+    try { await supabase.from("notifications").update({ is_read: true }).eq("id", id); } catch(e){}
+    setNotifs(p => p.map(n => n.id === id ? { ...n, is_read: true } : n));
+  };
+
+  const markAllRead = async () => {
+    try { await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id); } catch(e){}
+    setNotifs(p => p.map(n => ({ ...n, is_read: true })));
+  };
+
+  const unreadCount = notifs.filter(n => !n.is_read).length;
+
+  const typeIcon = (type) => ({ warning: "⚠️", success: "✅", info: "ℹ️", error: "❌" }[type] || "🔔");
+
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Notifications</h1>
-      {notifs.map((n, i) => (
-        <div key={i} style={{ background: "#FFFFFF", borderRadius: 8, border: `1px solid ${n.unread ? "#A8D4F5" : "#F5FAFF"}`, padding: "16px 20px", marginBottom: 12, display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <span style={{ fontSize: 20 }}>{n.type === "warning" ? "⚠️" : n.type === "success" ? "✅" : "ℹ️"}</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 14, color: "#64B5F6", marginBottom: 3 }}>{n.title}</div>
-            <div style={{ fontSize: 13, color: "#6D28D9" }}>{n.msg}</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", fontFamily: "Sora" }}>Notifications</h1>
+          {unreadCount > 0 && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{unreadCount} unread notification{unreadCount > 1 ? "s" : ""}</div>}
+        </div>
+        {unreadCount > 0 && (
+          <button style={{ fontSize: 12, color: "#64B5F6", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "7px 14px", cursor: "pointer", fontWeight: 600 }} onClick={markAllRead}>Mark all read</button>
+        )}
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "60px 0" }}><div style={{ fontSize: 32 }}>⏳</div><div style={{ color: "#90CAF9", fontSize: 14, marginTop: 8 }}>Loading...</div></div>
+      ) : notifs.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 16, border: "1px solid #E3F2FD" }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🔔</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>No Notifications Yet</div>
+          <div style={{ fontSize: 13, color: "#90CAF9" }}>You'll receive updates about your applications and documents here</div>
+        </div>
+      ) : notifs.map(n => (
+        <div key={n.id} onClick={() => !n.is_read && markRead(n.id)} style={{ background: "white", borderRadius: 12, border: `1px solid ${!n.is_read ? "#BFDBFE" : "#E3F2FD"}`, padding: "16px 20px", marginBottom: 10, display: "flex", gap: 14, alignItems: "flex-start", cursor: !n.is_read ? "pointer" : "default", transition: "all 0.2s", boxShadow: !n.is_read ? "0 2px 8px rgba(100,181,246,0.1)" : "none" }}>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: !n.is_read ? "#EFF6FF" : "#F8FAFF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{typeIcon(n.type)}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: !n.is_read ? 700 : 500, fontSize: 14, color: "#1A1A2E", marginBottom: 4 }}>{n.title}</div>
+            <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{n.message}</div>
+            <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 6 }}>{new Date(n.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
           </div>
-          <div style={{ fontSize: 11, color: "#6D28D9", whiteSpace: "nowrap" }}>{n.time}</div>
-          {n.unread && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#64B5F6", flexShrink: 0, marginTop: 5 }} />}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+            {!n.is_read && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#64B5F6" }} />}
+            {!n.is_read && <div style={{ fontSize: 10, color: "#64B5F6", fontWeight: 600 }}>tap to read</div>}
+          </div>
         </div>
       ))}
     </div>
   );
 }
 
-function SupportTab() {
+function SupportTab({ user }) {
+  const [form, setForm] = useState({ category: "", description: "" });
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [tickets, setTickets] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("support_tickets").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+      .then(({ data }) => setTickets(data || [])).catch(() => {});
+  }, [user, sent]);
+
+  const handleSubmit = async () => {
+    if (!form.category || !form.description.trim()) { setError("Please select a category and describe your issue."); return; }
+    setError(""); setLoading(true);
+    try {
+      const { error: err } = await supabase.from("support_tickets").insert({
+        user_id: user.id,
+        category: form.category,
+        description: form.description,
+        status: "open",
+        created_at: new Date().toISOString(),
+      });
+      if (err) throw err;
+      setSent(true);
+      setForm({ category: "", description: "" });
+      setTimeout(() => setSent(false), 4000);
+    } catch (e) { setError(e.message || "Failed to submit. Please try again."); }
+    setLoading(false);
+  };
+
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 24 }}>Support Center</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 28 }}>
+      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", marginBottom: 20, fontFamily: "Sora" }}>Support Center</h1>
+
+      {/* Contact Options */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 24 }}>
         {[
-          { icon: "📞", title: "Call Support", desc: "+91 98765 43210", sub: "Mon–Sat, 9AM–7PM", action: "Call Now" },
-          { icon: "💬", title: "Live Chat", desc: "Chat with an advisor", sub: "Avg. response: 5 min", action: "Start Chat" },
-          { icon: "✉️", title: "Email Support", desc: "support@educeff.com", sub: "Response within 4 hours", action: "Send Email" },
-          { icon: "📅", title: "Book Appointment", desc: "Schedule a session", sub: "In-person or video call", action: "Book Now" },
+          { icon: "📞", title: "Call Us", desc: "+91 98765 43210", sub: "Mon–Sat, 9AM–7PM", color: "#EFF6FF", border: "#BFDBFE", action: () => window.open("tel:+919876543210") },
+          { icon: "✉️", title: "Email Us", desc: "support@educeff.com", sub: "Reply within 4 hours", color: "#F0FDF4", border: "#A7F3D0", action: () => window.open("mailto:support@educeff.com") },
+          { icon: "💬", title: "WhatsApp", desc: "+91 98765 43210", sub: "Quick responses", color: "#F5F3FF", border: "#DDD6FE", action: () => window.open("https://wa.me/919876543210") },
+          { icon: "📅", title: "Book Session", desc: "Free counseling", sub: "45 min call", color: "#FFFBEB", border: "#FDE68A", action: () => {} },
         ].map(s => (
-          <div key={s.title} className="card" style={{ display: "flex", gap: 14, alignItems: "center" }}>
-            <span style={{ fontSize: 28 }}>{s.icon}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 14, color: "#64B5F6" }}>{s.title}</div>
-              <div style={{ fontSize: 13, color: "#64B5F6" }}>{s.desc}</div>
-              <div style={{ fontSize: 12, color: "#6D28D9" }}>{s.sub}</div>
+          <div key={s.title} onClick={s.action} style={{ background: s.color, border: `1px solid ${s.border}`, borderRadius: 12, padding: "16px 14px", cursor: "pointer", transition: "all 0.2s", display: "flex", gap: 12, alignItems: "center" }}
+            onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
+            onMouseLeave={e => e.currentTarget.style.transform = "none"}>
+            <span style={{ fontSize: 24 }}>{s.icon}</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>{s.title}</div>
+              <div style={{ fontSize: 12, color: "#374151" }}>{s.desc}</div>
+              <div style={{ fontSize: 10, color: "#6B7280" }}>{s.sub}</div>
             </div>
-            <button className="btn-teal" style={{ fontSize: 12, padding: "6px 14px" }}>{s.action}</button>
           </div>
         ))}
       </div>
-      <div className="card">
-        <h3 style={{ fontWeight: 600, fontSize: 16, marginBottom: 16, color: "#64B5F6" }}>Submit a Support Ticket</h3>
-        <label>Issue Category</label>
-        <select><option>Select category</option><option>Document Upload Issue</option><option>Application Status</option><option>Login Problem</option><option>Payment Query</option><option>Other</option></select>
-        <label>Describe your issue</label>
-        <textarea rows={4} placeholder="Describe your issue in detail..." style={{ resize: "vertical" }} />
-        <button className="btn-primary">Submit Ticket</button>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
+        {/* Submit Ticket */}
+        <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>🎫 Submit a Support Ticket</h3>
+          {sent && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46" }}>✅ Ticket submitted! We'll respond within 4 hours.</div>}
+          {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
+          <label>Issue Category</label>
+          <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+            <option value="">Select category</option>
+            <option>Document Upload Issue</option>
+            <option>Application Status Query</option>
+            <option>Login / Account Problem</option>
+            <option>Payment Query</option>
+            <option>Counseling Session</option>
+            <option>College Admission Help</option>
+            <option>Other</option>
+          </select>
+          <label>Describe Your Issue</label>
+          <textarea rows={4} placeholder="Describe your issue in detail..." style={{ resize: "vertical" }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+          <button className="btn-primary" style={{ width: "100%", padding: 12, opacity: loading ? 0.7 : 1 }} onClick={handleSubmit} disabled={loading}>
+            {loading ? "Submitting..." : "Submit Ticket →"}
+          </button>
+        </div>
+
+        {/* Ticket History */}
+        <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>📋 My Tickets ({tickets.length})</h3>
+          {tickets.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "32px 0" }}>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>🎫</div>
+              <div style={{ fontSize: 13, color: "#90CAF9" }}>No tickets yet</div>
+            </div>
+          ) : tickets.map(t => (
+            <div key={t.id} style={{ padding: "12px 0", borderBottom: "1px solid #F0F7FF" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>{t.category}</div>
+                <span className={`badge ${t.status === "resolved" ? "badge-success" : t.status === "in_progress" ? "badge-info" : "badge-warning"}`} style={{ fontSize: 9 }}>{t.status?.replace("_", " ")}</span>
+              </div>
+              <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4, lineHeight: 1.4 }}>{t.description?.substring(0, 80)}{t.description?.length > 80 ? "..." : ""}</div>
+              <div style={{ fontSize: 10, color: "#90CAF9" }}>{new Date(t.created_at).toLocaleDateString("en-IN")}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
