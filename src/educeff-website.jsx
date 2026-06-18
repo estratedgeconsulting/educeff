@@ -3938,6 +3938,11 @@ function CollegesPage() {
   const [activeStream, setActiveStream] = useState("All");
   const [activeTab, setActiveTab] = useState("exams");
   const [search, setSearch] = useState("");
+  const [applyCollege, setApplyCollege] = useState(null); // college being applied to
+  const [applyForm, setApplyForm] = useState({ name: "", email: "", mobile: "", course: "", exam: "", message: "" });
+  const [applyLoading, setApplyLoading] = useState(false);
+  const [applyDone, setApplyDone] = useState(false);
+  const [applyError, setApplyError] = useState("");
 
   const colleges = [
     // ── ENGINEERING – Maharashtra ──
@@ -4275,7 +4280,10 @@ function CollegesPage() {
                     <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>📍 {c.city}</div>
                     <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 4 }}>🏆 {c.ranking}</div>
                     <div style={{ fontSize: 12, color: "#90CAF9", marginBottom: 16 }}>Affiliated: {c.affiliation}</div>
-                    <button className="btn-primary" style={{ fontSize: 12, width: "100%" }}>Apply Through Educeff →</button>
+                    <button className="btn-primary" style={{ fontSize: 12, width: "100%" }}
+                      onClick={() => { setApplyCollege(c); setApplyDone(false); setApplyError(""); setApplyForm({ name: "", email: "", mobile: "", course: c.stream, exam: "", message: "" }); }}>
+                      Apply Through Educeff →
+                    </button>
                   </div>
                 ))}
               </div>
@@ -4283,6 +4291,106 @@ function CollegesPage() {
           )}
         </div>
       </section>
+
+      {/* Apply Modal */}
+      {applyCollege && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(13,27,75,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }}
+          onClick={() => setApplyCollege(null)}>
+          <div style={{ background: "white", borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }}
+            onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div style={{ background: "linear-gradient(135deg, #64B5F6, #7C3AED)", padding: "20px 24px", borderRadius: "16px 16px 0 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Apply Through Educeff</div>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, color: "white", margin: 0 }}>{applyCollege.name}</h2>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>📍 {applyCollege.city} · {applyCollege.stream}</div>
+                </div>
+                <button onClick={() => setApplyCollege(null)} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "white", width: 30, height: 30, borderRadius: "50%", cursor: "pointer", fontSize: 16, flexShrink: 0 }}>×</button>
+              </div>
+            </div>
+
+            <div style={{ padding: 24 }}>
+              {applyDone ? (
+                <div style={{ textAlign: "center", padding: "20px 0" }}>
+                  <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Application Submitted!</h3>
+                  <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 20, lineHeight: 1.6 }}>
+                    Our counselor will contact you within <strong>2 hours</strong> to guide you through the admission process for <strong>{applyCollege.name}</strong>.
+                  </p>
+                  <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 10, padding: 16, marginBottom: 20, textAlign: "left" }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#065F46", marginBottom: 8 }}>✅ What happens next:</div>
+                    <ul style={{ paddingLeft: 18, fontSize: 13, color: "#065F46", lineHeight: 2, margin: 0 }}>
+                      <li>Counselor reviews your profile</li>
+                      <li>You receive a call to discuss eligibility</li>
+                      <li>Document checklist shared with you</li>
+                      <li>Application submitted on your behalf</li>
+                    </ul>
+                  </div>
+                  <button className="btn-primary" style={{ width: "100%", padding: 12 }} onClick={() => setApplyCollege(null)}>Done →</button>
+                </div>
+              ) : (
+                <>
+                  <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20, lineHeight: 1.6 }}>
+                    Fill in your details and our expert counselors will guide you through the complete admission process for this college — from eligibility check to final admission.
+                  </p>
+
+                  {applyError && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{applyError}</div>}
+
+                  <label>Full Name *</label>
+                  <input placeholder="Your full name" value={applyForm.name} onChange={e => setApplyForm(f => ({ ...f, name: e.target.value }))} />
+
+                  <label>Email Address *</label>
+                  <input type="email" placeholder="your@email.com" value={applyForm.email} onChange={e => setApplyForm(f => ({ ...f, email: e.target.value }))} />
+
+                  <label>Mobile Number *</label>
+                  <input placeholder="+91 98765 43210" value={applyForm.mobile} onChange={e => setApplyForm(f => ({ ...f, mobile: e.target.value }))} />
+
+                  <label>Course You Want to Apply For *</label>
+                  <input placeholder={`e.g. B.E. Computer Science, MBBS, LLB`} value={applyForm.course} onChange={e => setApplyForm(f => ({ ...f, course: e.target.value }))} />
+
+                  <label>Entrance Exam Appeared / Score</label>
+                  <input placeholder="e.g. JEE Main - 95 percentile, NEET - 620" value={applyForm.exam} onChange={e => setApplyForm(f => ({ ...f, exam: e.target.value }))} />
+
+                  <label>Additional Message (Optional)</label>
+                  <textarea rows={3} placeholder="Any specific queries or requirements..." style={{ resize: "vertical" }} value={applyForm.message} onChange={e => setApplyForm(f => ({ ...f, message: e.target.value }))} />
+
+                  <button className="btn-primary" style={{ width: "100%", padding: 14, opacity: applyLoading ? 0.7 : 1, marginTop: 4 }}
+                    disabled={applyLoading}
+                    onClick={async () => {
+                      if (!applyForm.name.trim()) { setApplyError("Please enter your full name."); return; }
+                      if (!applyForm.email.trim() || !applyForm.email.includes("@")) { setApplyError("Please enter a valid email."); return; }
+                      if (!applyForm.mobile.replace(/\D/g, "").match(/^\d{10}$/)) { setApplyError("Please enter a valid 10-digit mobile number."); return; }
+                      if (!applyForm.course.trim()) { setApplyError("Please enter the course you want to apply for."); return; }
+                      setApplyError(""); setApplyLoading(true);
+                      try {
+                        await supabase.from("contact_messages").insert({
+                          full_name: sanitize(applyForm.name),
+                          email: applyForm.email.toLowerCase().trim(),
+                          phone: applyForm.mobile.trim(),
+                          subject: `College Application: ${applyCollege.name}`,
+                          message: `College: ${applyCollege.name} (${applyCollege.city})\nStream: ${applyCollege.stream}\nCourse: ${sanitize(applyForm.course)}\nExam/Score: ${sanitize(applyForm.exam)}\nMessage: ${sanitize(applyForm.message)}`,
+                          created_at: new Date().toISOString(),
+                        });
+                        setApplyDone(true);
+                      } catch(e) {
+                        setApplyError("Submission failed. Please try again or call us directly.");
+                      }
+                      setApplyLoading(false);
+                    }}>
+                    {applyLoading ? "Submitting..." : "Submit Application Request →"}
+                  </button>
+
+                  <p style={{ fontSize: 11, color: "#90CAF9", textAlign: "center", marginTop: 12 }}>
+                    By submitting, you agree to be contacted by Educeff counselors regarding this application.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
