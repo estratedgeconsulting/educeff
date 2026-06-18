@@ -1747,7 +1747,7 @@ function PortalProfile({ user, profile, onSave }) {
   const [saved, setSaved] = useState(false);
 
   // Password change state
-  const [pwForm, setPwForm] = useState({ newPw: "", confirm: "" });
+  const [pwForm, setPwForm] = useState({ current: "", newPw: "", confirm: "" });
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState("");
   const [pwSuccess, setPwSuccess] = useState(false);
@@ -1769,16 +1769,30 @@ function PortalProfile({ user, profile, onSave }) {
 
   const handlePasswordChange = async () => {
     setPwError(""); setPwSuccess(false);
+    if (!pwForm.current) { setPwError("Please enter your current password."); return; }
     if (!pwForm.newPw || pwForm.newPw.length < 6) { setPwError("New password must be at least 6 characters."); return; }
-    if (pwForm.newPw !== pwForm.confirm) { setPwError("Passwords do not match."); return; }
+    if (pwForm.newPw !== pwForm.confirm) { setPwError("New passwords do not match."); return; }
+    if (pwForm.newPw === pwForm.current) { setPwError("New password must be different from your current password."); return; }
     setPwLoading(true);
     try {
-      // Supabase session is already active — just update directly
-      const { error: updateErr } = await supabase.auth.updateUser({ password: pwForm.newPw });
+      // Step 1: Re-authenticate to get a fresh session
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: pwForm.current,
+      });
+      if (signInErr) {
+        setPwError("Current password is incorrect. Please try again.");
+        setPwLoading(false);
+        return;
+      }
+      // Step 2: Now update to new password with fresh session
+      const { error: updateErr } = await supabase.auth.updateUser({
+        password: pwForm.newPw,
+      });
       if (updateErr) throw updateErr;
       setPwSuccess(true);
-      setPwForm({ newPw: "", confirm: "" });
-      setTimeout(() => { setPwSuccess(false); setShowPwSection(false); }, 3000);
+      setPwForm({ current: "", newPw: "", confirm: "" });
+      setTimeout(() => { setPwSuccess(false); setShowPwSection(false); }, 4000);
     } catch(e) {
       setPwError(e.message || "Failed to change password. Please try again.");
     }
@@ -1824,7 +1838,7 @@ function PortalProfile({ user, profile, onSave }) {
                   <div style={{ fontSize: 11, color: "#90CAF9" }}>Update your login password</div>
                 </div>
               </div>
-              <button onClick={() => { setShowPwSection(s => !s); setPwError(""); setPwSuccess(false); setPwForm({ newPw: "", confirm: "" }); }}
+              <button onClick={() => { setShowPwSection(s => !s); setPwError(""); setPwSuccess(false); setPwForm({ current: "", newPw: "", confirm: "" }); }}
                 style={{ fontSize: 12, padding: "6px 14px", background: showPwSection ? "#FEF2F2" : "#F0F7FF", border: `1px solid ${showPwSection ? "#FECACA" : "#BFDBFE"}`, borderRadius: 8, cursor: "pointer", color: showPwSection ? "#DC2626" : "#1565C0", fontWeight: 600 }}>
                 {showPwSection ? "✕ Cancel" : "Change"}
               </button>
@@ -1844,6 +1858,12 @@ function PortalProfile({ user, profile, onSave }) {
                     <span>⚠️</span> {pwError}
                   </div>
                 )}
+
+                {/* Current Password */}
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5, display: "block" }}>Current Password</label>
+                <input type="password" placeholder="Enter your current password" value={pwForm.current}
+                  onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))}
+                  style={{ marginBottom: 14 }} />
 
                 {/* New Password */}
                 <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5, display: "block" }}>New Password</label>
@@ -1875,8 +1895,8 @@ function PortalProfile({ user, profile, onSave }) {
                   </div>
                 )}
 
-                <button onClick={handlePasswordChange} disabled={pwLoading || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm}
-                  style={{ width: "100%", padding: "11px 0", background: pwForm.newPw.length >= 6 && pwForm.newPw === pwForm.confirm ? "#7C3AED" : "#E3F2FD", color: pwForm.newPw.length >= 6 && pwForm.newPw === pwForm.confirm ? "white" : "#90CAF9", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: pwForm.newPw.length >= 6 && pwForm.newPw === pwForm.confirm ? "pointer" : "not-allowed", transition: "all 0.2s", opacity: pwLoading ? 0.7 : 1 }}>
+                <button onClick={handlePasswordChange} disabled={pwLoading || !pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm}
+                  style={{ width: "100%", padding: "11px 0", background: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#E3F2FD" : "#7C3AED", color: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#90CAF9" : "white", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "not-allowed" : "pointer", transition: "all 0.2s", opacity: pwLoading ? 0.7 : 1 }}>
                   {pwLoading ? "Updating..." : "🔒 Update Password"}
                 </button>
               </div>
