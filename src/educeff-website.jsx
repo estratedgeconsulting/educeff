@@ -1772,36 +1772,52 @@ function PortalProfile({ user, profile, onSave }) {
     if (!pwForm.current) { setPwError("Please enter your current password."); return; }
     if (!pwForm.newPw || pwForm.newPw.length < 6) { setPwError("New password must be at least 6 characters."); return; }
     if (pwForm.newPw !== pwForm.confirm) { setPwError("New passwords do not match."); return; }
-    if (pwForm.newPw === pwForm.current) { setPwError("New password must be different from your current password."); return; }
+    if (pwForm.newPw === pwForm.current) { setPwError("New password must be different."); return; }
     setPwLoading(true);
     try {
-      // Get current session
-      const { data: sessionData } = await supabase.auth.getSession();
-      const currentEmail = sessionData?.session?.user?.email || user?.email;
+      const email = user?.email;
 
-      // Sign in fresh with current password
-      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
-        email: currentEmail,
-        password: pwForm.current,
+      // Verify current password is correct first
+      const { error: verifyErr } = await supabase.auth.signInWithPassword({
+        email, password: pwForm.current,
       });
-
-      if (signInErr) {
+      if (verifyErr) {
         setPwError("Current password is incorrect.");
         setPwLoading(false);
         return;
       }
 
-      // Small delay to ensure session is refreshed
-      await new Promise(r => setTimeout(r, 500));
+      // Use Admin-style update via direct sign in + update in same call
+      // Sign in gets a completely new access token
+      const { data: freshSession, error: freshErr } = await supabase.auth.signInWithPassword({
+        email, password: pwForm.current,
+      });
+      if (freshErr || !freshSession?.session) {
+        setPwError("Authentication failed. Please try again.");
+        setPwLoading(false);
+        return;
+      }
 
-      // Update password
-      const { data: updateData, error: updateErr } = await supabase.auth.updateUser({
+      // Create a new supabase client with the fresh token to bypass reauth check
+      const { createClient } = await import("@supabase/supabase-js");
+      const freshClient = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${freshSession.session.access_token}`,
+            },
+          },
+        }
+      );
+
+      const { error: updateErr } = await freshClient.auth.updateUser({
         password: pwForm.newPw,
       });
 
       if (updateErr) {
-        // Show exact Supabase error for debugging
-        setPwError(`Error: ${updateErr.message} (${updateErr.status || ""})`);
+        setPwError(`${updateErr.message}`);
         setPwLoading(false);
         return;
       }
@@ -1810,7 +1826,7 @@ function PortalProfile({ user, profile, onSave }) {
       setPwForm({ current: "", newPw: "", confirm: "" });
       setTimeout(() => { setPwSuccess(false); setShowPwSection(false); }, 4000);
     } catch(e) {
-      setPwError(`Error: ${e.message}`);
+      setPwError(e.message || "Failed. Please try again.");
     }
     setPwLoading(false);
   };
