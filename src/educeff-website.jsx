@@ -1775,26 +1775,42 @@ function PortalProfile({ user, profile, onSave }) {
     if (pwForm.newPw === pwForm.current) { setPwError("New password must be different from your current password."); return; }
     setPwLoading(true);
     try {
-      // Step 1: Re-authenticate to get a fresh session
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: user.email,
+      // Get current session
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentEmail = sessionData?.session?.user?.email || user?.email;
+
+      // Sign in fresh with current password
+      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+        email: currentEmail,
         password: pwForm.current,
       });
+
       if (signInErr) {
-        setPwError("Current password is incorrect. Please try again.");
+        setPwError("Current password is incorrect.");
         setPwLoading(false);
         return;
       }
-      // Step 2: Now update to new password with fresh session
-      const { error: updateErr } = await supabase.auth.updateUser({
+
+      // Small delay to ensure session is refreshed
+      await new Promise(r => setTimeout(r, 500));
+
+      // Update password
+      const { data: updateData, error: updateErr } = await supabase.auth.updateUser({
         password: pwForm.newPw,
       });
-      if (updateErr) throw updateErr;
+
+      if (updateErr) {
+        // Show exact Supabase error for debugging
+        setPwError(`Error: ${updateErr.message} (${updateErr.status || ""})`);
+        setPwLoading(false);
+        return;
+      }
+
       setPwSuccess(true);
       setPwForm({ current: "", newPw: "", confirm: "" });
       setTimeout(() => { setPwSuccess(false); setShowPwSection(false); }, 4000);
     } catch(e) {
-      setPwError(e.message || "Failed to change password. Please try again.");
+      setPwError(`Error: ${e.message}`);
     }
     setPwLoading(false);
   };
