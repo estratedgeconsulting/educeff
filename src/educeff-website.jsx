@@ -1746,6 +1746,13 @@ function PortalProfile({ user, profile, onSave }) {
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // Password change state
+  const [pwForm, setPwForm] = useState({ current: "", newPw: "", confirm: "" });
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState("");
+  const [pwSuccess, setPwSuccess] = useState(false);
+  const [showPwSection, setShowPwSection] = useState(false);
+
   useEffect(() => { if (profile) setForm(f => ({ ...f, ...profile })); }, [profile]);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -1760,6 +1767,28 @@ function PortalProfile({ user, profile, onSave }) {
     setLoading(false);
   };
 
+  const handlePasswordChange = async () => {
+    setPwError(""); setPwSuccess(false);
+    if (!pwForm.newPw || pwForm.newPw.length < 6) { setPwError("New password must be at least 6 characters."); return; }
+    if (pwForm.newPw !== pwForm.confirm) { setPwError("Passwords do not match."); return; }
+    if (pwForm.newPw === pwForm.current) { setPwError("New password must be different from current password."); return; }
+    setPwLoading(true);
+    try {
+      // Re-authenticate with current password first
+      const { error: signInErr } = await supabase.auth.signInWithPassword({ email: user.email, password: pwForm.current });
+      if (signInErr) { setPwError("Current password is incorrect."); setPwLoading(false); return; }
+      // Update to new password
+      const { error: updateErr } = await supabase.auth.updateUser({ password: pwForm.newPw });
+      if (updateErr) throw updateErr;
+      setPwSuccess(true);
+      setPwForm({ current: "", newPw: "", confirm: "" });
+      setTimeout(() => { setPwSuccess(false); setShowPwSection(false); }, 4000);
+    } catch(e) {
+      setPwError(e.message || "Failed to change password. Please try again.");
+    }
+    setPwLoading(false);
+  };
+
   const initials = `${form.first_name?.[0] || ""}${form.last_name?.[0] || ""}` || "ST";
 
   return (
@@ -1767,13 +1796,73 @@ function PortalProfile({ user, profile, onSave }) {
       <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 28 }}>Profile Management</h1>
       {saved && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#065F46" }}>✅ Profile saved successfully!</div>}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
-        <div className="card" style={{ textAlign: "center", padding: 28 }}>
-          <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#E3F2FD", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 22, margin: "0 auto 14px" }}>{initials}</div>
-          <div style={{ fontWeight: 600, fontSize: 16, color: "#64B5F6" }}>{form.first_name} {form.last_name}</div>
-          <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>{user?.email}</div>
-          <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 20 }}>{form.course_interest || "Student"}</div>
-          <span className="badge badge-success">Profile Active</span>
+        {/* Left Card - Avatar + Security */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="card" style={{ textAlign: "center", padding: 28 }}>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#E3F2FD", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 22, margin: "0 auto 14px" }}>{initials}</div>
+            <div style={{ fontWeight: 600, fontSize: 16, color: "#64B5F6" }}>{form.first_name} {form.last_name}</div>
+            <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>{user?.email}</div>
+            <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 20 }}>{form.course_interest || "Student"}</div>
+            <span className="badge badge-success">Profile Active</span>
+          </div>
+
+          {/* Password Change Card */}
+          <div className="card" style={{ padding: 22 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: showPwSection ? 16 : 0 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E" }}>🔒 Change Password</div>
+                <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>Keep your account secure</div>
+              </div>
+              <button onClick={() => { setShowPwSection(s => !s); setPwError(""); setPwSuccess(false); setPwForm({ current: "", newPw: "", confirm: "" }); }}
+                style={{ fontSize: 11, padding: "5px 12px", background: showPwSection ? "#FEF2F2" : "#EFF6FF", border: `1px solid ${showPwSection ? "#FECACA" : "#BFDBFE"}`, borderRadius: 6, cursor: "pointer", color: showPwSection ? "#DC2626" : "#1565C0", fontWeight: 600 }}>
+                {showPwSection ? "Cancel" : "Change"}
+              </button>
+            </div>
+
+            {showPwSection && (
+              <div>
+                {pwSuccess && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 14px", marginBottom: 12, fontSize: 13, color: "#065F46" }}>✅ Password changed successfully!</div>}
+                {pwError && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 12, fontSize: 13, color: "#DC2626" }}>{pwError}</div>}
+
+                <label>Current Password</label>
+                <input type="password" placeholder="Enter current password" value={pwForm.current} onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))} />
+
+                <label>New Password</label>
+                <input type="password" placeholder="Min 6 characters" value={pwForm.newPw} onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))} />
+
+                {/* Password strength indicator */}
+                {pwForm.newPw && (
+                  <div style={{ marginTop: -10, marginBottom: 12 }}>
+                    <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+                      {[1,2,3,4].map(i => (
+                        <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: pwForm.newPw.length >= i * 3 ? (i <= 1 ? "#DC2626" : i <= 2 ? "#D97706" : i <= 3 ? "#64B5F6" : "#059669") : "#E3F2FD" }} />
+                      ))}
+                    </div>
+                    <div style={{ fontSize: 10, color: pwForm.newPw.length < 6 ? "#DC2626" : pwForm.newPw.length < 8 ? "#D97706" : pwForm.newPw.length < 10 ? "#64B5F6" : "#059669" }}>
+                      {pwForm.newPw.length < 6 ? "Too short" : pwForm.newPw.length < 8 ? "Weak" : pwForm.newPw.length < 10 ? "Good" : "Strong"}
+                    </div>
+                  </div>
+                )}
+
+                <label>Confirm New Password</label>
+                <input type="password" placeholder="Re-enter new password" value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} />
+
+                {pwForm.confirm && pwForm.newPw !== pwForm.confirm && (
+                  <div style={{ fontSize: 11, color: "#DC2626", marginTop: -10, marginBottom: 10 }}>⚠️ Passwords do not match</div>
+                )}
+                {pwForm.confirm && pwForm.newPw === pwForm.confirm && pwForm.confirm.length > 0 && (
+                  <div style={{ fontSize: 11, color: "#059669", marginTop: -10, marginBottom: 10 }}>✅ Passwords match</div>
+                )}
+
+                <button className="btn-primary" style={{ width: "100%", padding: 11, fontSize: 13, opacity: pwLoading ? 0.7 : 1 }} onClick={handlePasswordChange} disabled={pwLoading}>
+                  {pwLoading ? "Changing..." : "Update Password →"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Right Card - Profile Form */}
         <div className="card" style={{ padding: 28 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20, color: "#64B5F6" }}>Personal Information</h3>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0 16px" }}>
@@ -4397,12 +4486,95 @@ function CollegesPage() {
 
 // ─── MAIN APP ────────────────────────────────────────────────────────────────
 
+// ─── RESET PASSWORD PAGE ─────────────────────────────────────────────────────
+function ResetPasswordPage({ onDone }) {
+  const [newPw, setNewPw] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleReset = async () => {
+    setError("");
+    if (!newPw || newPw.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (newPw !== confirm) { setError("Passwords do not match."); return; }
+    setLoading(true);
+    try {
+      const { error: err } = await supabase.auth.updateUser({ password: newPw });
+      if (err) throw err;
+      setSuccess(true);
+      setTimeout(() => onDone(), 3000);
+    } catch (e) {
+      setError(e.message || "Failed to reset password. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #64B5F6 0%, #7C3AED 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div style={{ background: "white", borderRadius: 16, padding: 40, width: "100%", maxWidth: 420, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ width: 52, height: 52, background: "linear-gradient(135deg, #64B5F6, #7C3AED)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 22, fontWeight: 800, color: "white", fontFamily: "Sora" }}>E</div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", margin: 0, fontFamily: "Sora" }}>Reset Your Password</h2>
+          <p style={{ fontSize: 13, color: "#6B7280", marginTop: 6 }}>Enter your new password below</p>
+        </div>
+
+        {success ? (
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>✅</div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Password Reset!</h3>
+            <p style={{ fontSize: 14, color: "#6B7280" }}>Your password has been updated successfully. Redirecting you to the homepage...</p>
+          </div>
+        ) : (
+          <>
+            {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#DC2626" }}>{error}</div>}
+
+            <label>New Password</label>
+            <input type="password" placeholder="Minimum 6 characters" value={newPw} onChange={e => setNewPw(e.target.value)} />
+
+            {/* Strength bar */}
+            {newPw && (
+              <div style={{ marginTop: -10, marginBottom: 14 }}>
+                <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+                  {[1,2,3,4].map(i => (
+                    <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: newPw.length >= i * 3 ? (i <= 1 ? "#DC2626" : i <= 2 ? "#D97706" : i <= 3 ? "#64B5F6" : "#059669") : "#E3F2FD" }} />
+                  ))}
+                </div>
+                <div style={{ fontSize: 11, color: newPw.length < 6 ? "#DC2626" : newPw.length < 8 ? "#D97706" : newPw.length < 10 ? "#64B5F6" : "#059669" }}>
+                  {newPw.length < 6 ? "Too short" : newPw.length < 8 ? "Weak" : newPw.length < 10 ? "Good" : "Strong"}
+                </div>
+              </div>
+            )}
+
+            <label>Confirm New Password</label>
+            <input type="password" placeholder="Re-enter new password" value={confirm} onChange={e => setConfirm(e.target.value)} />
+
+            {confirm && newPw !== confirm && <div style={{ fontSize: 11, color: "#DC2626", marginTop: -10, marginBottom: 10 }}>⚠️ Passwords do not match</div>}
+            {confirm && newPw === confirm && confirm.length > 0 && <div style={{ fontSize: 11, color: "#059669", marginTop: -10, marginBottom: 10 }}>✅ Passwords match</div>}
+
+            <button className="btn-primary" style={{ width: "100%", padding: 14, marginTop: 4, fontSize: 15, opacity: loading ? 0.7 : 1 }}
+              onClick={handleReset} disabled={loading}>
+              {loading ? "Resetting..." : "Set New Password →"}
+            </button>
+
+            <button onClick={onDone} style={{ width: "100%", padding: 10, marginTop: 10, background: "none", border: "none", color: "#90CAF9", fontSize: 13, cursor: "pointer" }}>
+              Cancel — Back to Home
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [page, setPage] = useState("Home");
   const [modal, setModal] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
+  const [isRecovery, setIsRecovery] = useState(false); // password reset mode
 
   // Restore session on page load
   useEffect(() => {
@@ -4410,7 +4582,14 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) { setUser(session.user); setIsLoggedIn(true); }
     }).catch(e => console.warn("Session check failed:", e));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      // Detect password recovery event from email link
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecovery(true);
+        setUser(session?.user || null);
+        return;
+      }
       if (session?.user) { setUser(session.user); setIsLoggedIn(true); }
       else { setUser(null); setIsLoggedIn(false); setIsAdmin(false); }
     });
@@ -4433,6 +4612,9 @@ export default function App() {
 
   if (page === "Portal") return <StudentPortal setPage={setPage} user={user} />;
   if (page === "Admin") return <AdminDashboard setPage={setPage} />;
+
+  // Show reset password page when student clicks email link
+  if (isRecovery) return <ResetPasswordPage onDone={() => { setIsRecovery(false); setPage("Home"); }} />;
 
   return (
     <div>
