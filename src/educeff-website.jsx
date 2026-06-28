@@ -2244,66 +2244,326 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
   );
 }
 
+// ─── COLLEGE DATABASE (from CollegesPage) ────────────────────────────────────
+const ALL_COLLEGES = [
+  { name: "COEP Technological University", city: "Pune", stream: "Engineering", ranking: "#1 Govt. Engineering, Maharashtra", affiliation: "Autonomous", type: "Government", exams: ["JEE Main", "MHT-CET"] },
+  { name: "VJTI Mumbai", city: "Mumbai", stream: "Engineering", ranking: "Top 10 Govt. Engineering, India", affiliation: "University of Mumbai", type: "Government", exams: ["JEE Main", "MHT-CET"] },
+  { name: "MIT College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top 20 Private Engineering", affiliation: "Savitribai Phule Pune Univ.", type: "Private", exams: ["MHT-CET", "JEE Main"] },
+  { name: "Pune Institute of Computer Technology", city: "Pune", stream: "Engineering", ranking: "Top Private CS College, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private", exams: ["MHT-CET"] },
+  { name: "Walchand College of Engineering", city: "Sangli", stream: "Engineering", ranking: "Top 5 Govt. Engineering, Maharashtra", affiliation: "Shivaji University", type: "Government", exams: ["MHT-CET", "JEE Main"] },
+  { name: "Vishwakarma Institute of Technology", city: "Pune", stream: "Engineering", ranking: "Top Private Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private", exams: ["MHT-CET"] },
+  { name: "Cummins College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top Women Engineering College", affiliation: "Savitribai Phule Pune Univ.", type: "Private", exams: ["MHT-CET"] },
+  { name: "Symbiosis Institute of Technology", city: "Pune", stream: "Engineering", ranking: "Top Private Tech, Pune", affiliation: "SIU", type: "Private", exams: ["JEE Main", "MHT-CET"] },
+  { name: "IIT Bombay", city: "Mumbai", stream: "Engineering", ranking: "#3 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government", exams: ["JEE Advanced"] },
+  { name: "IIT Delhi", city: "Delhi", stream: "Engineering", ranking: "#2 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government", exams: ["JEE Advanced"] },
+  { name: "NIT Nagpur (VNIT)", city: "Nagpur", stream: "Engineering", ranking: "Top 15 NIT, India", affiliation: "Autonomous (NIT)", type: "Government", exams: ["JEE Main"] },
+  { name: "BITS Pilani", city: "Rajasthan", stream: "Engineering", ranking: "Top 5 Private Engineering", affiliation: "Autonomous (BITS)", type: "Private", exams: ["BITSAT"] },
+  { name: "VIT Vellore", city: "Vellore", stream: "Engineering", ranking: "Top 5 Private Engineering, India", affiliation: "VIT University", type: "Private", exams: ["VITEEE"] },
+  { name: "BJ Medical College", city: "Pune", stream: "Medical", ranking: "#2 Govt. Medical, Maharashtra", affiliation: "MUHS", type: "Government", exams: ["NEET UG"] },
+  { name: "Grant Medical College", city: "Mumbai", stream: "Medical", ranking: "#1 Govt. Medical, Maharashtra", affiliation: "University of Mumbai", type: "Government", exams: ["NEET UG"] },
+  { name: "Seth GS Medical College", city: "Mumbai", stream: "Medical", ranking: "Top 5 Medical, India", affiliation: "University of Mumbai", type: "Government", exams: ["NEET UG"] },
+  { name: "D.Y. Patil Medical College", city: "Pune", stream: "Medical", ranking: "Top Private Medical, Pune", affiliation: "DPU", type: "Private", exams: ["NEET UG"] },
+  { name: "AIIMS New Delhi", city: "Delhi", stream: "Medical", ranking: "#1 Medical, India (NIRF)", affiliation: "Autonomous (AIIMS)", type: "Government", exams: ["NEET UG"] },
+  { name: "Symbiosis Law School", city: "Pune", stream: "Law", ranking: "Top 5 Law Colleges, India", affiliation: "SIU", type: "Private", exams: ["CLAT", "SLAT"] },
+  { name: "ILS Law College", city: "Pune", stream: "Law", ranking: "Top Govt. Law, Maharashtra", affiliation: "Savitribai Phule Pune Univ.", type: "Government", exams: ["MHCET Law"] },
+  { name: "Government Law College Mumbai", city: "Mumbai", stream: "Law", ranking: "#1 Govt. Law, Maharashtra", affiliation: "University of Mumbai", type: "Government", exams: ["MHCET Law"] },
+  { name: "NLSIU Bangalore", city: "Bangalore", stream: "Law", ranking: "#1 Law, India (NIRF)", affiliation: "Autonomous (NLU)", type: "Government", exams: ["CLAT"] },
+  { name: "IIM Nagpur", city: "Nagpur", stream: "Management", ranking: "IIM — CAT cutoff 90+", affiliation: "Autonomous (IIM)", type: "Government", exams: ["CAT"] },
+  { name: "Symbiosis Institute of Business Management", city: "Pune", stream: "Management", ranking: "Top 10 MBA, India", affiliation: "SIU", type: "Private", exams: ["SNAP"] },
+  { name: "JBIMS Mumbai", city: "Mumbai", stream: "Management", ranking: "Top 5 MBA, Maharashtra", affiliation: "University of Mumbai", type: "Government", exams: ["MAH-MBA-CET"] },
+  { name: "IIM Ahmedabad", city: "Ahmedabad", stream: "Management", ranking: "#1 Management, India", affiliation: "Autonomous (IIM)", type: "Government", exams: ["CAT"] },
+  { name: "IIM Bangalore", city: "Bangalore", stream: "Management", ranking: "#2 Management, India", affiliation: "Autonomous (IIM)", type: "Government", exams: ["CAT"] },
+  { name: "SPJIMR Mumbai", city: "Mumbai", stream: "Management", ranking: "Top 5 MBA, India", affiliation: "S.P. Jain Institute", type: "Private", exams: ["CAT", "XAT"] },
+  { name: "Sir JJ College of Architecture", city: "Mumbai", stream: "Architecture", ranking: "#1 Architecture, Maharashtra", affiliation: "University of Mumbai", type: "Government", exams: ["NATA", "JEE Main Paper 2"] },
+  { name: "CEPT University", city: "Ahmedabad", stream: "Architecture", ranking: "#1 Architecture, India (NIRF)", affiliation: "Autonomous", type: "Private", exams: ["NATA"] },
+  { name: "Fergusson College", city: "Pune", stream: "Science", ranking: "Top Arts & Science, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Autonomous", exams: ["CUET UG"] },
+  { name: "St. Xavier's College", city: "Mumbai", stream: "Science", ranking: "Top Science College, Mumbai", affiliation: "University of Mumbai", type: "Autonomous", exams: ["CUET UG"] },
+  { name: "Shri Ram College of Commerce", city: "Delhi", stream: "Commerce", ranking: "#1 Commerce, India (NIRF)", affiliation: "University of Delhi", type: "Government", exams: ["CUET UG"] },
+  { name: "H.R. College of Commerce", city: "Mumbai", stream: "Commerce", ranking: "Top Commerce, India", affiliation: "University of Mumbai", type: "Autonomous", exams: ["CUET UG"] },
+  { name: "Bombay College of Pharmacy", city: "Mumbai", stream: "Pharmacy", ranking: "#1 Pharmacy, Maharashtra", affiliation: "University of Mumbai", type: "Autonomous", exams: ["MHT-CET PCB", "GPAT"] },
+];
+
 function ApplicationsTab({ user }) {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ college: "", course: "", exam: "" });
+  const [profile, setProfile] = useState(null);
+  const [activeSection, setActiveSection] = useState("suggestions"); // "suggestions" | "applications"
+  const [searchStream, setSearchStream] = useState("All");
+  const [collegeSearch, setCollegeSearch] = useState("");
+  const [applyModal, setApplyModal] = useState(null);
+  const [applying, setApplying] = useState({});
 
   useEffect(() => {
     if (!user) return;
+    // Load applications
     supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => { setApps(data || []); setLoading(false); });
+      .then(({ data }) => { setApps(data || []); setLoading(false); })
+      .catch(() => setLoading(false));
+    // Load profile for smart suggestions
+    supabase.from("students").select("course_interest, entrance_exam, score").eq("user_id", user.id).single()
+      .then(({ data }) => { if (data) setProfile(data); })
+      .catch(() => {});
   }, [user]);
 
-  const handleAdd = async () => {
+  // Smart suggestions based on profile
+  const getSuggestions = () => {
+    const stream = profile?.course_interest || "All";
+    const exam = profile?.entrance_exam || "";
+    const appliedColleges = new Set(apps.map(a => a.college));
+
+    let suggestions = ALL_COLLEGES.filter(c => !appliedColleges.has(c.name));
+
+    // Filter by stream if profile has one
+    if (stream && stream !== "All" && stream !== "Science / Commerce") {
+      const streamMap = {
+        "Engineering": "Engineering",
+        "Medical": "Medical",
+        "Law": "Law",
+        "Management": "Management",
+        "Architecture": "Architecture",
+        "Science / Commerce": null,
+      };
+      const mappedStream = streamMap[stream];
+      if (mappedStream) suggestions = suggestions.filter(c => c.stream === mappedStream);
+    }
+
+    // Prioritize colleges matching their exam
+    if (exam) {
+      suggestions.sort((a, b) => {
+        const aMatch = a.exams.some(e => e.toLowerCase().includes(exam.toLowerCase())) ? -1 : 1;
+        const bMatch = b.exams.some(e => e.toLowerCase().includes(exam.toLowerCase())) ? -1 : 1;
+        return aMatch - bMatch;
+      });
+    }
+
+    return suggestions;
+  };
+
+  const suggestions = getSuggestions();
+
+  const filteredSuggestions = suggestions.filter(c => {
+    const matchStream = searchStream === "All" || c.stream === searchStream;
+    const matchSearch = !collegeSearch || c.name.toLowerCase().includes(collegeSearch.toLowerCase()) || c.city.toLowerCase().includes(collegeSearch.toLowerCase());
+    return matchStream && matchSearch;
+  });
+
+  const handleQuickApply = async (college) => {
+    setApplying(p => ({ ...p, [college.name]: true }));
     try {
-      const { data, error } = await supabase.from("applications").insert({ user_id: user.id, college: form.college, course: form.course, exam: form.exam, status: "pending", created_at: new Date().toISOString() }).select().single();
+      const course = college.stream === "Engineering" ? "B.E. / B.Tech" :
+        college.stream === "Medical" ? "MBBS" :
+        college.stream === "Law" ? "LLB / BA LLB" :
+        college.stream === "Management" ? "MBA" :
+        college.stream === "Architecture" ? "B.Arch" : college.stream;
+      const exam = college.exams[0] || profile?.entrance_exam || "";
+      const { data, error } = await supabase.from("applications").insert({
+        user_id: user.id,
+        college: college.name,
+        course,
+        exam,
+        status: "pending",
+        created_at: new Date().toISOString(),
+      }).select().single();
+      if (!error && data) {
+        setApps(a => [data, ...a]);
+        setApplyModal({ college, success: true });
+      }
+    } catch(e) { console.warn(e); }
+    setApplying(p => ({ ...p, [college.name]: false }));
+  };
+
+  const isApplied = (collegeName) => apps.some(a => a.college === collegeName);
+
+  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
+
+  const handleAdd = async () => {
+    if (!form.college.trim() || !form.course.trim()) return;
+    try {
+      const { data, error } = await supabase.from("applications").insert({
+        user_id: user.id, college: form.college, course: form.course,
+        exam: form.exam, status: "pending", created_at: new Date().toISOString()
+      }).select().single();
       if (!error && data) { setApps(a => [data, ...a]); setShowForm(false); setForm({ college: "", course: "", exam: "" }); }
-      else if (error) console.warn("Insert app error:", error.message);
-    } catch(e) { console.warn("App insert failed:", e); }
+    } catch(e) { console.warn(e); }
   };
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6" }}>My Applications</h1>
-        <button className="btn-primary" onClick={() => setShowForm(s => !s)}>+ New Application</button>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", fontFamily: "Sora" }}>Applications</h1>
+          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} application{apps.length !== 1 ? "s" : ""} submitted</div>
+        </div>
+        <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => setShowForm(s => !s)}>+ Custom Apply</button>
       </div>
+
+      {/* Tab Switch */}
+      <div style={{ display: "flex", gap: 0, background: "#F0F7FF", borderRadius: 10, padding: 4, marginBottom: 20, width: "fit-content" }}>
+        {[{ id: "suggestions", label: "🎯 College Suggestions", count: suggestions.length }, { id: "applications", label: "📋 My Applications", count: apps.length }].map(t => (
+          <button key={t.id} onClick={() => setActiveSection(t.id)}
+            style={{ padding: "8px 16px", border: "none", borderRadius: 8, background: activeSection === t.id ? "white" : "transparent", color: activeSection === t.id ? "#1565C0" : "#6D28D9", fontWeight: activeSection === t.id ? 700 : 500, fontSize: 13, cursor: "pointer", boxShadow: activeSection === t.id ? "0 2px 8px rgba(0,0,0,0.08)" : "none", transition: "all 0.2s" }}>
+            {t.label} <span style={{ background: activeSection === t.id ? "#EFF6FF" : "transparent", color: "#64B5F6", borderRadius: 10, padding: "1px 6px", fontSize: 11, fontWeight: 700 }}>{t.count}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Custom Application Form */}
       {showForm && (
-        <div className="card" style={{ marginBottom: 20, padding: 20 }}>
-          <h3 style={{ fontWeight: 600, fontSize: 15, marginBottom: 14, color: "#64B5F6" }}>Add New Application</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 16px" }}>
-            <div><label>College Name</label><input placeholder="e.g. COEP Pune" value={form.college} onChange={e => setForm(f => ({ ...f, college: e.target.value }))} /></div>
-            <div><label>Course</label><input placeholder="e.g. B.E. Computer" value={form.course} onChange={e => setForm(f => ({ ...f, course: e.target.value }))} /></div>
+        <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 20, marginBottom: 20 }}>
+          <h3 style={{ fontWeight: 700, fontSize: 14, marginBottom: 14, color: "#1A1A2E" }}>Add Custom Application</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0 16px" }}>
+            <div><label>College Name *</label><input placeholder="e.g. COEP Pune" value={form.college} onChange={e => setForm(f => ({ ...f, college: e.target.value }))} /></div>
+            <div><label>Course *</label><input placeholder="e.g. B.E. Computer" value={form.course} onChange={e => setForm(f => ({ ...f, course: e.target.value }))} /></div>
             <div><label>Entrance Exam</label><input placeholder="e.g. JEE Main" value={form.exam} onChange={e => setForm(f => ({ ...f, exam: e.target.value }))} /></div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button className="btn-primary" onClick={handleAdd}>Submit Application</button>
-            <button className="btn-navy" style={{ background: "transparent", color: "#64B5F6", border: "1px solid #64B5F6" }} onClick={() => setShowForm(false)}>Cancel</button>
+            <button className="btn-primary" style={{ fontSize: 13 }} onClick={handleAdd}>Submit Application</button>
+            <button style={{ fontSize: 13, padding: "10px 20px", background: "transparent", color: "#64B5F6", border: "1px solid #BFDBFE", borderRadius: 8, cursor: "pointer" }} onClick={() => setShowForm(false)}>Cancel</button>
           </div>
         </div>
       )}
-      <div style={{ background: "#FFFFFF", borderRadius: 8, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-        <table>
-          <thead><tr><th>Application ID</th><th>College</th><th>Course</th><th>Exam</th><th>Applied On</th><th>Status</th></tr></thead>
-          <tbody>
-            {loading ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#6D28D9" }}>Loading...</td></tr>
-            : apps.length === 0 ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#6D28D9" }}>No applications yet.</td></tr>
-            : apps.map(a => (
-              <tr key={a.id}>
-                <td style={{ fontWeight: 600, color: "#64B5F6", fontSize: 12 }}>APP-{String(a.id).slice(-4).padStart(4,"0")}</td>
-                <td>{a.college}</td><td>{a.course}</td><td>{a.exam}</td>
-                <td style={{ color: "#6D28D9" }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</td>
-                <td><span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`}>{a.status?.replace("_"," ")}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+      {/* ── SUGGESTIONS SECTION ── */}
+      {activeSection === "suggestions" && (
+        <div>
+          {/* Profile match banner */}
+          {profile?.course_interest && (
+            <div style={{ background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE", borderRadius: 12, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ fontSize: 24 }}>🎯</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>Personalized for you</div>
+                <div style={{ fontSize: 12, color: "#6B7280" }}>
+                  Showing colleges for <strong>{profile.course_interest}</strong>
+                  {profile.entrance_exam ? ` · ${profile.entrance_exam}` : ""}
+                  {profile.score ? ` · ${profile.score}` : ""}
+                </div>
+              </div>
+              <div style={{ marginLeft: "auto", fontSize: 12, color: "#64B5F6", fontWeight: 600 }}>{filteredSuggestions.length} colleges</div>
+            </div>
+          )}
+
+          {/* Filters */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+            <input value={collegeSearch} onChange={e => setCollegeSearch(e.target.value)} placeholder="🔍 Search college or city..." style={{ flex: 1, minWidth: 180, marginBottom: 0, fontSize: 13 }} />
+            <select value={searchStream} onChange={e => setSearchStream(e.target.value)} style={{ width: 160, marginBottom: 0, fontSize: 13 }}>
+              {streams.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+
+          {/* College Cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
+            {filteredSuggestions.length === 0 ? (
+              <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "48px 0" }}>
+                <div style={{ fontSize: 40, marginBottom: 10 }}>🔍</div>
+                <div style={{ fontSize: 14, color: "#6B7280" }}>No colleges found for your search</div>
+              </div>
+            ) : filteredSuggestions.map(c => {
+              const applied = isApplied(c.name);
+              const isApplying = applying[c.name];
+              const typeColor = c.type === "Government" ? "#059669" : c.type === "Autonomous" ? "#7C3AED" : "#1565C0";
+              const typeBg = c.type === "Government" ? "#ECFDF5" : c.type === "Autonomous" ? "#F5F3FF" : "#EFF6FF";
+              return (
+                <div key={c.name} style={{ background: "white", borderRadius: 14, border: `1px solid ${applied ? "#A7F3D0" : "#E3F2FD"}`, padding: 18, transition: "all 0.2s", position: "relative", overflow: "hidden" }}>
+                  {applied && <div style={{ position: "absolute", top: 0, right: 0, background: "#059669", color: "white", fontSize: 9, fontWeight: 700, padding: "3px 10px", borderBottomLeftRadius: 8 }}>✓ APPLIED</div>}
+
+                  {/* Header */}
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 16, flexShrink: 0 }}>{c.name[0]}</div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E", lineHeight: 1.3 }}>{c.name}</div>
+                      <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>📍 {c.city}</div>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+                    <span style={{ background: typeBg, color: typeColor, fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{c.type}</span>
+                    <span style={{ background: "#EFF6FF", color: "#1565C0", fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{c.stream}</span>
+                  </div>
+
+                  {/* Ranking */}
+                  <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 8 }}>🏆 {c.ranking}</div>
+
+                  {/* Affiliated */}
+                  <div style={{ fontSize: 10, color: "#90CAF9", marginBottom: 10 }}>Affiliated: {c.affiliation}</div>
+
+                  {/* Exams */}
+                  <div style={{ display: "flex", gap: 4, marginBottom: 14, flexWrap: "wrap" }}>
+                    {c.exams.map(e => (
+                      <span key={e} style={{ background: profile?.entrance_exam && e.includes(profile.entrance_exam.split(" ")[0]) ? "#DBEAFE" : "#F8FAFF", color: profile?.entrance_exam && e.includes(profile.entrance_exam.split(" ")[0]) ? "#1D4ED8" : "#90CAF9", fontSize: 10, padding: "2px 8px", borderRadius: 6, border: `1px solid ${profile?.entrance_exam && e.includes(profile.entrance_exam.split(" ")[0]) ? "#BFDBFE" : "#E3F2FD"}`, fontWeight: profile?.entrance_exam && e.includes(profile.entrance_exam.split(" ")[0]) ? 700 : 400 }}>
+                        {e}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Apply Button */}
+                  {applied ? (
+                    <div style={{ background: "#ECFDF5", borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#065F46", fontWeight: 600, textAlign: "center" }}>✅ Application Submitted</div>
+                  ) : (
+                    <button className="btn-primary" style={{ width: "100%", fontSize: 12, padding: "9px 0", opacity: isApplying ? 0.7 : 1 }}
+                      onClick={() => handleQuickApply(c)} disabled={isApplying}>
+                      {isApplying ? "Applying..." : "⚡ Quick Apply →"}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── MY APPLICATIONS SECTION ── */}
+      {activeSection === "applications" && (
+        <div>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "48px 0" }}><div style={{ fontSize: 32 }}>⏳</div><div style={{ color: "#90CAF9", fontSize: 14, marginTop: 8 }}>Loading...</div></div>
+          ) : apps.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 16, border: "1px solid #E3F2FD" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>📋</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1A2E", marginBottom: 8 }}>No Applications Yet</div>
+              <div style={{ fontSize: 13, color: "#90CAF9", marginBottom: 20 }}>Browse college suggestions and apply with one click</div>
+              <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => setActiveSection("suggestions")}>🎯 Browse Suggestions →</button>
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
+              {apps.map(a => (
+                <div key={a.id} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 18 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 15 }}>{a.college?.[0] || "C"}</div>
+                    <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`} style={{ fontSize: 10 }}>{a.status?.replace("_", " ")}</span>
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", marginBottom: 4 }}>{a.college}</div>
+                  <div style={{ fontSize: 12, color: "#90CAF9", marginBottom: 4 }}>{a.course}</div>
+                  {a.exam && <div style={{ fontSize: 11, color: "#64B5F6", marginBottom: 8 }}>📝 {a.exam}</div>}
+                  <div style={{ fontSize: 10, color: "#C8E4FA" }}>Applied: {new Date(a.created_at).toLocaleDateString("en-IN")}</div>
+                  <div style={{ fontSize: 10, color: "#C8E4FA", marginTop: 2 }}>ID: APP-{String(a.id).slice(-8).toUpperCase()}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Quick Apply Success Modal */}
+      {applyModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(13,27,75,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }}
+          onClick={() => setApplyModal(null)}>
+          <div style={{ background: "white", borderRadius: 16, padding: 36, maxWidth: 380, width: "100%", textAlign: "center" }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#059669", marginBottom: 8, fontFamily: "Sora" }}>Application Submitted!</h3>
+            <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 6 }}>Your application to <strong>{applyModal.college.name}</strong> has been submitted.</p>
+            <p style={{ fontSize: 13, color: "#90CAF9", marginBottom: 24 }}>Our counselors will contact you to guide you through the next steps.</p>
+            <button className="btn-primary" style={{ width: "100%", padding: 12 }} onClick={() => { setApplyModal(null); setActiveSection("applications"); }}>View My Applications →</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 function PaymentsTab({ user, profile }) {
   const [history, setHistory] = useState([]);
