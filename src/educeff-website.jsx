@@ -515,6 +515,25 @@ const css = `
 `;
 
 
+
+// ─── SITE STATS — Single source of truth (P0-1) ─────────────────────────────
+// Update these values with real, verified numbers before publishing.
+const SITE_STATS = {
+  studentsGuided:    "{{OWNER_INPUT: real_student_count}}",   // e.g. "5,200+"
+  partnerColleges:   "116",        // equals actual college records rendered
+  yearsExcellence:  "{{OWNER_INPUT: real_years_of_excellence}}", // e.g. "8"
+  counselors:        "14",
+  successRateLabel:  "{{OWNER_INPUT: success_rate_basis}}",   // e.g. "94%" or remove
+};
+
+// ─── LEGAL CREDENTIALS — Verified before publishing (P0-4) ──────────────────
+// Replace placeholders with real, current, verified values.
+const LEGAL = {
+  cin:  "{{OWNER_INPUT: real_CIN}}",            // e.g. "U80900MH2017PTC123456"
+  iso:  "{{OWNER_INPUT: iso_cert_number}}",     // leave "" if not certified
+  gstin: "{{OWNER_INPUT: gstin}}",
+};
+
 // ─── INPUT SANITIZER ─────────────────────────────────────────────────────────
 const sanitize = (str) => {
   if (!str) return str;
@@ -547,10 +566,10 @@ const SERVICES = [
 ];
 
 const STATS = [
-  { num: "12,400+", label: "Students Guided" },
-  { num: "98%", label: "Admission Success Rate" },
-  { num: "340+", label: "Partner Colleges" },
-  { num: "8", label: "Years of Excellence" },
+  { num: SITE_STATS.studentsGuided, label: "Students Guided" },
+  { num: SITE_STATS.partnerColleges, label: "Partner Colleges" },
+  { num: SITE_STATS.yearsExcellence, label: "Years of Excellence" },
+  { num: SITE_STATS.counselors, label: "Expert Counselors" },
 ];
 
 const TESTIMONIALS = [
@@ -671,12 +690,12 @@ function Hero({ setPage, setModal }) {
             Your One-Stop Solution for College Admissions & Counseling
           </h1>
           <p style={{ fontSize: 17, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, marginBottom: 36, maxWidth: 520 }}>
-            Expert guidance for exam forms, educational counseling, and college admissions — from JEE to NEET to MBA, we've helped 12,000+ students achieve their academic dreams.
+            Expert guidance for exam forms, educational counseling, and college admissions — from JEE to NEET to MBA, we help thousands of students achieve their academic dreams each year.
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button className="btn-primary" onClick={() => setModal("register")}>Register Now — It's Free</button>
-            <button className="btn-outline" onClick={() => setModal("counseling")}>Book Free Counseling</button>
-            <button className="btn-outline" onClick={() => setModal("login")}>Student Login</button>
+            <button className="btn-primary" style={{ padding: "14px 32px", fontSize: 16, fontWeight: 700 }} onClick={() => setModal("counseling")}>Book Free Counseling →</button>
+            <button className="btn-outline" style={{ fontSize: 14 }} onClick={() => setModal("register")}>Register Free</button>
+            <button style={{ background: "none", border: "none", color: "rgba(255,255,255,0.65)", fontSize: 13, cursor: "pointer", textDecoration: "underline", padding: "8px 4px" }} onClick={() => setModal("login")}>Student Login</button>
           </div>
           <div style={{ display: "flex", gap: 24, marginTop: 48, flexWrap: "wrap" }}>
             {STATS.map(s => (
@@ -727,7 +746,7 @@ function WhyUs() {
     { icon: "🔒", title: "Secure Document Handling", desc: "Bank-grade encryption and secure cloud storage for all your sensitive documents." },
     { icon: "📱", title: "Real-Time Tracking", desc: "Monitor every application, document, and counseling session through your personalized portal." },
     { icon: "💬", title: "Dedicated Support", desc: "Assigned relationship manager for every student throughout their admission journey." },
-    { icon: "✅", title: "Verified Success Record", desc: "98% admission success rate with placements across IITs, NITs, and top private colleges." },
+    { icon: "✅", title: "Proven Track Record", desc: "Thousands of students successfully placed in top engineering, medical, law, and management colleges across India." },
   ];
   return (
     <section className="section section-alt">
@@ -781,7 +800,10 @@ function Testimonials() {
       <div className="container">
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <div className="tag">Student Stories</div>
-          <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Real Results, Real Students</h2>
+          <h2 className="font-display" style={{ fontSize: "clamp(24px,4vw,38px)", fontWeight: 700, color: "#1A1A2E", letterSpacing: "-0.02em" }}>Student Experiences</h2>
+          <p style={{ fontSize: 13, color: "#90CAF9", marginTop: 8, maxWidth: 500, margin: "8px auto 0" }}>
+            * These are illustrative testimonials representing typical student journeys. Real testimonials with consent will be added as received.
+          </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
           {TESTIMONIALS.map(t => (
@@ -936,7 +958,7 @@ function CTA({ setModal }) {
           Ready to Secure Your Admission?
         </h2>
         <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, marginBottom: 32, maxWidth: 480, margin: "0 auto 32px" }}>
-          Join 12,000+ students who trusted Educeff for their academic journey. Register today and get a free counseling session.
+          Join thousands of students who trusted Educeff for their academic journey. Register today and get a free counseling session.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", padding: "0 16px" }}>
           <button className="btn-primary" style={{ padding: "14px 32px", fontSize: 15 }} onClick={() => setModal("register")}>Register Now — It's Free</button>
@@ -982,7 +1004,7 @@ function Footer({ setPage }) {
         </div>
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 12 }}>© 2025 Educeff. All rights reserved.</span>
-          <span style={{ fontSize: 12 }}>CIN: U80900MH2015PTC123456 | ISO 9001:2015 Certified</span>
+          <span style={{ fontSize: 12 }}>{LEGAL.cin !== "{{OWNER_INPUT: real_CIN}}" ? `CIN: ${LEGAL.cin}` : ""}{LEGAL.iso !== "{{OWNER_INPUT: iso_cert_number}}" && LEGAL.iso ? " | ISO 9001:2015 Certified" : ""}</span>
         </div>
       </div>
     </footer>
@@ -1108,7 +1130,7 @@ function RegisterModal({ onClose }) {
     if (form.dob < minDob) return "Please enter a valid date of birth.";
 
     if (!form.course) return "Please select your course of interest.";
-    if (!form.password || form.password.length < 6) return "Password must be at least 6 characters.";
+    if (!form.password || form.password.length < 8) return "Password must be at least 8 characters.";
     if (!agreed) return "Please agree to the Terms of Service.";
     return null;
   };
@@ -1189,10 +1211,17 @@ function RegisterModal({ onClose }) {
           <option value="">Select your field</option>
           <option>Engineering</option><option>Medical</option><option>Law</option><option>Management</option><option>Architecture</option><option>Science / Commerce</option>
         </select>
-        <label>Password</label><input name="password" type="password" placeholder="Create a strong password (min 6 chars)" value={form.password} onChange={handleChange} />
+        <label>Password</label><input name="password" type="password" placeholder="Min 8 characters, mix letters &amp; numbers" value={form.password} onChange={handleChange} />
         <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 16 }}>
           <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width: "auto", marginTop: 3, marginBottom: 0 }} />
-          <span style={{ fontSize: 12, color: "#6D28D9" }}>I agree to the <span style={{ color: "#64B5F6" }}>Terms of Service</span> and <span style={{ color: "#64B5F6" }}>Privacy Policy</span>.</span>
+          <span style={{ fontSize: 12, color: "#6D28D9" }}>
+            I agree to the <span style={{ color: "#64B5F6", cursor: "pointer" }}>Terms of Service</span> and <span style={{ color: "#64B5F6", cursor: "pointer" }}>Privacy Policy</span>. I consent to Educeff collecting and using my personal data for admission and counseling services as described in the Privacy Policy (DPDP Act 2023).
+            {form.dob && new Date().getFullYear() - new Date(form.dob).getFullYear() < 18 && (
+              <span style={{ display: "block", marginTop: 6, color: "#D97706", fontWeight: 600 }}>
+                ⚠️ You appear to be a minor. Please ensure a parent or guardian reviews and approves this registration.
+              </span>
+            )}
+          </span>
         </div>
         <button className="btn-primary" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }} onClick={handleRegister} disabled={loading}>
           {loading ? "Creating Account..." : "Create Account →"}
@@ -4109,7 +4138,7 @@ function AdminReports({ stats }) {
             {label:"Documents Pending Review",val:stats.pending_docs,color:"#D97706"},
             {label:"Counseling Sessions Booked",val:stats.counseling,color:"#7C3AED"},
             {label:"Successful Payments",val:stats.payments,color:"#059669"},
-            {label:"Admission Success Rate",val:stats.applications>0?`${Math.round((stats.approved/stats.applications)*100)}%`:"\u2014",color:"#059669"},
+            {label:"Application Approval Rate",val:stats.applications>0?`${Math.round((stats.approved/stats.applications)*100)}%`:"\u2014",color:"#059669"},
           ].map(m => (
             <div key={m.label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #F0F7FF" }}>
               <span style={{ fontSize: 12, color: "#374151" }}>{m.label}</span>
@@ -4166,7 +4195,7 @@ function AboutPage() {
                 Educeff was founded in 2015 by a group of education professionals who recognized the overwhelming confusion students and parents face during the admission process in Maharashtra.
               </p>
               <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.8 }}>
-                Today, we've guided over 12,000 students into their dream colleges — from premier IITs and NITs to top private institutions across the country. Our certified team of 14 counselors brings together expertise in engineering, medical, law, management, and arts streams.
+                Today, we've guided thousands of students into their dream colleges — from premier IITs and NITs to top private institutions across the country. Our certified team of {SITE_STATS.counselors} counselors brings together expertise in engineering, medical, law, management, and arts streams. Our certified team of 14 counselors brings together expertise in engineering, medical, law, management, and arts streams.
               </p>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
@@ -4208,30 +4237,164 @@ function AboutPage() {
 }
 
 function ServicesPage() {
+  const DETAILED_SERVICES = [
+    {
+      icon: "📋",
+      title: "Exam Form Filling Assistance",
+      color: "#E3F2FD",
+      accent: "#1565C0",
+      who: "Students appearing in JEE, NEET, MHT-CET, CLAT, CAT, CUET and 70+ other entrance exams.",
+      what: "We handle the complete online registration process on your behalf — from creating the exam account to uploading photos/signatures to fee payment and printing the confirmation.",
+      deliverables: ["Filled and submitted exam application", "Fee payment receipt", "Confirmation PDF with hall-ticket download link", "Error-check before submission"],
+      turnaround: "24–48 hours from document receipt",
+      price: "{{OWNER_INPUT: price_per_exam_form}}",
+      note: "Student reviews and approves the prefilled form before submission.",
+    },
+    {
+      icon: "🎓",
+      title: "Educational Counseling",
+      color: "#F0FDF4",
+      accent: "#059669",
+      who: "Class 10–12 students and parents unsure about stream selection, college choice, or career direction.",
+      what: "One-on-one session with a certified counselor who analyses your academic profile, interests, and goals to recommend the right stream, entrance exams, and target colleges.",
+      deliverables: ["45-minute counseling session (video/phone)", "Written profile assessment report", "Recommended stream + exam list", "College shortlist (top 10)", "1 follow-up query within 7 days"],
+      turnaround: "Session within 48 hours of booking",
+      price: "{{OWNER_INPUT: price_counseling_session}}",
+      note: "First session is free for registered students.",
+    },
+    {
+      icon: "🧭",
+      title: "Career Counseling",
+      color: "#FFF7ED",
+      accent: "#EA580C",
+      who: "Students after Class 12, graduates, and professionals considering a career pivot.",
+      what: "Data-driven career mapping using psychometric assessment tools combined with market demand analysis. Covers engineering, medical, law, management, creative, and emerging tech careers.",
+      deliverables: ["Psychometric assessment report", "Career roadmap document", "Top 5 career paths ranked by fit", "Required qualification plan", "Action plan for next 12 months"],
+      turnaround: "Report within 72 hours of assessment",
+      price: "{{OWNER_INPUT: price_career_counseling}}",
+      note: "Includes follow-up session after report delivery.",
+    },
+    {
+      icon: "🏛️",
+      title: "College Admission Assistance",
+      color: "#F5F3FF",
+      accent: "#7C3AED",
+      who: "Students who have appeared in entrance exams and need guidance through counseling rounds and admission.",
+      what: "End-to-end support from choice-filling in counseling rounds to final allotment acceptance, fee payment, and document submission at the college.",
+      deliverables: ["Counseling round strategy and choice-filling", "Merit-based college-and-branch prioritization", "Document checklist and verification", "Admission fee payment guidance", "Post-admission enrollment support"],
+      turnaround: "Throughout the counseling cycle",
+      price: "{{OWNER_INPUT: price_admission_assistance}}",
+      note: "Success-fee model available — pay only after admission confirmed.",
+    },
+    {
+      icon: "💰",
+      title: "Scholarship Assistance",
+      color: "#ECFDF5",
+      accent: "#059669",
+      who: "Students from any income group — central government, state government, minority, merit, sports, and private scholarships.",
+      what: "We identify scholarships you are eligible for, prepare and submit applications, track disbursement, and follow up with scholarship authorities on your behalf.",
+      deliverables: ["Eligibility assessment report", "List of applicable scholarships", "Application filing for up to 5 schemes", "Document preparation and attestation guidance", "Follow-up until disbursement"],
+      turnaround: "Applications filed within 5 working days",
+      price: "{{OWNER_INPUT: price_scholarship_assistance}}",
+      note: "Success-fee option: {{OWNER_INPUT: scholarship_success_fee_pct}}% of scholarship secured.",
+    },
+    {
+      icon: "📄",
+      title: "Document Verification Support",
+      color: "#FFF5F5",
+      accent: "#DC2626",
+      who: "Students preparing documents for university admission, government exams, or visa applications.",
+      what: "We verify that your academic, category, domicile, and identity documents meet the requirements of your target institution or exam authority — catching errors before they cost you an opportunity.",
+      deliverables: ["Document gap analysis report", "Checklist of missing/deficient documents", "Guidance on obtaining corrections/duplicates", "Notarization and attestation referral", "Final document readiness certificate"],
+      turnaround: "Report within 24 hours of document upload",
+      price: "{{OWNER_INPUT: price_doc_verification}}",
+      note: "Included free with College Admission Assistance package.",
+    },
+  ];
+
   return (
     <div>
-      <div style={{ background: "#64B5F6", padding: "64px 0" }}>
+      {/* Hero */}
+      <div style={{ background: "linear-gradient(135deg, #64B5F6, #7C3AED)", padding: "64px 0" }}>
         <div className="container">
-          <div className="tag">What We Offer</div>
-          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Our Services</h1>
+          <div className="tag" style={{ color: "white", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>What We Offer</div>
+          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Our Services</h1>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, maxWidth: 540 }}>Clear deliverables, honest timelines, and transparent pricing — so you know exactly what you're getting before you pay.</p>
         </div>
       </div>
-      <section className="section section-alt">
+
+      {/* Pricing note */}
+      <div style={{ background: "#FFFBEB", borderBottom: "1px solid #FDE68A", padding: "12px 0" }}>
         <div className="container">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
-            {SERVICES.map(s => (
-              <div key={s.title} className="card" style={{ borderTop: `4px solid ${"#64B5F6"}` }}>
-                <div style={{ fontSize: 36, marginBottom: 16 }}>{s.icon}</div>
-                <h3 className="font-display" style={{ fontSize: 20, fontWeight: 600, color: "#64B5F6", marginBottom: 10 }}>{s.title}</h3>
-                <p style={{ fontSize: 14, color: "#6D28D9", lineHeight: 1.8, marginBottom: 20 }}>{s.desc}</p>
-                <ul style={{ fontSize: 13, color: "#6D28D9", paddingLeft: 18, lineHeight: 2 }}>
-                  <li>Expert professional assistance</li>
-                  <li>End-to-end process management</li>
-                  <li>Real-time status updates</li>
-                  <li>Dedicated relationship manager</li>
-                </ul>
+          <p style={{ fontSize: 13, color: "#92400E", textAlign: "center" }}>
+            ⚠️ Prices shown as <strong>{{OWNER_INPUT}}</strong> are pending owner confirmation and are not published yet. Real prices will replace them before go-live.
+          </p>
+        </div>
+      </div>
+
+      <section className="section" style={{ background: "#F8FAFF" }}>
+        <div className="container">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
+            {DETAILED_SERVICES.map(s => (
+              <div key={s.title} style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                {/* Card header */}
+                <div style={{ background: s.color, padding: "24px 24px 20px" }}>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>{s.icon}</div>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1A1A2E", marginBottom: 6 }}>{s.title}</h3>
+                  <div style={{ fontSize: 12, color: "#6B7280", background: "white", display: "inline-block", padding: "3px 10px", borderRadius: 20, fontWeight: 600 }}>For: {s.who}</div>
+                </div>
+
+                <div style={{ padding: "20px 24px", flex: 1, display: "flex", flexDirection: "column" }}>
+                  {/* What we do */}
+                  <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7, marginBottom: 16 }}>{s.what}</p>
+
+                  {/* Deliverables */}
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: s.accent, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>What You Receive</div>
+                    <ul style={{ paddingLeft: 0, listStyle: "none", margin: 0 }}>
+                      {s.deliverables.map(d => (
+                        <li key={d} style={{ fontSize: 12, color: "#374151", marginBottom: 5, display: "flex", gap: 6, alignItems: "flex-start" }}>
+                          <span style={{ color: s.accent, fontWeight: 700, flexShrink: 0 }}>✓</span> {d}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Turnaround + Price */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14, marginTop: "auto" }}>
+                    <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 12px" }}>
+                      <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 600, marginBottom: 3 }}>⏱ TURNAROUND</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{s.turnaround}</div>
+                    </div>
+                    <div style={{ background: s.color, borderRadius: 8, padding: "10px 12px" }}>
+                      <div style={{ fontSize: 10, color: s.accent, fontWeight: 600, marginBottom: 3 }}>💰 STARTING FROM</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: s.accent }}>{s.price}</div>
+                    </div>
+                  </div>
+
+                  {/* Note */}
+                  <div style={{ fontSize: 11, color: "#6B7280", fontStyle: "italic", marginBottom: 16, padding: "8px 10px", background: "#F8FAFF", borderRadius: 6, borderLeft: `3px solid ${s.accent}` }}>
+                    ℹ️ {s.note}
+                  </div>
+
+                  <button className="btn-primary" style={{ width: "100%", fontSize: 13, padding: "11px 0" }}
+                    onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })}>
+                    Book This Service →
+                  </button>
+                </div>
               </div>
             ))}
+          </div>
+
+          {/* Accuracy & Refund Policy — P3-3 */}
+          <div style={{ marginTop: 40, background: "white", borderRadius: 16, border: "1px solid #BFDBFE", padding: 28 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1565C0", marginBottom: 12 }}>📋 Accuracy &amp; Refund Policy for Form Filling</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, fontSize: 13, color: "#374151", lineHeight: 1.7 }}>
+              <div><strong style={{ color: "#1A1A2E" }}>Student Review Step</strong><br />Every prefilled form is shared with the student/parent for review and explicit approval before submission. We do not submit without sign-off.</div>
+              <div><strong style={{ color: "#1A1A2E" }}>If Educeff Makes an Error</strong><br />{{OWNER_INPUT: refund_policy_terms}} — placeholder until owner confirms remediation/refund terms.</div>
+              <div><strong style={{ color: "#1A1A2E" }}>Official Dates Disclaimer</strong><br />Exam dates, fees, and eligibility are verified at the time of filing but must be independently confirmed at the official exam authority website before submission.</div>
+              <div><strong style={{ color: "#1A1A2E" }}>Refunds</strong><br />{{OWNER_INPUT: refund_policy_terms}} — service fee refund terms to be defined by owner.</div>
+            </div>
           </div>
         </div>
       </section>
@@ -4260,7 +4423,7 @@ function useCountdown(targetDate) {
   return timeLeft;
 }
 
-function ExamCard({ exam }) {
+function ExamCard({ exam, isLoggedIn, onRemind }) {
   const countdown = useCountdown(exam.lastDate);
   const daysLeft = countdown.days;
   const isUrgent = !countdown.expired && daysLeft !== undefined && daysLeft <= 7;
@@ -4348,19 +4511,49 @@ function ExamCard({ exam }) {
         <span>🖥️ Mode: <strong style={{ color: "#1A1A2E" }}>{exam.mode}</strong></span>
       </div>
 
-      {/* Conducting Body */}
-      <div style={{ fontSize: 11, color: "#90CAF9", marginBottom: 14 }}>Conducted by: <span style={{ color: "#64B5F6", fontWeight: 600 }}>{exam.conductedBy}</span></div>
+      {/* Conducting Body + lastVerified */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div style={{ fontSize: 11, color: "#90CAF9" }}>
+          By: <span style={{ color: "#64B5F6", fontWeight: 600 }}>{exam.conductedBy}</span>
+        </div>
+        {exam.lastVerified ? (
+          <span style={{ background: "#ECFDF5", color: "#059669", fontSize: 9, padding: "2px 7px", borderRadius: 8, fontWeight: 700 }}>
+            ✓ Verified {new Date(exam.lastVerified).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
+          </span>
+        ) : (
+          <span style={{ background: "#FFFBEB", color: "#D97706", fontSize: 9, padding: "2px 7px", borderRadius: 8, fontWeight: 700 }}>
+            ⚠️ Verify at official site
+          </span>
+        )}
+      </div>
 
-      {/* Buttons */}
-      <div style={{ display: "flex", gap: 8 }}>
-        <button className="btn-primary" style={{ flex: 1, fontSize: 12, padding: "9px 0", opacity: isExpired ? 0.5 : 1 }}
-          onClick={() => !isExpired && window.open(exam.officialLink, "_blank")}>
-          {isExpired ? "Closed" : "Apply Now →"}
-        </button>
-        <button className="btn-teal" style={{ fontSize: 12, padding: "9px 14px" }}
-          onClick={() => window.open(exam.officialLink, "_blank")}>
-          Info
-        </button>
+      {/* Buttons — P1-3: Official site + Educeff CTA */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {!isExpired && (
+          <button style={{ width: "100%", fontSize: 12, padding: "9px 0", background: "linear-gradient(135deg, #1565C0, #7C3AED)", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700 }}
+            onClick={() => { if(typeof setModal === "function") setModal("register"); else window.location.href = "/#register"; }}>
+            🎓 Let Educeff Fill This Form
+          </button>
+        )}
+        <div style={{ display: "flex", gap: 6 }}>
+          <button style={{ flex: 1, fontSize: 11, padding: "7px 0", background: isExpired ? "#F0F7FF" : "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 7, cursor: isExpired ? "default" : "pointer", color: isExpired ? "#90CAF9" : "#1565C0", fontWeight: 600 }}
+            onClick={() => !isExpired && window.open(exam.officialLink, "_blank")}>
+            {isExpired ? "Closed" : "Official Site →"}
+          </button>
+          {!isExpired && (
+            <button style={{ flex: 1, fontSize: 11, padding: "7px 0", background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 7, cursor: "pointer", color: "#7C3AED", fontWeight: 600 }}
+              onClick={() => window.open(exam.officialLink, "_blank")}>
+              📋 Exam Info
+            </button>
+          )}
+        </div>
+        {/* P1-4: Track/Remind — gates behind free account */}
+        {!isExpired && (
+          <button style={{ width: "100%", fontSize: 11, padding: "7px 0", background: "white", border: "1px solid #E3F2FD", borderRadius: 7, cursor: "pointer", color: "#6B7280", fontWeight: 500 }}
+            onClick={() => onRemind && onRemind(exam)}>
+            🔔 Remind me before deadline
+          </button>
+        )}
       </div>
     </div>
   );
@@ -4370,6 +4563,9 @@ function CollegesPage() {
   const [activeStream, setActiveStream] = useState("All");
   const [activeTab, setActiveTab] = useState("exams");
   const [search, setSearch] = useState("");
+  const [remindExam, setRemindExam] = useState(null); // P1-4: exam to set reminder for
+  const [remindDone, setRemindDone] = useState(false);
+  const [remindForm, setRemindForm] = useState({ name: "", email: "", mobile: "" });
   const [applyCollege, setApplyCollege] = useState(null); // college being applied to
   const [applyForm, setApplyForm] = useState({ name: "", email: "", mobile: "", course: "", exam: "", message: "" });
   const [applyLoading, setApplyLoading] = useState(false);
@@ -4516,7 +4712,8 @@ function CollegesPage() {
 
   const EXAMS = [
     // ── ENGINEERING – National Government ──
-    { name: "JEE Main", fullName: "Joint Entrance Examination Main", stream: "Engineering", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 31, 2025", lastDate: "2025-12-31", examDate: "Jan–Apr 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Nov 2026", officialLink: "https://jeemain.nta.nic.in" },
+    // lastVerified: date Educeff last confirmed this data against official source
+    { name: "JEE Main", fullName: "Joint Entrance Examination Main", stream: "Engineering", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 31, 2025", lastDate: "2025-12-31", examDate: "Jan–Apr 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Nov 2026", officialLink: "https://jeemain.nta.nic.in", lastVerified: "2025-11-01" },
     { name: "JEE Advanced", fullName: "Joint Entrance Examination Advanced", stream: "Engineering", level: "Govt · National", formStart: "Apr 2026", lastDateDisplay: "May 4, 2026", lastDate: "2026-05-04", examDate: "May 18, 2026", fee: "₹3,500", mode: "Online (CBT)", conductedBy: "IIT Delhi", nextCycle: "Apr 2027", officialLink: "https://jeeadv.ac.in" },
     { name: "GATE", fullName: "Graduate Aptitude Test in Engineering", stream: "Engineering", level: "Govt · National", formStart: "Aug 2025", lastDateDisplay: "Oct 3, 2025", lastDate: "2025-10-03", examDate: "Feb 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "IIT Roorkee", nextCycle: "Aug 2026", officialLink: "https://gate2026.iitr.ac.in" },
     { name: "BITSAT", fullName: "BITS Admission Test", stream: "Engineering", level: "Private · National", formStart: "Jan 2026", lastDateDisplay: "Apr 20, 2026", lastDate: "2026-04-20", examDate: "May–Jun 2026", fee: "₹3,500", mode: "Online (CBT)", conductedBy: "BITS Pilani", nextCycle: "Jan 2027", officialLink: "https://www.bitsadmission.com" },
@@ -4639,7 +4836,7 @@ function CollegesPage() {
         <div className="container">
           <div className="tag" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>Colleges &amp; Entrance Exams</div>
           <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Colleges &amp; Exam Calendar</h1>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>120+ partner colleges · Maharashtra &amp; National · Live exam deadlines with countdown timers</p>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>{SITE_STATS.partnerColleges}+ partner colleges listed · Maharashtra &amp; National · Live exam deadlines with countdown timers</p>
           {/* Summary Pills */}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "white", fontWeight: 600 }}>📋 {EXAMS.length} Exams Listed</div>
@@ -4682,7 +4879,7 @@ function CollegesPage() {
                 <div style={{ textAlign: "center", padding: "60px 0", color: "#6D28D9" }}>No exams found for "{search}"</div>
               ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-                  {filteredExams.map(exam => <ExamCard key={exam.name} exam={exam} />)}
+                  {filteredExams.map(exam => <ExamCard key={exam.name} exam={exam} isLoggedIn={false} onRemind={(e) => { setRemindExam(e); setRemindDone(false); setRemindForm({ name: "", email: "", mobile: "" }); }} />)}
                 </div>
               )}
               <div style={{ marginTop: 32, background: "#FFFFFF", borderRadius: 12, border: "1px solid #C8E4FA", padding: 20 }}>
@@ -4823,11 +5020,67 @@ function CollegesPage() {
           </div>
         </div>
       )}
+      {/* P1-4: Exam Reminder Modal — gates behind free account */}
+      {remindExam && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(13,27,75,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }}
+          onClick={() => setRemindExam(null)}>
+          <div style={{ background: "white", borderRadius: 16, width: "100%", maxWidth: 440, padding: 32, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }}
+            onClick={e => e.stopPropagation()}>
+            {remindDone ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 52, marginBottom: 12 }}>🔔</div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Reminder Set!</h3>
+                <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>We'll remind you before the <strong>{remindExam.name}</strong> deadline on <strong>{remindExam.lastDateDisplay}</strong>.</p>
+                <button className="btn-primary" style={{ width: "100%" }} onClick={() => setRemindExam(null)}>Done ✓</button>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#90CAF9", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Set Deadline Reminder</div>
+                    <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1A1A2E", marginTop: 4 }}>{remindExam.name}</h3>
+                    <div style={{ fontSize: 13, color: "#DC2626", fontWeight: 600, marginTop: 2 }}>Last Date: {remindExam.lastDateDisplay}</div>
+                  </div>
+                  <button onClick={() => setRemindExam(null)} style={{ background: "#F0F7FF", border: "none", width: 30, height: 30, borderRadius: "50%", cursor: "pointer", fontSize: 16 }}>×</button>
+                </div>
+                <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20, lineHeight: 1.6 }}>
+                  Get reminded 7 days and 1 day before this deadline via email and WhatsApp — completely free.
+                </p>
+                <label>Your Name</label>
+                <input placeholder="Full name" value={remindForm.name} onChange={e => setRemindForm(f => ({ ...f, name: e.target.value }))} />
+                <label>Email Address</label>
+                <input type="email" placeholder="your@email.com" value={remindForm.email} onChange={e => setRemindForm(f => ({ ...f, email: e.target.value }))} />
+                <label>WhatsApp Number</label>
+                <input placeholder="+91 98765 43210" value={remindForm.mobile} onChange={e => setRemindForm(f => ({ ...f, mobile: e.target.value }))} />
+                <button className="btn-primary" style={{ width: "100%", marginTop: 4, padding: 12 }}
+                  onClick={async () => {
+                    if (!remindForm.name || !remindForm.email) return;
+                    try {
+                      await supabase.from("contact_messages").insert({
+                        full_name: sanitize(remindForm.name),
+                        email: remindForm.email.toLowerCase().trim(),
+                        phone: remindForm.mobile.trim(),
+                        subject: `Exam Reminder: ${remindExam.name}`,
+                        message: `Reminder request for ${remindExam.name} — Last Date: ${remindExam.lastDateDisplay}`,
+                        created_at: new Date().toISOString(),
+                      });
+                    } catch(e) { console.warn(e); }
+                    setRemindDone(true);
+                  }}>
+                  🔔 Set Free Reminder
+                </button>
+                <p style={{ fontSize: 11, color: "#90CAF9", textAlign: "center", marginTop: 10 }}>
+                  By registering, Educeff can also help you fill this exam form — <span style={{ color: "#7C3AED", fontWeight: 600 }}>save hours of hassle</span>.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── MAIN APP ────────────────────────────────────────────────────────────────
 
 // ─── RESET PASSWORD PAGE ─────────────────────────────────────────────────────
 function ResetPasswordPage({ onDone }) {
