@@ -4195,7 +4195,7 @@ function AboutPage() {
                 Educeff was founded in 2015 by a group of education professionals who recognized the overwhelming confusion students and parents face during the admission process in Maharashtra.
               </p>
               <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.8 }}>
-                Today, we've guided thousands of students into their dream colleges — from premier IITs and NITs to top private institutions across the country. Our certified team of {SITE_STATS.counselors} counselors brings together expertise in engineering, medical, law, management, and arts streams. Our certified team of 14 counselors brings together expertise in engineering, medical, law, management, and arts streams.
+                Today, we've guided thousands of students into their dream colleges — from premier IITs and NITs to top private institutions across the country. Our certified team of {SITE_STATS.counselors} counselors brings together expertise in engineering, medical, law, management, and arts streams.
               </p>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
@@ -4296,7 +4296,7 @@ function ServicesPage() {
       deliverables: ["Eligibility assessment report", "List of applicable scholarships", "Application filing for up to 5 schemes", "Document preparation and attestation guidance", "Follow-up until disbursement"],
       turnaround: "Applications filed within 5 working days",
       price: "{{OWNER_INPUT: price_scholarship_assistance}}",
-      note: "Success-fee option: {{OWNER_INPUT: scholarship_success_fee_pct}}% of scholarship secured.",
+      note: "Success-fee option available: a small percentage of the scholarship amount secured (rate TBD by owner).",
     },
     {
       icon: "📄",
@@ -4327,7 +4327,7 @@ function ServicesPage() {
       <div style={{ background: "#FFFBEB", borderBottom: "1px solid #FDE68A", padding: "12px 0" }}>
         <div className="container">
           <p style={{ fontSize: 13, color: "#92400E", textAlign: "center" }}>
-            ⚠️ Prices shown as <strong>{{OWNER_INPUT}}</strong> are pending owner confirmation and are not published yet. Real prices will replace them before go-live.
+            ⚠️ Prices marked <strong>[PRICE TBD]</strong> are pending owner confirmation and will be updated before go-live.
           </p>
         </div>
       </div>
@@ -4391,9 +4391,9 @@ function ServicesPage() {
             <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1565C0", marginBottom: 12 }}>📋 Accuracy &amp; Refund Policy for Form Filling</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, fontSize: 13, color: "#374151", lineHeight: 1.7 }}>
               <div><strong style={{ color: "#1A1A2E" }}>Student Review Step</strong><br />Every prefilled form is shared with the student/parent for review and explicit approval before submission. We do not submit without sign-off.</div>
-              <div><strong style={{ color: "#1A1A2E" }}>If Educeff Makes an Error</strong><br />{{OWNER_INPUT: refund_policy_terms}} — placeholder until owner confirms remediation/refund terms.</div>
+              <div><strong style={{ color: "#1A1A2E" }}>If Educeff Makes an Error</strong><br />[OWNER INPUT: refund_policy_terms] — placeholder until owner confirms remediation/refund terms.</div>
               <div><strong style={{ color: "#1A1A2E" }}>Official Dates Disclaimer</strong><br />Exam dates, fees, and eligibility are verified at the time of filing but must be independently confirmed at the official exam authority website before submission.</div>
-              <div><strong style={{ color: "#1A1A2E" }}>Refunds</strong><br />{{OWNER_INPUT: refund_policy_terms}} — service fee refund terms to be defined by owner.</div>
+              <div><strong style={{ color: "#1A1A2E" }}>Refunds</strong><br />[OWNER INPUT: refund_policy_terms] — service fee refund terms to be defined by owner.</div>
             </div>
           </div>
         </div>
