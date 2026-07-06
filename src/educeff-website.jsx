@@ -3818,189 +3818,154 @@ function StudentPaymentsAdmin({ userId }) {
 function AdminDocVerification() {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("pending_review");
+
   useEffect(() => { loadDocs(); }, []);
 
   const loadDocs = async () => {
     setLoading(true);
     try {
-      // Step 1: fetch all documents
       const { data: docData, error: docErr } = await supabase
-        .from("student_documents")
-        .select("*")
-        .order("uploaded_at", { ascending: false });
-
-      if (docErr) { console.warn("Doc fetch error:", docErr.message); setLoading(false); return; }
+        .from("student_documents").select("*").order("uploaded_at", { ascending: false });
+      if (docErr) { console.warn(docErr.message); setLoading(false); return; }
       if (!docData || docData.length === 0) { setDocs([]); setLoading(false); return; }
-
-      // Step 2: fetch matching student profiles by user_id
       const userIds = [...new Set(docData.map(d => d.user_id))];
       const { data: studentData } = await supabase
-        .from("students")
-        .select("user_id, first_name, last_name, email")
+        .from("students").select("user_id, first_name, last_name, email")
         .in("user_id", userIds);
-
-      // Step 3: merge student info into docs
       const studentMap = {};
       (studentData || []).forEach(s => { studentMap[s.user_id] = s; });
-
-      const merged = docData.map(d => ({
-        ...d,
-        student: studentMap[d.user_id] || null,
-      }));
-
-      setDocs(merged);
-    } catch (e) { console.warn("loadDocs error:", e); }
+      setDocs(docData.map(d => ({ ...d, student: studentMap[d.user_id] || null })));
+    } catch (e) { console.warn(e); }
     setLoading(false);
   };
 
   const viewDoc = async (filePath) => {
     if (!filePath) return alert("File path not found.");
     try {
-      const { data, error } = await supabase.storage
-        .from("student-documents")
-        .createSignedUrl(filePath, 60);
+      const { data, error } = await supabase.storage.from("student-documents").createSignedUrl(filePath, 60);
       if (error) throw error;
       window.open(data.signedUrl, "_blank");
-    } catch (e) {
-      console.warn("View doc error:", e);
-      alert("Could not open file. Make sure the storage bucket exists and policies are set.");
-    }
+    } catch (e) { alert("Could not open file. Check storage policies."); }
   };
 
   const updateStatus = async (id, status) => {
-    await supabase.from("student_documents")
-      .update({ status, reviewed_at: new Date().toISOString() })
-      .eq("id", id);
+    await supabase.from("student_documents").update({ status, reviewed_at: new Date().toISOString() }).eq("id", id);
     setDocs(p => p.map(d => d.id === id ? { ...d, status } : d));
   };
 
   const pending = docs.filter(d => d.status === "pending_review");
-  const reviewed = docs.filter(d => d.status !== "pending_review");
+  const verified = docs.filter(d => d.status === "verified");
+  const rejected = docs.filter(d => d.status === "rejected");
+  const filtered = statusFilter === "pending_review" ? pending : statusFilter === "verified" ? verified : rejected;
+
+  const docTypeIcon = (name) => {
+    if (!name) return "📄";
+    const n = name.toLowerCase();
+    if (n.includes("aadhaar") || n.includes("aadhar")) return "🪪";
+    if (n.includes("10th") || n.includes("marksheet")) return "📜";
+    if (n.includes("12th")) return "📜";
+    if (n.includes("photo")) return "🖼️";
+    if (n.includes("caste") || n.includes("category")) return "📋";
+    if (n.includes("domicile")) return "🏠";
+    return "📄";
+  };
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Document Verification</h1>
-          <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{pending.length} documents pending review · {docs.length} total</div>
+          <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{pending.length} pending · {verified.length} verified · {rejected.length} rejected</div>
         </div>
-        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadDocs}>↻ Refresh</button>
+        <button style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "7px 16px", fontSize: 12, fontWeight: 600, color: "#1565C0", cursor: "pointer" }} onClick={loadDocs}>↻ Refresh</button>
+      </div>
+
+      {/* Status filter tabs */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {[
+          ["pending_review", "⏳ Pending Review", pending.length, "#D97706", "#FFFBEB"],
+          ["verified", "✅ Verified", verified.length, "#059669", "#ECFDF5"],
+          ["rejected", "❌ Rejected", rejected.length, "#DC2626", "#FEF2F2"],
+        ].map(([val, label, count, color, bg]) => (
+          <button key={val} onClick={() => setStatusFilter(val)}
+            style={{ padding: "8px 18px", borderRadius: 20, border: `1px solid ${statusFilter === val ? color : "#E3F2FD"}`, background: statusFilter === val ? color : "white", color: statusFilter === val ? "white" : "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+            {label}
+            <span style={{ background: statusFilter === val ? "rgba(255,255,255,0.25)" : bg, color: statusFilter === val ? "white" : color, borderRadius: 10, padding: "1px 7px", fontSize: 11, fontWeight: 700 }}>{count}</span>
+          </button>
+        ))}
       </div>
 
       {loading ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
-          <div style={{ fontSize: 32, marginBottom: 10 }}>⏳</div>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
           <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading documents...</div>
         </div>
-      ) : docs.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "60px 0" }}>
-          <div style={{ fontSize: 40, marginBottom: 10 }}>📁</div>
-          <div style={{ color: "#6B7280", fontSize: 15, marginBottom: 6 }}>No documents uploaded yet</div>
-          <div style={{ color: "#90CAF9", fontSize: 13 }}>Documents will appear here once students upload them</div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
+          <div style={{ fontSize: 44, marginBottom: 10 }}>📁</div>
+          <div style={{ color: "#6B7280", fontSize: 15 }}>
+            {docs.length === 0 ? "No documents uploaded yet" : `No ${statusFilter.replace("_", " ")} documents`}
+          </div>
         </div>
       ) : (
-        <>
-          {pending.length > 0 && (
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#D97706", marginBottom: 10 }}>
-                ⚠️ Pending Review ({pending.length})
-              </div>
-              <div style={{ background: "white", borderRadius: 12, border: "1.5px solid #FCD34D", overflow: "hidden" }}>
-                <div style={{ overflowX: "auto" }}>
-                  <table>
-                    <thead>
-                      <tr><th>Student</th><th>Document</th><th>Uploaded</th><th>Status</th><th>Actions</th></tr>
-                    </thead>
-                    <tbody>
-                      {pending.map(d => (
-                        <tr key={d.id} className="student-row">
-                          <td>
-                            <div style={{ fontWeight: 600, fontSize: 13 }}>
-                              {d.student ? `${d.student.first_name || ""} ${d.student.last_name || ""}`.trim() : "Unknown Student"}
-                            </div>
-                            <div style={{ fontSize: 11, color: "#90CAF9" }}>
-                              {d.student?.email || d.user_id?.substring(0, 8) + "..."}
-                            </div>
-                          </td>
-                          <td style={{ fontSize: 13, fontWeight: 500 }}>{d.doc_name}</td>
-                          <td style={{ fontSize: 11, color: "#90CAF9" }}>
-                            {d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "—"}
-                          </td>
-                          <td>
-                            <span className="badge badge-warning">
-                              {d.status?.replace("_", " ")}
-                            </span>
-                          </td>
-                          <td>
-                            <div style={{ display: "flex", gap: 6 }}>
-                              <button style={{ fontSize: 11, padding: "5px 12px", background: "#EFF6FF", border: "none", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 700 }}
-                                onClick={() => viewDoc(d.file_path)}>👁 View</button>
-                              <button style={{ fontSize: 11, padding: "5px 12px", background: "#ECFDF5", border: "none", borderRadius: 6, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
-                                onClick={() => updateStatus(d.id, "verified")}>✓ Verify</button>
-                              <button style={{ fontSize: 11, padding: "5px 12px", background: "#FEF2F2", border: "none", borderRadius: 6, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
-                                onClick={() => updateStatus(d.id, "rejected")}>✗ Reject</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
+          {filtered.map(d => {
+            const studentName = d.student ? `${d.student.first_name || ""} ${d.student.last_name || ""}`.trim() : "Unknown Student";
+            const isPending = d.status === "pending_review";
+            const isVerified = d.status === "verified";
+            return (
+              <div key={d.id} style={{ background: "white", borderRadius: 14, border: `1.5px solid ${isPending ? "#FCD34D" : isVerified ? "#A7F3D0" : "#FECACA"}`, overflow: "hidden" }}>
+                <div style={{ height: 4, background: isPending ? "#D97706" : isVerified ? "#059669" : "#DC2626" }} />
+                <div style={{ padding: 18 }}>
+                  {/* Doc type + name */}
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: isPending ? "#FFFBEB" : isVerified ? "#ECFDF5" : "#FEF2F2", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+                      {docTypeIcon(d.doc_name)}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E" }}>{d.doc_name}</div>
+                      <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>
+                        Uploaded {d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "—"}
+                      </div>
+                    </div>
+                    <span className={`badge ${isPending ? "badge-warning" : isVerified ? "badge-success" : "badge-danger"}`} style={{ fontSize: 9, flexShrink: 0, marginLeft: "auto" }}>
+                      {d.status?.replace("_", " ")}
+                    </span>
+                  </div>
 
-          {reviewed.length > 0 && (
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", marginBottom: 10 }}>
-                Reviewed Documents ({reviewed.length})
-              </div>
-              <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-                <div style={{ overflowX: "auto" }}>
-                  <table>
-                    <thead>
-                      <tr><th>Student</th><th>Document</th><th>Uploaded</th><th>Reviewed</th><th>Status</th><th>Action</th></tr>
-                    </thead>
-                    <tbody>
-                      {reviewed.map(d => (
-                        <tr key={d.id} className="student-row">
-                          <td>
-                            <div style={{ fontWeight: 600, fontSize: 13 }}>
-                              {d.student ? `${d.student.first_name || ""} ${d.student.last_name || ""}`.trim() : "Unknown"}
-                            </div>
-                            <div style={{ fontSize: 11, color: "#90CAF9" }}>{d.student?.email || "—"}</div>
-                          </td>
-                          <td style={{ fontSize: 13 }}>{d.doc_name}</td>
-                          <td style={{ fontSize: 11, color: "#90CAF9" }}>
-                            {d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "—"}
-                          </td>
-                          <td style={{ fontSize: 11, color: "#90CAF9" }}>
-                            {d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString("en-IN") : "—"}
-                          </td>
-                          <td><span className={`badge ${d.status === "verified" ? "badge-success" : "badge-danger"}`}>{d.status}</span></td>
-                          <td>
-                            <div style={{ display: "flex", gap: 6 }}>
-                              <button style={{ fontSize: 11, padding: "5px 12px", background: "#EFF6FF", border: "none", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 700 }}
-                                onClick={() => viewDoc(d.file_path)}>👁 View</button>
-                              {d.status === "verified" && (
-                                <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
-                                  onClick={() => updateStatus(d.id, "rejected")}>Reject</button>
-                              )}
-                              {d.status === "rejected" && (
-                                <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
-                                  onClick={() => updateStatus(d.id, "verified")}>Verify</button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  {/* Student info */}
+                  <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 12px", marginBottom: 14 }}>
+                    <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Student</div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{studentName}</div>
+                    <div style={{ fontSize: 11, color: "#90CAF9" }}>{d.student?.email || d.user_id?.substring(0, 12) + "..."}</div>
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button style={{ flex: 1, fontSize: 11, padding: "8px 0", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 7, cursor: "pointer", color: "#1565C0", fontWeight: 700 }}
+                      onClick={() => viewDoc(d.file_path)}>👁 View File</button>
+                    {isPending && <>
+                      <button style={{ flex: 1, fontSize: 11, padding: "8px 0", background: "#ECFDF5", border: "none", borderRadius: 7, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                        onClick={() => updateStatus(d.id, "verified")}>✓ Verify</button>
+                      <button style={{ flex: 1, fontSize: 11, padding: "8px 0", background: "#FEF2F2", border: "none", borderRadius: 7, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
+                        onClick={() => updateStatus(d.id, "rejected")}>✗ Reject</button>
+                    </>}
+                    {isVerified && (
+                      <button style={{ flex: 1, fontSize: 11, padding: "8px 0", background: "#FEF2F2", border: "none", borderRadius: 7, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
+                        onClick={() => updateStatus(d.id, "rejected")}>Reject</button>
+                    )}
+                    {d.status === "rejected" && (
+                      <button style={{ flex: 1, fontSize: 11, padding: "8px 0", background: "#ECFDF5", border: "none", borderRadius: 7, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                        onClick={() => updateStatus(d.id, "verified")}>Re-verify</button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -4011,18 +3976,16 @@ function AdminApplications() {
   const [students, setStudents] = useState({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => { loadApps(); }, []);
 
   const loadApps = async () => {
     setLoading(true);
     try {
-      // Fetch applications
       const { data: appData, error: appErr } = await supabase
         .from("applications").select("*").order("created_at", { ascending: false });
-      if (appErr) { console.warn("Apps error:", appErr.message); setLoading(false); return; }
-
-      // Fetch student profiles separately
+      if (appErr) { console.warn(appErr.message); setLoading(false); return; }
       const userIds = [...new Set((appData || []).map(a => a.user_id))];
       if (userIds.length > 0) {
         const { data: studentData } = await supabase
@@ -4042,7 +4005,6 @@ function AdminApplications() {
     setApps(p => p.map(a => a.id === id ? { ...a, status } : a));
   };
 
-  const filtered = filter === "all" ? apps : apps.filter(a => a.status === filter);
   const counts = {
     all: apps.length,
     pending: apps.filter(a => a.status === "pending").length,
@@ -4051,64 +4013,114 @@ function AdminApplications() {
     rejected: apps.filter(a => a.status === "rejected").length,
   };
 
+  const filtered = (filter === "all" ? apps : apps.filter(a => a.status === filter))
+    .filter(a => {
+      if (!search) return true;
+      const s = students[a.user_id];
+      const name = s ? `${s.first_name || ""} ${s.last_name || ""}`.toLowerCase() : "";
+      return name.includes(search.toLowerCase()) ||
+        (a.college || "").toLowerCase().includes(search.toLowerCase()) ||
+        (a.course || "").toLowerCase().includes(search.toLowerCase());
+    });
+
+  const statusConfig = {
+    pending:      { bg: "#FFFBEB", color: "#D97706", border: "#FCD34D", badge: "badge-warning" },
+    under_review: { bg: "#EFF6FF", color: "#1565C0", border: "#BFDBFE", badge: "badge-info" },
+    approved:     { bg: "#ECFDF5", color: "#059669", border: "#A7F3D0", badge: "badge-success" },
+    rejected:     { bg: "#FEF2F2", color: "#DC2626", border: "#FECACA", badge: "badge-danger" },
+  };
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Applications</h1>
-          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} total applications</div>
+          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} total · {filtered.length} shown</div>
         </div>
-        <button className="btn-primary" style={{ fontSize: 13 }} onClick={loadApps}>↻ Refresh</button>
+        <button style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "7px 16px", fontSize: 12, fontWeight: 600, color: "#1565C0", cursor: "pointer" }} onClick={loadApps}>↻ Refresh</button>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+      {/* Search */}
+      <input value={search} onChange={e => setSearch(e.target.value)}
+        placeholder="Search by student name, college or course..."
+        style={{ marginBottom: 14, fontSize: 13 }} />
+
+      {/* Status filter tabs */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
         {[["all","All","#1565C0"],["pending","Pending","#D97706"],["under_review","Under Review","#1565C0"],["approved","Approved","#059669"],["rejected","Rejected","#DC2626"]].map(([val,label,color]) => (
-          <button key={val} onClick={() => setFilter(val)} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${filter === val ? color : "#E3F2FD"}`, background: filter === val ? color : "white", color: filter === val ? "white" : "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-            {label} ({counts[val]})
+          <button key={val} onClick={() => setFilter(val)}
+            style={{ padding: "7px 16px", borderRadius: 20, border: `1px solid ${filter === val ? color : "#E3F2FD"}`, background: filter === val ? color : "white", color: filter === val ? "white" : "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+            {label} ({counts[val] ?? 0})
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading applications...</div>
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
+          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading applications...</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
+          <div style={{ fontSize: 44, marginBottom: 10 }}>📋</div>
+          <div style={{ color: "#6B7280", fontSize: 15 }}>{apps.length === 0 ? "No applications yet" : "No results found"}</div>
+        </div>
       ) : (
-        <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table>
-              <thead>
-                <tr><th>#</th><th>Student</th><th>College</th><th>Course</th><th>Exam</th><th>Applied</th><th>Status</th><th>Actions</th></tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No applications found</td></tr>
-                ) : filtered.map((a, i) => {
-                  const s = students[a.user_id];
-                  return (
-                    <tr key={a.id} className="student-row">
-                      <td style={{ color: "#90CAF9", fontSize: 12 }}>{i + 1}</td>
-                      <td>
-                        <div style={{ fontWeight: 600, fontSize: 13 }}>{s ? `${s.first_name || ""} ${s.last_name || ""}`.trim() : "Unknown"}</div>
-                        <div style={{ fontSize: 10, color: "#90CAF9" }}>{s?.email || "—"}</div>
-                      </td>
-                      <td style={{ fontSize: 13, fontWeight: 500 }}>{a.college}</td>
-                      <td style={{ fontSize: 12 }}>{a.course}</td>
-                      <td style={{ fontSize: 12 }}>{a.exam || "—"}</td>
-                      <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</td>
-                      <td><span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`}>{a.status?.replace("_"," ")}</span></td>
-                      <td>
-                        <div style={{ display: "flex", gap: 4 }}>
-                          {(a.status === "pending" || a.status === "under_review") && <>
-                            <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => updateStatus(a.id, "approved")}>✓</button>
-                            <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#991B1B", fontWeight: 700 }} onClick={() => updateStatus(a.id, "rejected")}>✗</button>
-                          </>}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
+          {filtered.map(a => {
+            const s = students[a.user_id];
+            const studentName = s ? `${s.first_name || ""} ${s.last_name || ""}`.trim() : "Unknown";
+            const cfg = statusConfig[a.status] || statusConfig.pending;
+            return (
+              <div key={a.id} style={{ background: "white", borderRadius: 14, border: `1.5px solid ${cfg.border}`, overflow: "hidden" }}>
+                <div style={{ height: 4, background: cfg.color }} />
+                <div style={{ padding: 18 }}>
+                  {/* College + course */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E", marginBottom: 3 }}>{a.college}</div>
+                      <div style={{ fontSize: 12, color: "#6B7280" }}>{a.course}</div>
+                      {a.exam && <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>📝 {a.exam}</div>}
+                    </div>
+                    <span className={`badge ${cfg.badge}`} style={{ fontSize: 10, flexShrink: 0, marginLeft: 8 }}>
+                      {a.status?.replace("_", " ")}
+                    </span>
+                  </div>
+
+                  {/* Student info */}
+                  <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 12px", marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 11, color: "white", flexShrink: 0 }}>
+                      {(s?.first_name?.[0] || "?").toUpperCase()}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{studentName}</div>
+                      <div style={{ fontSize: 11, color: "#90CAF9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s?.email || "—"}</div>
+                    </div>
+                  </div>
+
+                  {/* Date + actions */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontSize: 10, color: "#90CAF9" }}>
+                      Applied {new Date(a.created_at).toLocaleDateString("en-IN")}
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {(a.status === "pending" || a.status === "under_review") && <>
+                        <button style={{ fontSize: 11, padding: "6px 12px", background: "#ECFDF5", border: "none", borderRadius: 6, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                          onClick={() => updateStatus(a.id, "approved")}>✓ Approve</button>
+                        <button style={{ fontSize: 11, padding: "6px 12px", background: "#FEF2F2", border: "none", borderRadius: 6, cursor: "pointer", color: "#991B1B", fontWeight: 700 }}
+                          onClick={() => updateStatus(a.id, "rejected")}>✗ Reject</button>
+                      </>}
+                      {a.status === "pending" && (
+                        <button style={{ fontSize: 11, padding: "6px 12px", background: "#EFF6FF", border: "none", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 700 }}
+                          onClick={() => updateStatus(a.id, "under_review")}>Review</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -4120,13 +4132,13 @@ function AdminPayments() {
   const [students, setStudents] = useState({});
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     const load = async () => {
       try {
         const { data: payData } = await supabase
           .from("payments").select("*").order("created_at", { ascending: false });
-
         const userIds = [...new Set((payData || []).map(p => p.user_id))];
         if (userIds.length > 0) {
           const { data: studentData } = await supabase
@@ -4144,54 +4156,119 @@ function AdminPayments() {
     load();
   }, []);
 
+  const successCount = payments.filter(p => p.status === "success").length;
+  const failedCount = payments.filter(p => p.status === "failed").length;
+  const filtered = filter === "all" ? payments : payments.filter(p => p.status === filter);
+
+  const serviceIcon = (title) => {
+    if (!title) return "💳";
+    const t = title.toLowerCase();
+    if (t.includes("counseling") || t.includes("counselling")) return "🎓";
+    if (t.includes("career")) return "🧭";
+    if (t.includes("exam") || t.includes("form")) return "📋";
+    if (t.includes("admission")) return "🏛️";
+    if (t.includes("scholarship")) return "💰";
+    if (t.includes("document")) return "📄";
+    return "💳";
+  };
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Payment Records</h1>
-          <div style={{ fontSize: 12, color: "#059669", marginTop: 2, fontWeight: 600 }}>Total Revenue: ₹{total.toLocaleString("en-IN")}</div>
+          <div style={{ fontSize: 12, color: "#059669", marginTop: 2, fontWeight: 600 }}>
+            Total Revenue: ₹{total.toLocaleString("en-IN")}
+          </div>
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 20 }}>
+
+      {/* Stat cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14, marginBottom: 20 }}>
         {[
-          { label: "Total", val: payments.length, color: "#1565C0" },
-          { label: "Successful", val: payments.filter(p => p.status === "success").length, color: "#059669" },
-          { label: "Failed", val: payments.filter(p => p.status === "failed").length, color: "#DC2626" },
-          { label: "Revenue", val: `₹${total.toLocaleString("en-IN")}`, color: "#7C3AED" },
+          { label: "Total Transactions", val: payments.length, color: "#1565C0", bg: "#EFF6FF" },
+          { label: "Successful", val: successCount, color: "#059669", bg: "#ECFDF5" },
+          { label: "Failed", val: failedCount, color: "#DC2626", bg: "#FEF2F2" },
+          { label: "Total Revenue", val: `₹${total.toLocaleString("en-IN")}`, color: "#7C3AED", bg: "#F5F3FF" },
         ].map(s => (
-          <div key={s.label} className="admin-stat-card" style={{ borderTop: `3px solid ${s.color}` }}>
-            <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>{s.label}</div>
+          <div key={s.label} style={{ background: s.bg, borderRadius: 12, padding: 16, border: `1px solid ${s.color}20` }}>
+            <div style={{ fontSize: 10, color: s.color, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{s.label}</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: s.color, fontFamily: "Sora" }}>{s.val}</div>
           </div>
         ))}
       </div>
-      {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading payments...</div> : (
-        <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table>
-              <thead><tr><th>Student</th><th>Service</th><th>Amount</th><th>Payment ID</th><th>Date</th><th>Status</th></tr></thead>
-              <tbody>
-                {payments.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No payments yet</td></tr>
-                ) : payments.map(p => {
-                  const s = students[p.user_id];
-                  return (
-                    <tr key={p.id} className="student-row">
-                      <td>
-                        <div style={{ fontWeight: 600, fontSize: 13 }}>{s ? `${s.first_name || ""} ${s.last_name || ""}`.trim() : "Unknown"}</div>
-                        <div style={{ fontSize: 10, color: "#90CAF9" }}>{s?.email || "—"}</div>
-                      </td>
-                      <td style={{ fontSize: 12 }}>{p.service_title}</td>
-                      <td style={{ fontSize: 14, fontWeight: 700, color: "#059669" }}>₹{p.amount}</td>
-                      <td style={{ fontSize: 10, color: "#90CAF9", fontFamily: "monospace" }}>{p.razorpay_payment_id || "—"}</td>
-                      <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
-                      <td><span className={`badge ${p.status === "success" ? "badge-success" : "badge-danger"}`}>{p.status}</span></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+
+      {/* Filter */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {[["all","All",payments.length,"#1565C0"],["success","Successful",successCount,"#059669"],["failed","Failed",failedCount,"#DC2626"]].map(([val,label,count,color]) => (
+          <button key={val} onClick={() => setFilter(val)}
+            style={{ padding: "7px 16px", borderRadius: 20, border: `1px solid ${filter === val ? color : "#E3F2FD"}`, background: filter === val ? color : "white", color: filter === val ? "white" : "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+            {label} ({count})
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
+          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading payments...</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
+          <div style={{ fontSize: 44, marginBottom: 10 }}>💳</div>
+          <div style={{ color: "#6B7280", fontSize: 15 }}>No payments yet</div>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
+          {filtered.map(p => {
+            const s = students[p.user_id];
+            const studentName = s ? `${s.first_name || ""} ${s.last_name || ""}`.trim() : "Unknown";
+            const isSuccess = p.status === "success";
+            return (
+              <div key={p.id} style={{ background: "white", borderRadius: 14, border: `1.5px solid ${isSuccess ? "#A7F3D0" : "#FECACA"}`, overflow: "hidden" }}>
+                <div style={{ height: 4, background: isSuccess ? "#059669" : "#DC2626" }} />
+                <div style={{ padding: 18 }}>
+                  {/* Service + amount */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 10, background: isSuccess ? "#ECFDF5" : "#FEF2F2", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
+                        {serviceIcon(p.service_title)}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: 13, color: "#1A1A2E", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {p.service_title || "Service"}
+                        </div>
+                        <span className={`badge ${isSuccess ? "badge-success" : "badge-danger"}`} style={{ fontSize: 9 }}>{p.status}</span>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: isSuccess ? "#059669" : "#DC2626", fontFamily: "Sora", flexShrink: 0 }}>
+                      ₹{p.amount}
+                    </div>
+                  </div>
+
+                  {/* Student */}
+                  <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "8px 12px", marginBottom: 12 }}>
+                    <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Student</div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{studentName}</div>
+                    <div style={{ fontSize: 11, color: "#90CAF9" }}>{s?.email || "—"}</div>
+                  </div>
+
+                  {/* Date + payment ID */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontSize: 11, color: "#90CAF9" }}>
+                      {new Date(p.created_at).toLocaleDateString("en-IN")}
+                    </div>
+                    {p.razorpay_payment_id && (
+                      <div style={{ fontSize: 10, color: "#90CAF9", fontFamily: "monospace", background: "#F8FAFF", padding: "2px 8px", borderRadius: 6 }}>
+                        {p.razorpay_payment_id.substring(0, 14)}...
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -4201,41 +4278,154 @@ function AdminPayments() {
 function AdminCounseling() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("pending");
+
   useEffect(() => {
     supabase.from("counseling_bookings").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => { setBookings(data || []); setLoading(false); }).catch(e => { console.warn(e); setLoading(false); });
+      .then(({ data }) => { setBookings(data || []); setLoading(false); })
+      .catch(e => { console.warn(e); setLoading(false); });
   }, []);
+
   const updateStatus = async (id, status) => {
     await supabase.from("counseling_bookings").update({ status }).eq("id", id);
     setBookings(p => p.map(b => b.id === id ? { ...b, status } : b));
   };
+
+  const counts = {
+    pending: bookings.filter(b => b.status === "pending").length,
+    confirmed: bookings.filter(b => b.status === "confirmed").length,
+    completed: bookings.filter(b => b.status === "completed").length,
+  };
+
+  const filtered = filter === "all" ? bookings : bookings.filter(b => b.status === filter);
+
+  const streamColors = {
+    "Engineering": { bg: "#EFF6FF", color: "#1565C0" },
+    "Medical": { bg: "#F0FDF4", color: "#059669" },
+    "Law": { bg: "#FFF7ED", color: "#EA580C" },
+    "Management": { bg: "#F5F3FF", color: "#7C3AED" },
+    "Architecture": { bg: "#ECFEFF", color: "#0891B2" },
+  };
+  const getStream = (s) => streamColors[s] || { bg: "#F8FAFF", color: "#6B7280" };
+
+  const isUpcoming = (date) => date && new Date(date) >= new Date();
+  const daysUntil = (date) => {
+    if (!date) return null;
+    const diff = new Date(date) - new Date();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <div><h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Counseling Sessions</h1><div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{bookings.filter(b => b.status === "pending").length} pending sessions</div></div>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Counseling Sessions</h1>
+          <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{counts.pending} pending · {counts.confirmed} confirmed · {counts.completed} completed</div>
+        </div>
       </div>
-      {loading ? <div style={{ textAlign: "center", padding: "40px 0", color: "#90CAF9" }}>Loading...</div> : (
-        <div style={{ background: "white", borderRadius: 12, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}><table>
-            <thead><tr><th>Student</th><th>Mobile</th><th>Stream</th><th>Preferred Date</th><th>Booked</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
-              {bookings.length === 0 ? <tr><td colSpan={7} style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>No sessions booked yet</td></tr>
-              : bookings.map(b => (
-                <tr key={b.id} className="student-row">
-                  <td style={{ fontWeight: 600, fontSize: 13 }}>{b.full_name}</td>
-                  <td style={{ fontSize: 12 }}>{b.mobile}</td>
-                  <td><span className="badge badge-info" style={{ fontSize: 10 }}>{b.stream || "—"}</span></td>
-                  <td style={{ fontSize: 12 }}>{b.preferred_date ? new Date(b.preferred_date).toLocaleDateString("en-IN") : "—"}</td>
-                  <td style={{ fontSize: 11, color: "#90CAF9" }}>{new Date(b.created_at).toLocaleDateString("en-IN")}</td>
-                  <td><span className={`badge ${b.status === "confirmed" ? "badge-success" : b.status === "completed" ? "badge-gray" : "badge-warning"}`}>{b.status}</span></td>
-                  <td>{b.status === "pending" && <div style={{ display: "flex", gap: 4 }}>
-                    <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => updateStatus(b.id, "confirmed")}>Confirm</button>
-                    <button style={{ fontSize: 10, padding: "4px 8px", background: "#EFF6FF", border: "none", borderRadius: 5, cursor: "pointer", color: "#1565C0", fontWeight: 700 }} onClick={() => updateStatus(b.id, "completed")}>Done</button>
-                  </div>}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table></div>
+
+      {/* Filter tabs */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {[
+          ["pending", "⏳ Pending", counts.pending, "#D97706"],
+          ["confirmed", "✅ Confirmed", counts.confirmed, "#059669"],
+          ["completed", "🏁 Completed", counts.completed, "#6B7280"],
+          ["all", "All Sessions", bookings.length, "#1565C0"],
+        ].map(([val, label, count, color]) => (
+          <button key={val} onClick={() => setFilter(val)}
+            style={{ padding: "7px 16px", borderRadius: 20, border: `1px solid ${filter === val ? color : "#E3F2FD"}`, background: filter === val ? color : "white", color: filter === val ? "white" : "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+            {label} ({count})
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
+          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading sessions...</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
+          <div style={{ fontSize: 44, marginBottom: 10 }}>🎓</div>
+          <div style={{ color: "#6B7280", fontSize: 15 }}>
+            {bookings.length === 0 ? "No counseling sessions booked yet" : `No ${filter} sessions`}
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
+          {filtered.map(b => {
+            const st = getStream(b.stream);
+            const isPending = b.status === "pending";
+            const isConfirmed = b.status === "confirmed";
+            const days = daysUntil(b.preferred_date);
+            const upcoming = isUpcoming(b.preferred_date);
+            const borderColor = isPending ? "#FCD34D" : isConfirmed ? "#A7F3D0" : "#E3F2FD";
+            const topColor = isPending ? "#D97706" : isConfirmed ? "#059669" : "#6B7280";
+            return (
+              <div key={b.id} style={{ background: "white", borderRadius: 14, border: `1.5px solid ${borderColor}`, overflow: "hidden" }}>
+                <div style={{ height: 4, background: topColor }} />
+                <div style={{ padding: 18 }}>
+                  {/* Student name + status */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg, ${topColor}, #7C3AED)`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 15, flexShrink: 0 }}>
+                        {(b.full_name?.[0] || "?").toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E" }}>{b.full_name}</div>
+                        <div style={{ fontSize: 11, color: "#90CAF9" }}>{b.mobile}</div>
+                      </div>
+                    </div>
+                    <span className={`badge ${isPending ? "badge-warning" : isConfirmed ? "badge-success" : "badge-gray"}`} style={{ fontSize: 9, flexShrink: 0 }}>
+                      {b.status}
+                    </span>
+                  </div>
+
+                  {/* Stream */}
+                  {b.stream && (
+                    <span style={{ background: st.bg, color: st.color, fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, display: "inline-block", marginBottom: 12 }}>
+                      {b.stream}
+                    </span>
+                  )}
+
+                  {/* Preferred date */}
+                  <div style={{ background: upcoming && b.preferred_date ? "#F0FDF4" : "#F8FAFF", borderRadius: 8, padding: "10px 12px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Preferred Date</div>
+                      <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>
+                        {b.preferred_date ? new Date(b.preferred_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Not specified"}
+                      </div>
+                    </div>
+                    {days !== null && upcoming && (
+                      <div style={{ background: days <= 2 ? "#FEF2F2" : days <= 7 ? "#FFFBEB" : "#ECFDF5", color: days <= 2 ? "#DC2626" : days <= 7 ? "#D97706" : "#059669", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700 }}>
+                        {days === 0 ? "Today!" : days === 1 ? "Tomorrow" : `${days} days`}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Booked + actions */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontSize: 10, color: "#90CAF9" }}>
+                      Booked {new Date(b.created_at).toLocaleDateString("en-IN")}
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {isPending && <>
+                        <button style={{ fontSize: 11, padding: "6px 12px", background: "#ECFDF5", border: "none", borderRadius: 6, cursor: "pointer", color: "#065F46", fontWeight: 700 }}
+                          onClick={() => updateStatus(b.id, "confirmed")}>Confirm</button>
+                        <button style={{ fontSize: 11, padding: "6px 12px", background: "#EFF6FF", border: "none", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 700 }}
+                          onClick={() => updateStatus(b.id, "completed")}>Done</button>
+                      </>}
+                      {isConfirmed && (
+                        <button style={{ fontSize: 11, padding: "6px 12px", background: "#EFF6FF", border: "none", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 700 }}
+                          onClick={() => updateStatus(b.id, "completed")}>Mark Done</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
