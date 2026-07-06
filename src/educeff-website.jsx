@@ -1020,6 +1020,14 @@ function LoginModal({ onClose, onLogin }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Clear fields when switching tabs to prevent stale autofill
+  const switchTab = (admin) => {
+    setIsAdmin(admin);
+    setEmail("");
+    setPassword("");
+    setError("");
+  };
+
   const handleLogin = async () => {
     setError(""); setLoading(true);
     try {
@@ -1071,14 +1079,31 @@ function LoginModal({ onClose, onLogin }) {
         <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Sign in to your Educeff account</p>
         <div style={{ display: "flex", gap: 0, background: "#F5FAFF", borderRadius: 6, padding: 3, marginBottom: 20 }}>
           {["Student", "Admin"].map(t => (
-            <button key={t} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 4, background: (t === "Admin") === isAdmin ? "#FFFFFF" : "transparent", fontWeight: 500, fontSize: 13, cursor: "pointer", color: (t === "Admin") === isAdmin ? "#64B5F6" : "#6D28D9", transition: "all 0.2s" }} onClick={() => { setIsAdmin(t === "Admin"); setError(""); }}>{t}</button>
+            <button key={t} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 4, background: (t === "Admin") === isAdmin ? "#FFFFFF" : "transparent", fontWeight: 500, fontSize: 13, cursor: "pointer", color: (t === "Admin") === isAdmin ? "#64B5F6" : "#6D28D9", transition: "all 0.2s" }} onClick={() => switchTab(t === "Admin")}>{t}</button>
           ))}
         </div>
         {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
         <label>Email Address</label>
-        <input type="email" placeholder={isAdmin ? "Educeff.india@gmail.com" : "your@email.com"} value={email} onChange={e => setEmail(e.target.value)} />
+        <input
+          type="email"
+          placeholder="Enter your email address"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
+          name={isAdmin ? "admin-email" : "student-email"}
+        />
         <label>Password</label>
-        <input type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} />
+        <input
+          type="password"
+          placeholder="Enter your password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          autoComplete="new-password"
+          name={isAdmin ? "admin-password" : "student-password"}
+        />
         <div style={{ textAlign: "right", marginTop: -8, marginBottom: 16 }}>
           <span style={{ fontSize: 12, color: "#64B5F6", cursor: "pointer" }} onClick={async () => {
             if (!email) { alert("Enter your email first"); return; }
