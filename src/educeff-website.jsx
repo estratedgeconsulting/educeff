@@ -912,9 +912,9 @@ function ContactForm() {
             <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#64B5F6", marginBottom: 16, letterSpacing: "-0.02em" }}>Let's Start Your Journey Today</h2>
             <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>Reach out to our team for any queries about admissions, counseling, or services. We typically respond within 2 hours.</p>
             {[
-              { icon: "📍", label: "Address", val: "123 Pimpri Road, Pimpri-Chinchwad, Pune 411045" },
+              { icon: "📍", label: "Address", val: "Lane 3, near Vijay Sales, Baner, Pallod Farms, Pune, Maharashtra 411045" },
               { icon: "📞", label: "Phone", val: "+91 98996 44633" },
-              { icon: "✉️", label: "Email", val: "hello@educeff.com" },
+              { icon: "✉️", label: "Email", val: "Educeff.india@gmail.com" },
               { icon: "🕐", label: "Hours", val: "Mon–Sat, 9AM – 7PM" },
             ].map(c => (
               <div key={c.label} style={{ display: "flex", gap: 14, marginBottom: 18, alignItems: "flex-start" }}>
