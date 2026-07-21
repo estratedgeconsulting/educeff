@@ -1108,7 +1108,9 @@ function LoginModal({ onClose, onLogin }) {
           <span style={{ fontSize: 12, color: "#64B5F6", cursor: "pointer" }} onClick={async () => {
             if (!email) { alert("Enter your email first"); return; }
             try {
-              await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+              await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}`,
+              });
               alert("Password reset email sent! Check your inbox.");
             } catch(e) { alert("Failed to send reset email: " + e.message); }
           }}>Forgot password?</span>
@@ -1169,7 +1171,10 @@ function RegisterModal({ onClose }) {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { data: { full_name: `${form.firstName} ${form.lastName}` } }
+        options: {
+          data: { full_name: `${form.firstName} ${form.lastName}` },
+          emailRedirectTo: `${window.location.origin}`,
+        }
       });
       if (authError) throw authError;
 
@@ -4776,7 +4781,7 @@ function useCountdown(targetDate) {
   return timeLeft;
 }
 
-function ExamCard({ exam, isLoggedIn, onRemind }) {
+function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
   const countdown = useCountdown(exam.lastDate);
   const daysLeft = countdown.days;
   const isUrgent = !countdown.expired && daysLeft !== undefined && daysLeft <= 7;
@@ -4884,7 +4889,7 @@ function ExamCard({ exam, isLoggedIn, onRemind }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {!isExpired && (
           <button style={{ width: "100%", fontSize: 12, padding: "9px 0", background: "linear-gradient(135deg, #1565C0, #7C3AED)", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700 }}
-            onClick={() => { if(typeof setModal === "function") setModal("register"); else window.location.href = "/#register"; }}>
+            onClick={() => setModal ? setModal("register") : window.open("mailto:Educeff.india@gmail.com?subject=Form Filling Help - " + exam.name, "_blank")}>
             🎓 Let Educeff Fill This Form
           </button>
         )}
@@ -4912,7 +4917,7 @@ function ExamCard({ exam, isLoggedIn, onRemind }) {
   );
 }
 
-function CollegesPage() {
+function CollegesPage({ setModal }) {
   const [activeStream, setActiveStream] = useState("All");
   const [activeTab, setActiveTab] = useState("exams");
   const [search, setSearch] = useState("");
@@ -5232,7 +5237,7 @@ function CollegesPage() {
                 <div style={{ textAlign: "center", padding: "60px 0", color: "#6D28D9" }}>No exams found for "{search}"</div>
               ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-                  {filteredExams.map(exam => <ExamCard key={exam.name} exam={exam} isLoggedIn={false} onRemind={(e) => { setRemindExam(e); setRemindDone(false); setRemindForm({ name: "", email: "", mobile: "" }); }} />)}
+                  {filteredExams.map(exam => <ExamCard key={exam.name} exam={exam} isLoggedIn={false} onRemind={(e) => { setRemindExam(e); setRemindDone(false); setRemindForm({ name: "", email: "", mobile: "" }); }} setModal={setModal} />)}
                 </div>
               )}
               <div style={{ marginTop: 32, background: "#FFFFFF", borderRadius: 12, border: "1px solid #C8E4FA", padding: 20 }}>
@@ -5589,7 +5594,7 @@ export default function App() {
 
       {page === "About" && <><AboutPage /><CTA setModal={setModal} /></>}
       {page === "Services" && <><ServicesPage /><CTA setModal={setModal} /></>}
-      {page === "Colleges" && <><CollegesPage /><CTA setModal={setModal} /></>}
+      {page === "Colleges" && <><CollegesPage setModal={setModal} /><CTA setModal={setModal} /></>}
       {page === "Contact" && <><ContactForm /><CTA setModal={setModal} /></>}
 
       <Footer setPage={setPage} />
