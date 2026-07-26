@@ -1028,9 +1028,6 @@ function LoginModal({ onClose, onLogin }) {
     setError("");
   };
 
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendDone, setResendDone] = useState(false);
-
   const handleLogin = async () => {
     setError(""); setLoading(true);
     try {
@@ -1047,13 +1044,8 @@ function LoginModal({ onClose, onLogin }) {
         }
         onLogin(true);
       } else {
-        const { data, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
+        const { error: authErr } = await supabase.auth.signInWithPassword({ email, password });
         if (authErr) throw authErr;
-        // Check if email is confirmed
-        if (data?.user && !data.user.email_confirmed_at) {
-          await supabase.auth.signOut();
-          throw new Error("EMAIL_NOT_CONFIRMED");
-        }
         onLogin(false);
       }
     } catch (err) {
@@ -1072,15 +1064,6 @@ function LoginModal({ onClose, onLogin }) {
     }
   };
 
-  const handleResendConfirmation = async () => {
-    setResendLoading(true);
-    try {
-      await supabase.auth.resend({ type: "signup", email });
-      setResendDone(true);
-    } catch (e) { console.warn(e); }
-    setResendLoading(false);
-  };
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
@@ -1092,24 +1075,9 @@ function LoginModal({ onClose, onLogin }) {
             <button key={t} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 4, background: (t === "Admin") === isAdmin ? "#FFFFFF" : "transparent", fontWeight: 500, fontSize: 13, cursor: "pointer", color: (t === "Admin") === isAdmin ? "#64B5F6" : "#6D28D9", transition: "all 0.2s" }} onClick={() => switchTab(t === "Admin")}>{t}</button>
           ))}
         </div>
-        {error === "EMAIL_NOT_CONFIRMED" ? (
-          <div style={{ background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#92400E", marginBottom: 6 }}>📧 Please confirm your email first</div>
-            <div style={{ fontSize: 12, color: "#92400E", marginBottom: 12, lineHeight: 1.6 }}>
-              We sent a confirmation link to <strong>{email}</strong>. Please check your inbox (and spam folder) and click the link to activate your account.
-            </div>
-            {resendDone ? (
-              <div style={{ fontSize: 12, color: "#059669", fontWeight: 600 }}>✅ Confirmation email resent! Check your inbox.</div>
-            ) : (
-              <button style={{ fontSize: 12, color: "#1565C0", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, opacity: resendLoading ? 0.7 : 1 }}
-                onClick={handleResendConfirmation} disabled={resendLoading}>
-                {resendLoading ? "Sending..." : "↻ Resend confirmation email"}
-              </button>
-            )}
-          </div>
-        ) : error ? (
+        {error && (
           <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>
-        ) : null}
+        )}
         <label>Email Address</label>
         <input
           type="email"
@@ -1247,27 +1215,21 @@ function RegisterModal({ onClose }) {
 
   if (success) return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" style={{ maxWidth: 440, textAlign: "center" }} onClick={e => e.stopPropagation()}>
-        <div style={{ fontSize: 52, marginBottom: 12 }}>📧</div>
-        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#1A1A2E", marginBottom: 8 }}>Check your email!</h2>
+      <div className="modal" style={{ maxWidth: 420, textAlign: "center" }} onClick={e => e.stopPropagation()}>
+        <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
+        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#1A1A2E", marginBottom: 8 }}>Welcome to Educeff Aspire!</h2>
         <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 20, lineHeight: 1.7 }}>
-          We sent a confirmation link to <strong style={{ color: "#1565C0" }}>{form.email}</strong>
+          Your account has been created successfully. You can now log in and start your admission journey.
         </p>
-        <div style={{ background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 10, padding: "16px 20px", marginBottom: 20, textAlign: "left" }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#1565C0", marginBottom: 10 }}>To activate your account:</div>
+        <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 10, padding: "16px 20px", marginBottom: 24, textAlign: "left" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#059669", marginBottom: 10 }}>✅ What to do next:</div>
           <div style={{ fontSize: 13, color: "#374151", lineHeight: 2.2 }}>
-            1️⃣ &nbsp;Open the email from <strong>Educeff Aspire</strong><br/>
-            2️⃣ &nbsp;Click <strong>"Confirm My Email Address"</strong><br/>
-            3️⃣ &nbsp;Come back and log in
+            👤 &nbsp;Complete your student profile<br/>
+            📋 &nbsp;Browse college suggestions<br/>
+            🎓 &nbsp;Book a free counseling session
           </div>
         </div>
-        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 14px", marginBottom: 20, fontSize: 12, color: "#92400E" }}>
-          ⚠️ Check your <strong>spam/junk folder</strong> if you don't see it within 2 minutes.
-        </div>
-        <button className="btn-primary" style={{ width: "100%", padding: 13, marginBottom: 10 }} onClick={onClose}>OK, I'll check my email →</button>
-        <p style={{ fontSize: 12, color: "#90CAF9" }}>
-          Wrong email? <span style={{ color: "#1565C0", cursor: "pointer", textDecoration: "underline" }} onClick={() => { setSuccess(false); setForm(f => ({ ...f, email: "" })); }}>Go back and correct it</span>
-        </p>
+        <button className="btn-primary" style={{ width: "100%", padding: 13 }} onClick={onClose}>Login Now →</button>
       </div>
     </div>
   );
