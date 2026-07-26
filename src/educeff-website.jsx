@@ -3232,20 +3232,22 @@ function SupportTab({ user }) {
 const adminCSS = `
   .admin-wrap { display: flex; min-height: 100vh; background: #F0F7FF; font-family: 'Plus Jakarta Sans', sans-serif; }
   .admin-sidebar {
-    width: 260px;
+    width: 220px;
     background: linear-gradient(180deg, #0D1B4B 0%, #1A237E 50%, #283593 100%);
     display: flex; flex-direction: column;
     padding: 0; flex-shrink: 0;
     position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
   }
-  .admin-sidebar-top { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-  .admin-user-card { margin: 16px; padding: 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
-  .admin-nav-section { padding: 4px 12px; }
-  .admin-nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 8px; margin: 12px 0 4px; }
-  .admin-nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; margin-bottom: 1px; }
+  .admin-sidebar-top { padding: 16px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .admin-user-card { margin: 10px 12px; padding: 10px 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; }
+  .admin-nav-section { padding: 2px 10px; }
+  .admin-nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 8px; margin: 8px 0 2px; }
+  .admin-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.2s; margin-bottom: 1px; }
   .admin-nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
   .admin-nav-item.active { background: rgba(100,181,246,0.2); color: white; font-weight: 600; border-left: 3px solid #64B5F6; }
-  .admin-nav-icon { width: 30px; height: 30px; border-radius: 7px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .admin-nav-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
   .admin-nav-item.active .admin-nav-icon { background: rgba(100,181,246,0.2); }
   .admin-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
   .admin-topbar { background: white; border-bottom: 1px solid #E3F2FD; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
