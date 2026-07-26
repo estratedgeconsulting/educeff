@@ -912,9 +912,9 @@ function ContactForm() {
             <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#64B5F6", marginBottom: 16, letterSpacing: "-0.02em" }}>Let's Start Your Journey Today</h2>
             <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>Reach out to our team for any queries about admissions, counseling, or services. We typically respond within 2 hours.</p>
             {[
-              { icon: "📍", label: "Address", val: "Lane 3, near Vijay Sales, Baner, Pallod Farms, Pune, Maharashtra 411045" },
+              { icon: "📍", label: "Address", val: "123 Pimpri Road, Pimpri-Chinchwad, Pune 411045" },
               { icon: "📞", label: "Phone", val: "+91 98996 44633" },
-              { icon: "✉️", label: "Email", val: "Educeff.india@gmail.com" },
+              { icon: "✉️", label: "Email", val: "hello@educeff.com" },
               { icon: "🕐", label: "Hours", val: "Mon–Sat, 9AM – 7PM" },
             ].map(c => (
               <div key={c.label} style={{ display: "flex", gap: 14, marginBottom: 18, alignItems: "flex-start" }}>
@@ -1028,47 +1028,57 @@ function LoginModal({ onClose, onLogin }) {
     setError("");
   };
 
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
+
   const handleLogin = async () => {
     setError(""); setLoading(true);
     try {
       if (isAdmin) {
-        // Step 1: Sign in
         const { data, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
         if (authErr) throw authErr;
-
-        // Step 2: Check admins table — use maybeSingle() to avoid error when no row found
-        const { data: adminData, error: adminErr } = await supabase
-          .from("admins")
-          .select("*")
-          .eq("user_id", data.user.id)
-          .maybeSingle();
-
-        // Step 3: If RLS blocks the read, try matching by email instead
+        const { data: adminData } = await supabase.from("admins").select("*").eq("user_id", data.user.id).maybeSingle();
         if (!adminData) {
-          const { data: adminByEmail } = await supabase
-            .from("admins")
-            .select("*")
-            .eq("email", email.toLowerCase().trim())
-            .maybeSingle();
-
+          const { data: adminByEmail } = await supabase.from("admins").select("*").eq("email", email.toLowerCase().trim()).maybeSingle();
           if (!adminByEmail) {
-            // Sign out since they logged in but aren't admin
             await supabase.auth.signOut();
-            throw new Error("You do not have admin access. Make sure your email is added to the admins table in Supabase.");
+            throw new Error("You do not have admin access.");
           }
         }
         onLogin(true);
       } else {
-        // Student login
-        const { error: authErr } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
         if (authErr) throw authErr;
+        // Check if email is confirmed
+        if (data?.user && !data.user.email_confirmed_at) {
+          await supabase.auth.signOut();
+          throw new Error("EMAIL_NOT_CONFIRMED");
+        }
         onLogin(false);
       }
     } catch (err) {
-      setError(err.message || "Login failed. Please try again.");
+      const msg = err.message || "";
+      if (msg === "EMAIL_NOT_CONFIRMED" || msg.includes("Email not confirmed") || msg.includes("email_not_confirmed")) {
+        setError("EMAIL_NOT_CONFIRMED");
+      } else if (msg.includes("Invalid login") || msg.includes("Invalid email or password")) {
+        setError("Incorrect email or password. Please try again.");
+      } else if (msg.includes("fetch") || msg.includes("network")) {
+        setError("Connection error. Please check your internet and try again.");
+      } else {
+        setError(msg || "Login failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResendConfirmation = async () => {
+    setResendLoading(true);
+    try {
+      await supabase.auth.resend({ type: "signup", email });
+      setResendDone(true);
+    } catch (e) { console.warn(e); }
+    setResendLoading(false);
   };
 
   return (
@@ -1082,7 +1092,24 @@ function LoginModal({ onClose, onLogin }) {
             <button key={t} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 4, background: (t === "Admin") === isAdmin ? "#FFFFFF" : "transparent", fontWeight: 500, fontSize: 13, cursor: "pointer", color: (t === "Admin") === isAdmin ? "#64B5F6" : "#6D28D9", transition: "all 0.2s" }} onClick={() => switchTab(t === "Admin")}>{t}</button>
           ))}
         </div>
-        {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
+        {error === "EMAIL_NOT_CONFIRMED" ? (
+          <div style={{ background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#92400E", marginBottom: 6 }}>📧 Please confirm your email first</div>
+            <div style={{ fontSize: 12, color: "#92400E", marginBottom: 12, lineHeight: 1.6 }}>
+              We sent a confirmation link to <strong>{email}</strong>. Please check your inbox (and spam folder) and click the link to activate your account.
+            </div>
+            {resendDone ? (
+              <div style={{ fontSize: 12, color: "#059669", fontWeight: 600 }}>✅ Confirmation email resent! Check your inbox.</div>
+            ) : (
+              <button style={{ fontSize: 12, color: "#1565C0", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, opacity: resendLoading ? 0.7 : 1 }}
+                onClick={handleResendConfirmation} disabled={resendLoading}>
+                {resendLoading ? "Sending..." : "↻ Resend confirmation email"}
+              </button>
+            )}
+          </div>
+        ) : error ? (
+          <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>
+        ) : null}
         <label>Email Address</label>
         <input
           type="email"
@@ -1168,6 +1195,11 @@ function RegisterModal({ onClose }) {
 
     setError(""); setLoading(true);
     try {
+      // Check Supabase is configured before trying
+      if (!supabaseConfigured) {
+        throw new Error("Connection not configured. Please contact support at Educeff.india@gmail.com or call +91 98996 44633.");
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -1193,7 +1225,21 @@ function RegisterModal({ onClose }) {
 
       setSuccess(true);
     } catch (err) {
-      setError(err.message || "Registration failed. Please try again.");
+      // Friendly messages for common errors
+      const msg = err.message || "";
+      if (msg.includes("fetch") || msg.includes("network") || msg.includes("Failed to fetch")) {
+        setError("Connection error. Please check your internet and try again. If the problem persists, contact us at Educeff.india@gmail.com");
+      } else if (msg.includes("already registered") || msg.includes("User already registered")) {
+        setError("This email is already registered. Please login instead.");
+      } else if (msg.includes("Password should be")) {
+        setError("Password must be at least 8 characters.");
+      } else if (msg.includes("invalid email") || msg.includes("Invalid email")) {
+        setError("Please enter a valid email address.");
+      } else if (msg.includes("rate limit") || msg.includes("too many")) {
+        setError("Too many attempts. Please wait a minute and try again.");
+      } else {
+        setError(msg || "Registration failed. Please try again or contact support.");
+      }
     } finally {
       setLoading(false);
     }
@@ -1201,11 +1247,27 @@ function RegisterModal({ onClose }) {
 
   if (success) return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" style={{ maxWidth: 420, textAlign: "center" }} onClick={e => e.stopPropagation()}>
-        <div style={{ fontSize: 52, marginBottom: 16 }}>🎉</div>
-        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#64B5F6", marginBottom: 8 }}>Account Created!</h2>
-        <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Please check your email <strong>{form.email}</strong> and click the confirmation link to activate your account.</p>
-        <button className="btn-primary" style={{ width: "100%", padding: 13 }} onClick={onClose}>Got it →</button>
+      <div className="modal" style={{ maxWidth: 440, textAlign: "center" }} onClick={e => e.stopPropagation()}>
+        <div style={{ fontSize: 52, marginBottom: 12 }}>📧</div>
+        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#1A1A2E", marginBottom: 8 }}>Check your email!</h2>
+        <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 20, lineHeight: 1.7 }}>
+          We sent a confirmation link to <strong style={{ color: "#1565C0" }}>{form.email}</strong>
+        </p>
+        <div style={{ background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 10, padding: "16px 20px", marginBottom: 20, textAlign: "left" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#1565C0", marginBottom: 10 }}>To activate your account:</div>
+          <div style={{ fontSize: 13, color: "#374151", lineHeight: 2.2 }}>
+            1️⃣ &nbsp;Open the email from <strong>Educeff Aspire</strong><br/>
+            2️⃣ &nbsp;Click <strong>"Confirm My Email Address"</strong><br/>
+            3️⃣ &nbsp;Come back and log in
+          </div>
+        </div>
+        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 14px", marginBottom: 20, fontSize: 12, color: "#92400E" }}>
+          ⚠️ Check your <strong>spam/junk folder</strong> if you don't see it within 2 minutes.
+        </div>
+        <button className="btn-primary" style={{ width: "100%", padding: 13, marginBottom: 10 }} onClick={onClose}>OK, I'll check my email →</button>
+        <p style={{ fontSize: 12, color: "#90CAF9" }}>
+          Wrong email? <span style={{ color: "#1565C0", cursor: "pointer", textDecoration: "underline" }} onClick={() => { setSuccess(false); setForm(f => ({ ...f, email: "" })); }}>Go back and correct it</span>
+        </p>
       </div>
     </div>
   );
