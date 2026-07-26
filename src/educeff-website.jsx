@@ -1217,19 +1217,11 @@ function RegisterModal({ onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" style={{ maxWidth: 420, textAlign: "center" }} onClick={e => e.stopPropagation()}>
         <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
-        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#1A1A2E", marginBottom: 8 }}>Welcome to Educeff Aspire!</h2>
-        <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 20, lineHeight: 1.7 }}>
-          Your account has been created successfully. You can now log in and start your admission journey.
+        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#1A1A2E", marginBottom: 12 }}>Congratulations on Registration!</h2>
+        <p style={{ color: "#6B7280", fontSize: 15, marginBottom: 28, lineHeight: 1.7 }}>
+          Login to Access Your Account
         </p>
-        <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 10, padding: "16px 20px", marginBottom: 24, textAlign: "left" }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#059669", marginBottom: 10 }}>✅ What to do next:</div>
-          <div style={{ fontSize: 13, color: "#374151", lineHeight: 2.2 }}>
-            👤 &nbsp;Complete your student profile<br/>
-            📋 &nbsp;Browse college suggestions<br/>
-            🎓 &nbsp;Book a free counseling session
-          </div>
-        </div>
-        <button className="btn-primary" style={{ width: "100%", padding: 13 }} onClick={onClose}>Login Now →</button>
+        <button className="btn-primary" style={{ width: "100%", padding: 14, fontSize: 15 }} onClick={onClose}>Login Now →</button>
       </div>
     </div>
   );
