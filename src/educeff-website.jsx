@@ -1178,7 +1178,10 @@ function RegisterModal({ onClose }) {
       });
       if (authError) throw authError;
 
-      const { error: profileError } = await supabase.from("students").insert({
+      // Wait for auth.users row to be fully committed before inserting student profile
+      await new Promise(r => setTimeout(r, 1500));
+
+      const profileData = {
         user_id: authData.user.id,
         first_name: sanitize(form.firstName),
         last_name: sanitize(form.lastName),
@@ -1188,7 +1191,20 @@ function RegisterModal({ onClose }) {
         course_interest: form.course,
         status: "active",
         created_at: new Date().toISOString(),
-      });
+      };
+
+      // Try inserting student profile — retry up to 3 times if FK error
+      let profileError = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const { error } = await supabase.from("students").insert(profileData);
+        profileError = error;
+        if (!error) break;
+        if (error.message?.includes("foreign key") && attempt < 3) {
+          await new Promise(r => setTimeout(r, 1000 * attempt));
+        } else {
+          break;
+        }
+      }
       if (profileError) throw profileError;
 
       setSuccess(true);
@@ -2452,6 +2468,12 @@ function ApplicationsTab({ user }) {
   const isApplied = (collegeName) => apps.some(a => a.college === collegeName);
 
   const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
+  if (dataLoading) return (
+    <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+      <div style={{ fontSize: 40 }}>⏳</div>
+      <div style={{ fontSize: 16, color: "#90CAF9" }}>Loading colleges and exams...</div>
+    </div>
+  );
 
   const handleAdd = async () => {
     if (!form.college.trim() || !form.course.trim()) return;
@@ -3304,9 +3326,13 @@ function AdminDashboard({ setPage }) {
       { id: "counseling", label: "Counseling", icon: "🎓" },
     ]},
     { label: "Communication", items: [{ id: "notifications", label: "Notifications", icon: "🔔" }] },
+    { label: "Data Management", items: [
+      { id: "manage_colleges", label: "Colleges", icon: "🏛️" },
+      { id: "manage_exams", label: "Entrance Exams", icon: "📅" },
+    ]},
     { label: "System", items: [
-      { id: "reports", label: "Reports", icon: "\ud83d\udcc8" },
-      { id: "settings", label: "Settings", icon: "\u2699\ufe0f" },
+      { id: "reports", label: "Reports", icon: "📈" },
+      { id: "settings", label: "Settings", icon: "⚙️" },
     ]},
   ];
 
@@ -3385,6 +3411,8 @@ function AdminDashboard({ setPage }) {
           {tab === "notifications" && <AdminNotifications />}
           {tab === "reports" && <AdminReports stats={stats} />}
           {tab === "settings" && <AdminSettings />}
+          {tab === "manage_colleges" && <AdminManageColleges />}
+          {tab === "manage_exams" && <AdminManageExams />}
         </div>
       </div>
     </div>
@@ -4525,11 +4553,355 @@ function AdminReports({ stats }) {
   );
 }
 
-function AdminSettings() {
-  const [saved, setSaved] = useState(false);
+function AdminManageColleges() {
+  const [colleges, setColleges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterStream, setFilterStream] = useState("All");
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ name: "", city: "", stream: "Engineering", ranking: "", affiliation: "", type: "Government" });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState({ text: "", type: "" });
+
+  useEffect(() => { loadColleges(); }, []);
+
+  const loadColleges = async () => {
+    setLoading(true);
+    const { data } = await supabase.from("colleges").select("*").order("stream").order("name");
+    setColleges(data || []);
+    setLoading(false);
+  };
+
+  const openAdd = () => { setEditing(null); setForm({ name: "", city: "", stream: "Engineering", ranking: "", affiliation: "", type: "Government" }); setShowForm(true); };
+  const openEdit = (c) => { setEditing(c); setForm({ name: c.name, city: c.city || "", stream: c.stream || "Engineering", ranking: c.ranking || "", affiliation: c.affiliation || "", type: c.type || "Government" }); setShowForm(true); };
+
+  const handleSave = async () => {
+    if (!form.name.trim()) return setMsg({ text: "College name is required.", type: "error" });
+    setSaving(true);
+    try {
+      if (editing) {
+        await supabase.from("colleges").update({ ...form, updated_at: new Date().toISOString() }).eq("id", editing.id);
+        setMsg({ text: "College updated successfully!", type: "success" });
+      } else {
+        await supabase.from("colleges").insert({ ...form, is_active: true, created_at: new Date().toISOString() });
+        setMsg({ text: "College added successfully!", type: "success" });
+      }
+      setShowForm(false);
+      loadColleges();
+    } catch (e) { setMsg({ text: e.message, type: "error" }); }
+    setSaving(false);
+    setTimeout(() => setMsg({ text: "", type: "" }), 3000);
+  };
+
+  const handleToggle = async (id, is_active) => {
+    await supabase.from("colleges").update({ is_active: !is_active }).eq("id", id);
+    setColleges(p => p.map(c => c.id === id ? { ...c, is_active: !is_active } : c));
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this college permanently?")) return;
+    await supabase.from("colleges").delete().eq("id", id);
+    setColleges(p => p.filter(c => c.id !== id));
+  };
+
+  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
+  const filtered = colleges.filter(c => {
+    const matchStream = filterStream === "All" || c.stream === filterStream;
+    const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.city || "").toLowerCase().includes(search.toLowerCase());
+    return matchStream && matchSearch;
+  });
+
+  const streamColors = { Engineering: "#1565C0", Medical: "#059669", Law: "#EA580C", Management: "#7C3AED", Architecture: "#0891B2", Science: "#D97706", Commerce: "#0891B2", Pharmacy: "#9D174D" };
+
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 20 }}>Settings</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Manage Colleges</h1>
+          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{colleges.length} colleges · {filtered.length} shown</div>
+        </div>
+        <button className="btn-primary" style={{ fontSize: 13 }} onClick={openAdd}>+ Add College</button>
+      </div>
+
+      {msg.text && <div style={{ background: msg.type === "success" ? "#ECFDF5" : "#FEF2F2", border: `1px solid ${msg.type === "success" ? "#A7F3D0" : "#FECACA"}`, borderRadius: 8, padding: "10px 16px", marginBottom: 14, fontSize: 13, color: msg.type === "success" ? "#065F46" : "#DC2626" }}>{msg.text}</div>}
+
+      {/* Add/Edit Form */}
+      {showForm && (
+        <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 24, marginBottom: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>{editing ? "Edit College" : "Add New College"}</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0 16px" }}>
+            <div><label>College Name *</label><input placeholder="e.g. COEP Technological University" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
+            <div><label>City</label><input placeholder="e.g. Pune" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} /></div>
+            <div><label>Stream</label>
+              <select value={form.stream} onChange={e => setForm(f => ({ ...f, stream: e.target.value }))}>
+                {["Engineering","Medical","Law","Management","Architecture","Science","Commerce","Pharmacy"].map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div><label>Type</label>
+              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                {["Government","Private","Autonomous","Deemed"].map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+            <div><label>Ranking</label><input placeholder="e.g. Top 5 Engineering, Maharashtra" value={form.ranking} onChange={e => setForm(f => ({ ...f, ranking: e.target.value }))} /></div>
+            <div><label>Affiliation</label><input placeholder="e.g. Savitribai Phule Pune Univ." value={form.affiliation} onChange={e => setForm(f => ({ ...f, affiliation: e.target.value }))} /></div>
+          </div>
+          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            <button className="btn-primary" style={{ fontSize: 13, opacity: saving ? 0.7 : 1 }} onClick={handleSave} disabled={saving}>{saving ? "Saving..." : editing ? "Update College" : "Add College"}</button>
+            <button style={{ fontSize: 13, padding: "10px 20px", background: "transparent", border: "1px solid #E3F2FD", borderRadius: 8, cursor: "pointer", color: "#6B7280" }} onClick={() => setShowForm(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or city..." style={{ flex: 1, minWidth: 200, marginBottom: 0, fontSize: 13 }} />
+        <select value={filterStream} onChange={e => setFilterStream(e.target.value)} style={{ width: 180, marginBottom: 0, fontSize: 13 }}>
+          {streams.map(s => <option key={s}>{s}</option>)}
+        </select>
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "48px 0" }}><div style={{ fontSize: 32 }}>⏳</div></div>
+      ) : (
+        <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}>
+            <table>
+              <thead>
+                <tr><th>College</th><th>City</th><th>Stream</th><th>Type</th><th>Ranking</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {filtered.map(c => (
+                  <tr key={c.id} className="student-row">
+                    <td style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{c.name}</td>
+                    <td style={{ fontSize: 12, color: "#6B7280" }}>{c.city || "—"}</td>
+                    <td><span style={{ background: `${streamColors[c.stream] || "#6B7280"}15`, color: streamColors[c.stream] || "#6B7280", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 10 }}>{c.stream}</span></td>
+                    <td style={{ fontSize: 12, color: "#6B7280" }}>{c.type}</td>
+                    <td style={{ fontSize: 11, color: "#90CAF9", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.ranking || "—"}</td>
+                    <td>
+                      <span style={{ background: c.is_active ? "#ECFDF5" : "#FEF2F2", color: c.is_active ? "#059669" : "#DC2626", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 10 }}>
+                        {c.is_active ? "Active" : "Hidden"}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button style={{ fontSize: 11, padding: "5px 10px", background: "#EFF6FF", border: "none", borderRadius: 6, cursor: "pointer", color: "#1565C0", fontWeight: 600 }} onClick={() => openEdit(c)}>✏️ Edit</button>
+                        <button style={{ fontSize: 11, padding: "5px 10px", background: c.is_active ? "#FFFBEB" : "#ECFDF5", border: "none", borderRadius: 6, cursor: "pointer", color: c.is_active ? "#D97706" : "#059669", fontWeight: 600 }} onClick={() => handleToggle(c.id, c.is_active)}>{c.is_active ? "Hide" : "Show"}</button>
+                        <button style={{ fontSize: 11, padding: "5px 10px", background: "#FEF2F2", border: "none", borderRadius: 6, cursor: "pointer", color: "#DC2626", fontWeight: 600 }} onClick={() => handleDelete(c.id)}>🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AdminManageExams() {
+  const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterStream, setFilterStream] = useState("All");
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ name: "", full_name: "", stream: "Engineering", level: "Govt · National", form_start: "", last_date_display: "", last_date: "", exam_date: "", fee: "", mode: "Online (CBT)", conducted_by: "", next_cycle: "", official_link: "", last_verified: "" });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState({ text: "", type: "" });
+
+  useEffect(() => { loadExams(); }, []);
+
+  const loadExams = async () => {
+    setLoading(true);
+    const { data } = await supabase.from("entrance_exams").select("*").order("stream").order("name");
+    setExams(data || []);
+    setLoading(false);
+  };
+
+  const openAdd = () => { setEditing(null); setForm({ name: "", full_name: "", stream: "Engineering", level: "Govt · National", form_start: "", last_date_display: "", last_date: "", exam_date: "", fee: "", mode: "Online (CBT)", conducted_by: "", next_cycle: "", official_link: "", last_verified: "" }); setShowForm(true); };
+  const openEdit = (e) => {
+    setEditing(e);
+    setForm({ name: e.name || "", full_name: e.full_name || "", stream: e.stream || "Engineering", level: e.level || "Govt · National", form_start: e.form_start || "", last_date_display: e.last_date_display || "", last_date: e.last_date || "", exam_date: e.exam_date || "", fee: e.fee || "", mode: e.mode || "Online (CBT)", conducted_by: e.conducted_by || "", next_cycle: e.next_cycle || "", official_link: e.official_link || "", last_verified: e.last_verified || "" });
+    setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim()) return setMsg({ text: "Exam name is required.", type: "error" });
+    setSaving(true);
+    try {
+      const payload = { ...form, updated_at: new Date().toISOString() };
+      if (!payload.last_date) payload.last_date = null;
+      if (!payload.last_verified) payload.last_verified = null;
+      if (editing) {
+        await supabase.from("entrance_exams").update(payload).eq("id", editing.id);
+        setMsg({ text: "Exam updated successfully!", type: "success" });
+      } else {
+        await supabase.from("entrance_exams").insert({ ...payload, is_active: true, created_at: new Date().toISOString() });
+        setMsg({ text: "Exam added successfully!", type: "success" });
+      }
+      setShowForm(false);
+      loadExams();
+    } catch (e) { setMsg({ text: e.message, type: "error" }); }
+    setSaving(false);
+    setTimeout(() => setMsg({ text: "", type: "" }), 3000);
+  };
+
+  const markVerified = async (id) => {
+    const today = new Date().toISOString().split("T")[0];
+    await supabase.from("entrance_exams").update({ last_verified: today, updated_at: new Date().toISOString() }).eq("id", id);
+    setExams(p => p.map(e => e.id === id ? { ...e, last_verified: today } : e));
+    setMsg({ text: "Marked as verified today!", type: "success" });
+    setTimeout(() => setMsg({ text: "", type: "" }), 2000);
+  };
+
+  const handleToggle = async (id, is_active) => {
+    await supabase.from("entrance_exams").update({ is_active: !is_active }).eq("id", id);
+    setExams(p => p.map(e => e.id === id ? { ...e, is_active: !is_active } : e));
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this exam permanently?")) return;
+    await supabase.from("entrance_exams").delete().eq("id", id);
+    setExams(p => p.filter(e => e.id !== id));
+  };
+
+  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
+  const filtered = exams.filter(e => {
+    const matchStream = filterStream === "All" || e.stream === filterStream;
+    const matchSearch = !search || e.name.toLowerCase().includes(search.toLowerCase()) || (e.conducted_by || "").toLowerCase().includes(search.toLowerCase());
+    return matchStream && matchSearch;
+  });
+
+  const isStale = (lastVerified) => {
+    if (!lastVerified) return true;
+    const diff = new Date() - new Date(lastVerified);
+    return diff > 90 * 24 * 60 * 60 * 1000; // older than 90 days
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Manage Entrance Exams</h1>
+          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{exams.length} exams · {exams.filter(e => isStale(e.last_verified)).length} need verification</div>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button style={{ background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 600, color: "#D97706", cursor: "pointer" }} onClick={() => { setFilterStream("All"); setSearch(""); }}>
+            ⚠️ Stale: {exams.filter(e => isStale(e.last_verified)).length}
+          </button>
+          <button className="btn-primary" style={{ fontSize: 13 }} onClick={openAdd}>+ Add Exam</button>
+        </div>
+      </div>
+
+      {msg.text && <div style={{ background: msg.type === "success" ? "#ECFDF5" : "#FEF2F2", border: `1px solid ${msg.type === "success" ? "#A7F3D0" : "#FECACA"}`, borderRadius: 8, padding: "10px 16px", marginBottom: 14, fontSize: 13, color: msg.type === "success" ? "#065F46" : "#DC2626" }}>{msg.text}</div>}
+
+      {/* Add/Edit Form */}
+      {showForm && (
+        <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 24, marginBottom: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>{editing ? `Edit: ${editing.name}` : "Add New Exam"}</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0 16px" }}>
+            <div><label>Exam Name *</label><input placeholder="e.g. JEE Main" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
+            <div><label>Full Name</label><input placeholder="Joint Entrance Examination Main" value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} /></div>
+            <div><label>Stream</label>
+              <select value={form.stream} onChange={e => setForm(f => ({ ...f, stream: e.target.value }))}>
+                {["Engineering","Medical","Law","Management","Architecture","Science","Commerce","Pharmacy"].map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div><label>Level</label>
+              <select value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}>
+                {["Govt · National","Govt · State","Private · National","Private · State","Govt · University","Private · University"].map(l => <option key={l}>{l}</option>)}
+              </select>
+            </div>
+            <div><label>Form Start</label><input placeholder="e.g. Nov 2025" value={form.form_start} onChange={e => setForm(f => ({ ...f, form_start: e.target.value }))} /></div>
+            <div><label>Last Date (display)</label><input placeholder="e.g. Dec 31, 2025" value={form.last_date_display} onChange={e => setForm(f => ({ ...f, last_date_display: e.target.value }))} /></div>
+            <div><label>Last Date (actual)</label><input type="date" value={form.last_date} onChange={e => setForm(f => ({ ...f, last_date: e.target.value }))} /></div>
+            <div><label>Exam Date</label><input placeholder="e.g. Jan–Apr 2026" value={form.exam_date} onChange={e => setForm(f => ({ ...f, exam_date: e.target.value }))} /></div>
+            <div><label>Fee</label><input placeholder="e.g. ₹1,000" value={form.fee} onChange={e => setForm(f => ({ ...f, fee: e.target.value }))} /></div>
+            <div><label>Mode</label>
+              <select value={form.mode} onChange={e => setForm(f => ({ ...f, mode: e.target.value }))}>
+                {["Online (CBT)","Offline (OMR)","Hybrid"].map(m => <option key={m}>{m}</option>)}
+              </select>
+            </div>
+            <div><label>Conducted By</label><input placeholder="e.g. NTA" value={form.conducted_by} onChange={e => setForm(f => ({ ...f, conducted_by: e.target.value }))} /></div>
+            <div><label>Next Cycle</label><input placeholder="e.g. Nov 2026" value={form.next_cycle} onChange={e => setForm(f => ({ ...f, next_cycle: e.target.value }))} /></div>
+            <div><label>Official Link</label><input placeholder="https://..." value={form.official_link} onChange={e => setForm(f => ({ ...f, official_link: e.target.value }))} /></div>
+            <div><label>Last Verified Date</label><input type="date" value={form.last_verified} onChange={e => setForm(f => ({ ...f, last_verified: e.target.value }))} /></div>
+          </div>
+          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            <button className="btn-primary" style={{ fontSize: 13, opacity: saving ? 0.7 : 1 }} onClick={handleSave} disabled={saving}>{saving ? "Saving..." : editing ? "Update Exam" : "Add Exam"}</button>
+            <button style={{ fontSize: 13, padding: "10px 20px", background: "transparent", border: "1px solid #E3F2FD", borderRadius: 8, cursor: "pointer", color: "#6B7280" }} onClick={() => setShowForm(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by exam name or authority..." style={{ flex: 1, minWidth: 200, marginBottom: 0, fontSize: 13 }} />
+        <select value={filterStream} onChange={e => setFilterStream(e.target.value)} style={{ width: 180, marginBottom: 0, fontSize: 13 }}>
+          {streams.map(s => <option key={s}>{s}</option>)}
+        </select>
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "48px 0" }}><div style={{ fontSize: 32 }}>⏳</div></div>
+      ) : (
+        <div style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}>
+            <table>
+              <thead>
+                <tr><th>Exam</th><th>Stream</th><th>Last Date</th><th>Exam Date</th><th>Fee</th><th>Last Verified</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {filtered.map(e => (
+                  <tr key={e.id} className="student-row" style={{ background: isStale(e.last_verified) ? "#FFFBEB" : "white" }}>
+                    <td>
+                      <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{e.name}</div>
+                      <div style={{ fontSize: 10, color: "#90CAF9" }}>{e.conducted_by}</div>
+                    </td>
+                    <td style={{ fontSize: 11, color: "#6B7280" }}>{e.stream}</td>
+                    <td style={{ fontSize: 12, color: "#DC2626", fontWeight: 600 }}>{e.last_date_display || "—"}</td>
+                    <td style={{ fontSize: 12, color: "#374151" }}>{e.exam_date || "—"}</td>
+                    <td style={{ fontSize: 12, color: "#059669", fontWeight: 600 }}>{e.fee || "—"}</td>
+                    <td>
+                      {e.last_verified ? (
+                        <span style={{ background: isStale(e.last_verified) ? "#FFFBEB" : "#ECFDF5", color: isStale(e.last_verified) ? "#D97706" : "#059669", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8 }}>
+                          {isStale(e.last_verified) ? "⚠️ " : "✓ "}{new Date(e.last_verified).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "2-digit" })}
+                        </span>
+                      ) : (
+                        <span style={{ background: "#FEF2F2", color: "#DC2626", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8 }}>Not verified</span>
+                      )}
+                    </td>
+                    <td>
+                      <span style={{ background: e.is_active ? "#ECFDF5" : "#FEF2F2", color: e.is_active ? "#059669" : "#DC2626", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 10 }}>
+                        {e.is_active ? "Active" : "Hidden"}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                        <button style={{ fontSize: 10, padding: "4px 8px", background: "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: "#065F46", fontWeight: 700 }} onClick={() => markVerified(e.id)}>✓ Verify</button>
+                        <button style={{ fontSize: 10, padding: "4px 8px", background: "#EFF6FF", border: "none", borderRadius: 5, cursor: "pointer", color: "#1565C0", fontWeight: 700 }} onClick={() => openEdit(e)}>✏️ Edit</button>
+                        <button style={{ fontSize: 10, padding: "4px 8px", background: e.is_active ? "#FFFBEB" : "#ECFDF5", border: "none", borderRadius: 5, cursor: "pointer", color: e.is_active ? "#D97706" : "#059669", fontWeight: 700 }} onClick={() => handleToggle(e.id, e.is_active)}>{e.is_active ? "Hide" : "Show"}</button>
+                        <button style={{ fontSize: 10, padding: "4px 8px", background: "#FEF2F2", border: "none", borderRadius: 5, cursor: "pointer", color: "#DC2626", fontWeight: 700 }} onClick={() => handleDelete(e.id)}>🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+function AdminSettings() {
+
+  const [saved, setSaved] = useState(false);
       {saved && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 16px", marginBottom: 16, fontSize: 13, color: "#065F46" }}>✅ Settings saved!</div>}
       {[
         { title: "\ud83c\udfe2 Organization Profile", fields: [["Organization Name","Educeff Aspire"],["Registration No.","U80900MH2015PTC123456"],["Email","Educeff.india@gmail.com"],["Phone","+91 98996 44633"],["Address","Baner, Pune 411045"]] },
@@ -4937,257 +5309,60 @@ function CollegesPage({ setModal }) {
   const [activeStream, setActiveStream] = useState("All");
   const [activeTab, setActiveTab] = useState("exams");
   const [search, setSearch] = useState("");
-  const [remindExam, setRemindExam] = useState(null); // P1-4: exam to set reminder for
+  const [remindExam, setRemindExam] = useState(null);
   const [remindDone, setRemindDone] = useState(false);
   const [remindForm, setRemindForm] = useState({ name: "", email: "", mobile: "" });
-  const [applyCollege, setApplyCollege] = useState(null); // college being applied to
+  const [applyCollege, setApplyCollege] = useState(null);
   const [applyForm, setApplyForm] = useState({ name: "", email: "", mobile: "", course: "", exam: "", message: "" });
   const [applyLoading, setApplyLoading] = useState(false);
   const [applyDone, setApplyDone] = useState(false);
   const [applyError, setApplyError] = useState("");
 
-  const colleges = [
-    // ── ENGINEERING – Maharashtra ──
-    { name: "COEP Technological University", city: "Pune", stream: "Engineering", ranking: "#1 Govt. Engineering, Maharashtra", affiliation: "Autonomous", type: "Government" },
-    { name: "VJTI Mumbai", city: "Mumbai", stream: "Engineering", ranking: "Top 10 Govt. Engineering, India", affiliation: "University of Mumbai", type: "Government" },
-    { name: "MIT College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top 20 Private Engineering", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "Walchand College of Engineering", city: "Sangli", stream: "Engineering", ranking: "Top 5 Govt. Engineering, Maharashtra", affiliation: "Shivaji University", type: "Government" },
-    { name: "Government College of Engineering Aurangabad", city: "Aurangabad", stream: "Engineering", ranking: "Top Govt. Engineering, Marathwada", affiliation: "Dr. BAMU", type: "Government" },
-    { name: "Pune Institute of Computer Technology", city: "Pune", stream: "Engineering", ranking: "Top Private CS College, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "Sardar Patel College of Engineering", city: "Mumbai", stream: "Engineering", ranking: "Top Private Engineering, Mumbai", affiliation: "University of Mumbai", type: "Private" },
-    { name: "Fr. Conceicao Rodrigues College of Engineering", city: "Mumbai", stream: "Engineering", ranking: "Top Private Engineering, Mumbai", affiliation: "University of Mumbai", type: "Private" },
-    { name: "KIT's College of Engineering", city: "Kolhapur", stream: "Engineering", ranking: "Top Engineering, Kolhapur", affiliation: "Shivaji University", type: "Private" },
-    { name: "Symbiosis Institute of Technology", city: "Pune", stream: "Engineering", ranking: "Top Private Tech, Pune", affiliation: "SIU", type: "Private" },
-    // ── ENGINEERING – National ──
-    { name: "IIT Bombay", city: "Mumbai", stream: "Engineering", ranking: "#3 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "IIT Delhi", city: "Delhi", stream: "Engineering", ranking: "#2 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "NIT Nagpur (VNIT)", city: "Nagpur", stream: "Engineering", ranking: "Top 15 NIT, India", affiliation: "Autonomous (NIT)", type: "Government" },
-    { name: "NIT Surathkal", city: "Karnataka", stream: "Engineering", ranking: "Top 10 NIT, India", affiliation: "Autonomous (NIT)", type: "Government" },
-    { name: "BITS Pilani", city: "Rajasthan", stream: "Engineering", ranking: "Top 5 Private Engineering, India", affiliation: "Autonomous (BITS)", type: "Private" },
-    // ── MEDICAL – Maharashtra ──
-    { name: "BJ Medical College", city: "Pune", stream: "Medical", ranking: "#2 Govt. Medical, Maharashtra", affiliation: "MUHS", type: "Government" },
-    { name: "Grant Medical College", city: "Mumbai", stream: "Medical", ranking: "#1 Govt. Medical, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Seth GS Medical College", city: "Mumbai", stream: "Medical", ranking: "Top 5 Medical, India", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Nagpur Government Medical College", city: "Nagpur", stream: "Medical", ranking: "Top Govt. Medical, Vidarbha", affiliation: "MUHS", type: "Government" },
-    { name: "D.Y. Patil Medical College", city: "Pune", stream: "Medical", ranking: "Top Private Medical, Pune", affiliation: "DPU", type: "Private" },
-    { name: "Krishna Institute of Medical Sciences", city: "Karad", stream: "Medical", ranking: "Top Private Medical, Maharashtra", affiliation: "Krishna University", type: "Private" },
-    // ── MEDICAL – National ──
-    { name: "AIIMS New Delhi", city: "Delhi", stream: "Medical", ranking: "#1 Medical, India (NIRF)", affiliation: "Autonomous (AIIMS)", type: "Government" },
-    { name: "AIIMS Nagpur", city: "Nagpur", stream: "Medical", ranking: "Top AIIMS, Central India", affiliation: "Autonomous (AIIMS)", type: "Government" },
-    { name: "CMC Vellore", city: "Tamil Nadu", stream: "Medical", ranking: "Top 3 Medical, India", affiliation: "Autonomous", type: "Private" },
-    { name: "Kasturba Medical College", city: "Manipal", stream: "Medical", ranking: "Top 10 Private Medical, India", affiliation: "Manipal University", type: "Private" },
-    // ── LAW – Maharashtra ──
-    { name: "Symbiosis Law School", city: "Pune", stream: "Law", ranking: "Top 5 Law Colleges, India", affiliation: "SIU", type: "Private" },
-    { name: "ILS Law College", city: "Pune", stream: "Law", ranking: "Top Govt. Law, Maharashtra", affiliation: "Savitribai Phule Pune Univ.", type: "Government" },
-    { name: "Government Law College Mumbai", city: "Mumbai", stream: "Law", ranking: "#1 Govt. Law, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Maharashtra National Law University", city: "Mumbai", stream: "Law", ranking: "Top NLU, Maharashtra", affiliation: "Autonomous (NLU)", type: "Government" },
-    // ── LAW – National ──
-    { name: "NLSIU Bangalore", city: "Bangalore", stream: "Law", ranking: "#1 Law, India (NIRF)", affiliation: "Autonomous (NLU)", type: "Government" },
-    { name: "NLU Delhi", city: "Delhi", stream: "Law", ranking: "#2 Law, India (NIRF)", affiliation: "Autonomous (NLU)", type: "Government" },
-    { name: "NALSAR Hyderabad", city: "Hyderabad", stream: "Law", ranking: "#3 Law, India (NIRF)", affiliation: "Autonomous (NLU)", type: "Government" },
-    // ── MANAGEMENT – Maharashtra ──
-    { name: "IIM Nagpur", city: "Nagpur", stream: "Management", ranking: "IIM — CAT cutoff 90+", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "Symbiosis Institute of Business Management", city: "Pune", stream: "Management", ranking: "Top 10 MBA, India", affiliation: "SIU", type: "Private" },
-    { name: "Jamnalal Bajaj Institute of Management", city: "Mumbai", stream: "Management", ranking: "Top 5 MBA, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Prin. L. N. Welingkar Institute", city: "Mumbai", stream: "Management", ranking: "Top Private MBA, Mumbai", affiliation: "University of Mumbai", type: "Private" },
-    { name: "PUMBA – Pune University MBA", city: "Pune", stream: "Management", ranking: "Top Govt. MBA, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Government" },
-    // ── MANAGEMENT – National ──
-    { name: "IIM Ahmedabad", city: "Ahmedabad", stream: "Management", ranking: "#1 Management, India (NIRF)", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "IIM Bangalore", city: "Bangalore", stream: "Management", ranking: "#2 Management, India (NIRF)", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "IIM Calcutta", city: "Kolkata", stream: "Management", ranking: "#3 Management, India (NIRF)", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "FMS Delhi", city: "Delhi", stream: "Management", ranking: "Top 5 MBA, India", affiliation: "University of Delhi", type: "Government" },
-    // ── ARCHITECTURE ──
-    { name: "Sir JJ College of Architecture", city: "Mumbai", stream: "Architecture", ranking: "#1 Architecture, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    { name: "Rachana Sansad Academy of Architecture", city: "Mumbai", stream: "Architecture", ranking: "Top 5 Architecture, India", affiliation: "Autonomous", type: "Private" },
-    { name: "BKPS College of Architecture", city: "Pune", stream: "Architecture", ranking: "Top Architecture, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "CEPT University", city: "Ahmedabad", stream: "Architecture", ranking: "#1 Architecture, India (NIRF)", affiliation: "Autonomous", type: "Private" },
-    // ── SCIENCE & COMMERCE ──
-    { name: "Fergusson College", city: "Pune", stream: "Science", ranking: "Top Arts & Science, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Autonomous" },
-    { name: "St. Xavier's College", city: "Mumbai", stream: "Science", ranking: "Top Science College, Mumbai", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "Ruparel College", city: "Mumbai", stream: "Science", ranking: "Top Science, South Mumbai", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "Elphinstone College", city: "Mumbai", stream: "Commerce", ranking: "Top Commerce, Mumbai", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "H.R. College of Commerce & Economics", city: "Mumbai", stream: "Commerce", ranking: "Top Commerce, India", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "Sydenham College of Commerce", city: "Mumbai", stream: "Commerce", ranking: "Top Govt. Commerce, Maharashtra", affiliation: "University of Mumbai", type: "Government" },
-    // ── PHARMACY ──
-    { name: "Bombay College of Pharmacy", city: "Mumbai", stream: "Pharmacy", ranking: "#1 Pharmacy, Maharashtra", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "Poona College of Pharmacy", city: "Pune", stream: "Pharmacy", ranking: "Top Pharmacy, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "JSS College of Pharmacy", city: "Mysore", stream: "Pharmacy", ranking: "Top 5 Pharmacy, India", affiliation: "JSS University", type: "Private" },
-    // ── ENGINEERING – Additional Maharashtra ──
-    { name: "Government College of Engineering Pune", city: "Pune", stream: "Engineering", ranking: "Top Govt. Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Government" },
-    { name: "Vishwakarma Institute of Technology", city: "Pune", stream: "Engineering", ranking: "Top Private Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "Shri Guru Gobind Singhji Institute", city: "Nanded", stream: "Engineering", ranking: "Top Govt. Engineering, Marathwada", affiliation: "SRTMUN", type: "Government" },
-    { name: "Maharashtra Institute of Technology", city: "Aurangabad", stream: "Engineering", ranking: "Top Private Engineering, Aurangabad", affiliation: "Dr. BAMU", type: "Private" },
-    { name: "Pune Vidyarthi Griha College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "Cummins College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top Women Engineering College, India", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "DY Patil College of Engineering", city: "Pune", stream: "Engineering", ranking: "Top Private Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    { name: "Sinhgad College of Engineering", city: "Pune", stream: "Engineering", ranking: "Popular Engineering, Pune", affiliation: "Savitribai Phule Pune Univ.", type: "Private" },
-    // ── ENGINEERING – Additional National ──
-    { name: "IIT Madras", city: "Chennai", stream: "Engineering", ranking: "#1 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "IIT Kharagpur", city: "West Bengal", stream: "Engineering", ranking: "#5 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "IIT Kanpur", city: "Kanpur", stream: "Engineering", ranking: "#4 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "IIT Roorkee", city: "Roorkee", stream: "Engineering", ranking: "#7 Engineering, India (NIRF)", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "IIT Hyderabad", city: "Hyderabad", stream: "Engineering", ranking: "Top 10 IIT, India", affiliation: "Autonomous (IIT)", type: "Government" },
-    { name: "IIT Pune (COEP)", city: "Pune", stream: "Engineering", ranking: "#1 Govt. Engineering, Maharashtra", affiliation: "Autonomous", type: "Government" },
-    { name: "NIT Trichy", city: "Tamil Nadu", stream: "Engineering", ranking: "#8 NIT, India (NIRF)", affiliation: "Autonomous (NIT)", type: "Government" },
-    { name: "NIT Warangal", city: "Telangana", stream: "Engineering", ranking: "#5 NIT, India (NIRF)", affiliation: "Autonomous (NIT)", type: "Government" },
-    { name: "NIT Calicut", city: "Kerala", stream: "Engineering", ranking: "#6 NIT, India (NIRF)", affiliation: "Autonomous (NIT)", type: "Government" },
-    { name: "VIT Vellore", city: "Vellore", stream: "Engineering", ranking: "Top 5 Private Engineering, India", affiliation: "VIT University", type: "Private" },
-    { name: "SRM Institute of Science", city: "Chennai", stream: "Engineering", ranking: "Top 10 Private Engineering, India", affiliation: "SRM University", type: "Private" },
-    { name: "Thapar Institute", city: "Patiala", stream: "Engineering", ranking: "Top 15 Engineering, India", affiliation: "Autonomous", type: "Private" },
-    { name: "PES University", city: "Bangalore", stream: "Engineering", ranking: "Top Private Engineering, Bangalore", affiliation: "Autonomous", type: "Private" },
-    { name: "RV College of Engineering", city: "Bangalore", stream: "Engineering", ranking: "Top Private Engineering, Karnataka", affiliation: "VTU", type: "Private" },
-    { name: "BMS College of Engineering", city: "Bangalore", stream: "Engineering", ranking: "Top Private Engineering, Bangalore", affiliation: "VTU", type: "Autonomous" },
-    { name: "Amity University", city: "Noida", stream: "Engineering", ranking: "Top Private University, North India", affiliation: "Autonomous", type: "Private" },
-    { name: "Chandigarh University", city: "Chandigarh", stream: "Engineering", ranking: "Top Private University, Punjab", affiliation: "Autonomous", type: "Private" },
-    { name: "LPU - Lovely Professional University", city: "Punjab", stream: "Engineering", ranking: "Top Private University, North India", affiliation: "Autonomous", type: "Private" },
-    // ── MEDICAL – Additional ──
-    { name: "Maulana Azad Medical College", city: "Delhi", stream: "Medical", ranking: "Top Govt. Medical, Delhi", affiliation: "University of Delhi", type: "Government" },
-    { name: "Lady Hardinge Medical College", city: "Delhi", stream: "Medical", ranking: "Top Women Medical, India", affiliation: "University of Delhi", type: "Government" },
-    { name: "King George Medical University", city: "Lucknow", stream: "Medical", ranking: "Top Govt. Medical, UP", affiliation: "Autonomous", type: "Government" },
-    { name: "Madras Medical College", city: "Chennai", stream: "Medical", ranking: "Top Govt. Medical, Tamil Nadu", affiliation: "Tamil Nadu MGR Univ.", type: "Government" },
-    { name: "Amrita School of Medicine", city: "Coimbatore", stream: "Medical", ranking: "Top Private Medical, South India", affiliation: "Amrita University", type: "Private" },
-    { name: "Sri Ramachandra Medical College", city: "Chennai", stream: "Medical", ranking: "Top Private Medical, Tamil Nadu", affiliation: "SRMC University", type: "Private" },
-    { name: "Jawaharlal Nehru Medical College", city: "Belgaum", stream: "Medical", ranking: "Top Medical, Karnataka", affiliation: "KLE University", type: "Private" },
-    // ── LAW – Additional ──
-    { name: "Gujarat National Law University", city: "Gandhinagar", stream: "Law", ranking: "Top NLU, West India", affiliation: "Autonomous (NLU)", type: "Government" },
-    { name: "Rajiv Gandhi National Law University", city: "Patiala", stream: "Law", ranking: "Top NLU, North India", affiliation: "Autonomous (NLU)", type: "Government" },
-    { name: "National Law University Jodhpur", city: "Jodhpur", stream: "Law", ranking: "Top 5 NLU, India", affiliation: "Autonomous (NLU)", type: "Government" },
-    { name: "Hidayatullah National Law University", city: "Raipur", stream: "Law", ranking: "Top NLU, Central India", affiliation: "Autonomous (NLU)", type: "Government" },
-    { name: "School of Law, Christ University", city: "Bangalore", stream: "Law", ranking: "Top Private Law, South India", affiliation: "Christ University", type: "Private" },
-    // ── MANAGEMENT – Additional ──
-    { name: "IIM Lucknow", city: "Lucknow", stream: "Management", ranking: "Top 5 IIM, India", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "IIM Kozhikode", city: "Kozhikode", stream: "Management", ranking: "Top 7 IIM, India", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "IIM Indore", city: "Indore", stream: "Management", ranking: "Top 6 IIM, India", affiliation: "Autonomous (IIM)", type: "Government" },
-    { name: "SPJIMR Mumbai", city: "Mumbai", stream: "Management", ranking: "Top 5 MBA, India", affiliation: "S.P. Jain Institute", type: "Private" },
-    { name: "MDI Gurgaon", city: "Gurgaon", stream: "Management", ranking: "Top 10 MBA, India", affiliation: "Autonomous", type: "Private" },
-    { name: "IMT Ghaziabad", city: "Ghaziabad", stream: "Management", ranking: "Top 15 MBA, India", affiliation: "Autonomous", type: "Private" },
-    { name: "Great Lakes Institute", city: "Chennai", stream: "Management", ranking: "Top MBA, South India", affiliation: "Autonomous", type: "Private" },
-    { name: "XIMB - Xavier Institute", city: "Bhubaneswar", stream: "Management", ranking: "Top 15 MBA, India", affiliation: "Xavier University", type: "Private" },
-    { name: "KJ Somaiya Institute of Management", city: "Mumbai", stream: "Management", ranking: "Top MBA, Mumbai", affiliation: "Somaiya University", type: "Private" },
-    // ── SCIENCE – Additional ──
-    { name: "Indian Institute of Science", city: "Bangalore", stream: "Science", ranking: "#1 Research University, India (NIRF)", affiliation: "Autonomous (IISc)", type: "Government" },
-    { name: "Tata Institute of Fundamental Research", city: "Mumbai", stream: "Science", ranking: "Top Research Institute, India", affiliation: "Autonomous (TIFR)", type: "Government" },
-    { name: "IISER Pune", city: "Pune", stream: "Science", ranking: "Top Science Research, India", affiliation: "Autonomous (IISER)", type: "Government" },
-    { name: "IISER Kolkata", city: "Kolkata", stream: "Science", ranking: "Top Science Research, India", affiliation: "Autonomous (IISER)", type: "Government" },
-    { name: "Miranda House", city: "Delhi", stream: "Science", ranking: "#1 College, India (NIRF)", affiliation: "University of Delhi", type: "Government" },
-    { name: "Presidency College", city: "Chennai", stream: "Science", ranking: "Top Govt. Science, Tamil Nadu", affiliation: "University of Madras", type: "Government" },
-    { name: "Loyola College", city: "Chennai", stream: "Science", ranking: "Top Private Science, South India", affiliation: "University of Madras", type: "Private" },
-    // ── COMMERCE – Additional ──
-    { name: "Shri Ram College of Commerce", city: "Delhi", stream: "Commerce", ranking: "#1 Commerce, India (NIRF)", affiliation: "University of Delhi", type: "Government" },
-    { name: "Lady Shri Ram College", city: "Delhi", stream: "Commerce", ranking: "Top Women Commerce, India", affiliation: "University of Delhi", type: "Government" },
-    { name: "Narsee Monjee College", city: "Mumbai", stream: "Commerce", ranking: "Top Commerce, Mumbai", affiliation: "University of Mumbai", type: "Autonomous" },
-    { name: "St. Xavier College Commerce", city: "Kolkata", stream: "Commerce", ranking: "Top Commerce, Kolkata", affiliation: "University of Calcutta", type: "Autonomous" },
-    // ── ARCHITECTURE – Additional ──
-    { name: "School of Planning and Architecture", city: "Delhi", stream: "Architecture", ranking: "#2 Architecture, India (NIRF)", affiliation: "Autonomous (SPA)", type: "Government" },
-    { name: "School of Planning and Architecture", city: "Bhopal", stream: "Architecture", ranking: "Top Architecture, Central India", affiliation: "Autonomous (SPA)", type: "Government" },
-    { name: "Faculty of Architecture, Manipal", city: "Manipal", stream: "Architecture", ranking: "Top Private Architecture, India", affiliation: "Manipal University", type: "Private" },
-    { name: "Kamla Raheja College of Architecture", city: "Mumbai", stream: "Architecture", ranking: "Top Private Architecture, Mumbai", affiliation: "University of Mumbai", type: "Private" },
-  ];
+  // ── Fetch from Supabase ──────────────────────────────────────────────────
+  const [exams, setExams] = useState([]);
+  const [colleges, setColleges] = useState([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
-  const EXAMS = [
-    // ── ENGINEERING – National Government ──
-    // lastVerified: date Educeff last confirmed this data against official source
-    { name: "JEE Main", fullName: "Joint Entrance Examination Main", stream: "Engineering", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 31, 2025", lastDate: "2025-12-31", examDate: "Jan–Apr 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Nov 2026", officialLink: "https://jeemain.nta.nic.in", lastVerified: "2025-11-01" },
-    { name: "JEE Advanced", fullName: "Joint Entrance Examination Advanced", stream: "Engineering", level: "Govt · National", formStart: "Apr 2026", lastDateDisplay: "May 4, 2026", lastDate: "2026-05-04", examDate: "May 18, 2026", fee: "₹3,500", mode: "Online (CBT)", conductedBy: "IIT Delhi", nextCycle: "Apr 2027", officialLink: "https://jeeadv.ac.in" },
-    { name: "GATE", fullName: "Graduate Aptitude Test in Engineering", stream: "Engineering", level: "Govt · National", formStart: "Aug 2025", lastDateDisplay: "Oct 3, 2025", lastDate: "2025-10-03", examDate: "Feb 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "IIT Roorkee", nextCycle: "Aug 2026", officialLink: "https://gate2026.iitr.ac.in" },
-    { name: "BITSAT", fullName: "BITS Admission Test", stream: "Engineering", level: "Private · National", formStart: "Jan 2026", lastDateDisplay: "Apr 20, 2026", lastDate: "2026-04-20", examDate: "May–Jun 2026", fee: "₹3,500", mode: "Online (CBT)", conductedBy: "BITS Pilani", nextCycle: "Jan 2027", officialLink: "https://www.bitsadmission.com" },
-    { name: "VITEEE", fullName: "VIT Engineering Entrance Examination", stream: "Engineering", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Mar 31, 2026", lastDate: "2026-03-31", examDate: "Apr 2026", fee: "₹1,350", mode: "Online (CBT)", conductedBy: "VIT University", nextCycle: "Nov 2026", officialLink: "https://viteee.vit.ac.in" },
-    { name: "SRMJEEE", fullName: "SRM Joint Engineering Entrance Exam", stream: "Engineering", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Apr 10, 2026", lastDate: "2026-04-10", examDate: "Apr–May 2026", fee: "₹1,100", mode: "Online (CBT)", conductedBy: "SRM University", nextCycle: "Nov 2026", officialLink: "https://www.srmist.edu.in" },
-    { name: "WBJEE", fullName: "West Bengal Joint Entrance Examination", stream: "Engineering", level: "Govt · State", formStart: "Dec 2025", lastDateDisplay: "Jan 20, 2026", lastDate: "2026-01-20", examDate: "Apr 2026", fee: "₹500", mode: "Offline (OMR)", conductedBy: "WBJEEB", nextCycle: "Dec 2026", officialLink: "https://wbjeeb.nic.in" },
-    { name: "KCET", fullName: "Karnataka Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 5, 2026", lastDate: "2026-03-05", examDate: "Apr 2026", fee: "₹500", mode: "Offline (OMR)", conductedBy: "KEA Karnataka", nextCycle: "Jan 2027", officialLink: "https://kea.kar.nic.in" },
-    { name: "MHT-CET", fullName: "Maharashtra Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 15, 2026", lastDate: "2026-03-15", examDate: "Apr–May 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "State CET Cell", nextCycle: "Jan 2027", officialLink: "https://cetcell.mahacet.org" },
-    { name: "COMEDK", fullName: "Consortium of Medical Engineering Dental Colleges", stream: "Engineering", level: "Private · State", formStart: "Jan 2026", lastDateDisplay: "Apr 10, 2026", lastDate: "2026-04-10", examDate: "May 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "COMEDK", nextCycle: "Jan 2027", officialLink: "https://comedk.org" },
-    { name: "GUJCET", fullName: "Gujarat Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Feb 28, 2026", lastDate: "2026-02-28", examDate: "Mar 2026", fee: "₹300", mode: "Offline (OMR)", conductedBy: "GSEB", nextCycle: "Jan 2027", officialLink: "https://gujcet.gseb.org" },
-    { name: "AP EAMCET", fullName: "Andhra Pradesh Engineering Agriculture Medical CET", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "JNTU Kakinada", nextCycle: "Jan 2027", officialLink: "https://sche.ap.gov.in/eamcet" },
-    { name: "UPSEE", fullName: "Uttar Pradesh State Entrance Examination", stream: "Engineering", level: "Govt · State", formStart: "Feb 2026", lastDateDisplay: "Apr 5, 2026", lastDate: "2026-04-05", examDate: "May 2026", fee: "₹1,300", mode: "Online (CBT)", conductedBy: "AKTU Lucknow", nextCycle: "Feb 2027", officialLink: "https://upsee.nic.in" },
-    { name: "Manipal MET", fullName: "Manipal Entrance Test", stream: "Engineering", level: "Private · National", formStart: "Oct 2025", lastDateDisplay: "Apr 15, 2026", lastDate: "2026-04-15", examDate: "Apr–May 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "Manipal University", nextCycle: "Oct 2026", officialLink: "https://manipal.edu/met" },
-    { name: "KIITEE", fullName: "KIIT Entrance Examination", stream: "Engineering", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Mar 31, 2026", lastDate: "2026-03-31", examDate: "Apr 2026", fee: "₹1,350", mode: "Online (CBT)", conductedBy: "KIIT University", nextCycle: "Nov 2026", officialLink: "https://kiitee.kiit.ac.in" },
-    // ── MEDICAL – National Government ──
-    { name: "NEET UG", fullName: "National Eligibility cum Entrance Test UG", stream: "Medical", level: "Govt · National", formStart: "Feb 2026", lastDateDisplay: "Mar 7, 2026", lastDate: "2026-03-07", examDate: "May 3, 2026", fee: "₹1,700", mode: "Offline (OMR)", conductedBy: "NTA", nextCycle: "Feb 2027", officialLink: "https://neet.nta.nic.in" },
-    { name: "NEET PG", fullName: "National Eligibility cum Entrance Test PG", stream: "Medical", level: "Govt · National", formStart: "Dec 2025", lastDateDisplay: "Jan 15, 2026", lastDate: "2026-01-15", examDate: "Mar 2026", fee: "₹4,250", mode: "Online (CBT)", conductedBy: "NBE", nextCycle: "Dec 2026", officialLink: "https://nbe.edu.in" },
-    { name: "AIIMS MBBS", fullName: "AIIMS MBBS Entrance (via NEET)", stream: "Medical", level: "Govt · National", formStart: "Feb 2026", lastDateDisplay: "Mar 7, 2026", lastDate: "2026-03-07", examDate: "May 3, 2026", fee: "₹1,700", mode: "Offline (OMR)", conductedBy: "NTA / AIIMS", nextCycle: "Feb 2027", officialLink: "https://aiimsexams.ac.in" },
-    { name: "FMGE", fullName: "Foreign Medical Graduate Examination", stream: "Medical", level: "Govt · National", formStart: "Mar 2026", lastDateDisplay: "Apr 30, 2026", lastDate: "2026-04-30", examDate: "Jun 2026", fee: "₹5,000", mode: "Online (CBT)", conductedBy: "NBE", nextCycle: "Mar 2027", officialLink: "https://nbe.edu.in/fmge" },
-    { name: "JIPMER MBBS", fullName: "JIPMER MBBS Entrance (via NEET)", stream: "Medical", level: "Govt · National", formStart: "Feb 2026", lastDateDisplay: "Mar 7, 2026", lastDate: "2026-03-07", examDate: "May 3, 2026", fee: "₹1,700", mode: "Offline (OMR)", conductedBy: "NTA", nextCycle: "Feb 2027", officialLink: "https://jipmer.edu.in" },
-    { name: "CMC Vellore", fullName: "Christian Medical College Vellore Entrance", stream: "Medical", level: "Private · National", formStart: "Jan 2026", lastDateDisplay: "Feb 28, 2026", lastDate: "2026-02-28", examDate: "May 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "CMC Vellore", nextCycle: "Jan 2027", officialLink: "https://admissions.cmcvellore.ac.in" },
-    { name: "MAHE Manipal", fullName: "Manipal Academy MBBS Entrance", stream: "Medical", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Apr 10, 2026", lastDate: "2026-04-10", examDate: "Apr–May 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "Manipal University", nextCycle: "Nov 2026", officialLink: "https://manipal.edu" },
-    // ── LAW ──
-    { name: "CLAT", fullName: "Common Law Admission Test", stream: "Law", level: "Govt · National", formStart: "Aug 2025", lastDateDisplay: "Oct 15, 2025", lastDate: "2025-10-15", examDate: "Dec 1, 2025", fee: "₹4,000", mode: "Online (CBT)", conductedBy: "Consortium of NLUs", nextCycle: "Aug 2026", officialLink: "https://consortiumofnlus.ac.in" },
-    { name: "AILET", fullName: "All India Law Entrance Test", stream: "Law", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Jan 31, 2026", lastDate: "2026-01-31", examDate: "Mar 2026", fee: "₹3,316", mode: "Online (CBT)", conductedBy: "NLU Delhi", nextCycle: "Nov 2026", officialLink: "https://nationallawuniversitydelhi.in" },
-    { name: "MHCET Law", fullName: "Maharashtra Law Common Entrance Test", stream: "Law", level: "Govt · State", formStart: "Feb 2026", lastDateDisplay: "Mar 25, 2026", lastDate: "2026-03-25", examDate: "May 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "State CET Cell", nextCycle: "Feb 2027", officialLink: "https://cetcell.mahacet.org" },
-    { name: "LSAT India", fullName: "Law School Admission Test India", stream: "Law", level: "Private · National", formStart: "Oct 2025", lastDateDisplay: "Jan 10, 2026", lastDate: "2026-01-10", examDate: "Jan 2026", fee: "₹3,999", mode: "Online (CBT)", conductedBy: "Pearson VUE", nextCycle: "Oct 2026", officialLink: "https://discoverlaw.in" },
-    { name: "SLAT", fullName: "Symbiosis Law Admission Test", stream: "Law", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Jan 20, 2026", lastDate: "2026-01-20", examDate: "May 2026", fee: "₹2,000", mode: "Online (CBT)", conductedBy: "Symbiosis International", nextCycle: "Nov 2026", officialLink: "https://slat.set-test.org" },
-    { name: "ILICAT", fullName: "ILI Common Admission Test", stream: "Law", level: "Govt · National", formStart: "Mar 2026", lastDateDisplay: "Apr 30, 2026", lastDate: "2026-04-30", examDate: "Jun 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "Indian Law Institute", nextCycle: "Mar 2027", officialLink: "https://ili.ac.in" },
-    // ── MANAGEMENT ──
-    { name: "CAT", fullName: "Common Admission Test", stream: "Management", level: "Govt · National", formStart: "Aug 2026", lastDateDisplay: "Sep 13, 2026", lastDate: "2026-09-13", examDate: "Nov 2026", fee: "₹2,400", mode: "Online (CBT)", conductedBy: "IIMs", nextCycle: "Aug 2026", officialLink: "https://iimcat.ac.in" },
-    { name: "MAH-MBA-CET", fullName: "Maharashtra MBA Common Entrance Test", stream: "Management", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Feb 28, 2026", lastDate: "2026-02-28", examDate: "Mar 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "State CET Cell", nextCycle: "Jan 2027", officialLink: "https://cetcell.mahacet.org" },
-    { name: "SNAP", fullName: "Symbiosis National Aptitude Test", stream: "Management", level: "Private · National", formStart: "Aug 2026", lastDateDisplay: "Nov 24, 2026", lastDate: "2026-11-24", examDate: "Dec 2026", fee: "₹2,250", mode: "Online (CBT)", conductedBy: "Symbiosis International", nextCycle: "Aug 2026", officialLink: "https://www.snaptest.org" },
-    { name: "XAT", fullName: "Xavier Aptitude Test", stream: "Management", level: "Private · National", formStart: "Jul 2025", lastDateDisplay: "Nov 30, 2025", lastDate: "2025-11-30", examDate: "Jan 5, 2026", fee: "₹2,200", mode: "Online (CBT)", conductedBy: "XLRI Jamshedpur", nextCycle: "Jul 2026", officialLink: "https://xatonline.in" },
-    { name: "IIFT", fullName: "Indian Institute of Foreign Trade MBA", stream: "Management", level: "Govt · National", formStart: "Aug 2025", lastDateDisplay: "Oct 10, 2025", lastDate: "2025-10-10", examDate: "Dec 2025", fee: "₹2,500", mode: "Online (CBT)", conductedBy: "NTA / IIFT", nextCycle: "Aug 2026", officialLink: "https://iift.nta.nic.in" },
-    { name: "NMAT", fullName: "NMIMS Management Aptitude Test", stream: "Management", level: "Private · National", formStart: "Jul 2025", lastDateDisplay: "Oct 10, 2025", lastDate: "2025-10-10", examDate: "Oct–Dec 2025", fee: "₹2,800", mode: "Online (CBT)", conductedBy: "GMAC / NMIMS", nextCycle: "Jul 2026", officialLink: "https://www.nmat.org" },
-    { name: "CMAT", fullName: "Common Management Admission Test", stream: "Management", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 20, 2025", lastDate: "2025-12-20", examDate: "Jan 2026", fee: "₹2,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Nov 2026", officialLink: "https://cmat.nta.nic.in" },
-    { name: "MAT", fullName: "Management Aptitude Test", stream: "Management", level: "Private · National", formStart: "Quarterly", lastDateDisplay: "Rolling Dates", lastDate: "2026-12-31", examDate: "Quarterly 2026", fee: "₹1,990", mode: "Online + Offline", conductedBy: "AIMA", nextCycle: "Quarterly", officialLink: "https://mat.aima.in" },
-    { name: "TISSNET", fullName: "TISS National Entrance Test", stream: "Management", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 20, 2025", lastDate: "2025-12-20", examDate: "Jan 2026", fee: "₹1,030", mode: "Online (CBT)", conductedBy: "TISS Mumbai", nextCycle: "Nov 2026", officialLink: "https://tiss.edu" },
-    // ── ARCHITECTURE ──
-    { name: "NATA", fullName: "National Aptitude Test in Architecture", stream: "Architecture", level: "Govt · National", formStart: "Jan 2026", lastDateDisplay: "Feb 20, 2026", lastDate: "2026-02-20", examDate: "Apr 2026", fee: "₹2,000", mode: "Online + Offline", conductedBy: "COA", nextCycle: "Jan 2027", officialLink: "https://nata.in" },
-    { name: "JEE Main Paper 2", fullName: "JEE Main Paper 2 (B.Arch)", stream: "Architecture", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 31, 2025", lastDate: "2025-12-31", examDate: "Jan–Apr 2026", fee: "₹1,000", mode: "Online + Offline", conductedBy: "NTA", nextCycle: "Nov 2026", officialLink: "https://jeemain.nta.nic.in" },
-    { name: "CEED", fullName: "Common Entrance Exam for Design", stream: "Architecture", level: "Govt · National", formStart: "Sep 2025", lastDateDisplay: "Oct 20, 2025", lastDate: "2025-10-20", examDate: "Jan 2026", fee: "₹3,000", mode: "Online (CBT)", conductedBy: "IIT Bombay", nextCycle: "Sep 2026", officialLink: "https://ceed.iitb.ac.in" },
-    { name: "NID DAT", fullName: "National Institute of Design Aptitude Test", stream: "Architecture", level: "Govt · National", formStart: "Sep 2025", lastDateDisplay: "Nov 15, 2025", lastDate: "2025-11-15", examDate: "Jan 2026", fee: "₹3,000", mode: "Offline", conductedBy: "NID Ahmedabad", nextCycle: "Sep 2026", officialLink: "https://admissions.nid.edu" },
-    // ── SCIENCE / COMMERCE ──
-    { name: "CUET UG", fullName: "Common University Entrance Test UG", stream: "Science", level: "Govt · National", formStart: "Feb 2026", lastDateDisplay: "Mar 22, 2026", lastDate: "2026-03-22", examDate: "May 2026", fee: "₹750", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Feb 2027", officialLink: "https://cuet.samarth.ac.in" },
-    { name: "CUET PG", fullName: "Common University Entrance Test PG", stream: "Science", level: "Govt · National", formStart: "Feb 2026", lastDateDisplay: "Mar 10, 2026", lastDate: "2026-03-10", examDate: "May 2026", fee: "₹750", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Feb 2027", officialLink: "https://cuet.nta.nic.in" },
-    { name: "ICAR AIEEA", fullName: "All India Entrance Examination Agriculture", stream: "Science", level: "Govt · National", formStart: "Feb 2026", lastDateDisplay: "Mar 31, 2026", lastDate: "2026-03-31", examDate: "Jun 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "NTA / ICAR", nextCycle: "Feb 2027", officialLink: "https://icar.nta.nic.in" },
-    { name: "DUET", fullName: "Delhi University Entrance Test", stream: "Commerce", level: "Govt · University", formStart: "Feb 2026", lastDateDisplay: "Mar 25, 2026", lastDate: "2026-03-25", examDate: "May 2026", fee: "₹750", mode: "Online (CBT)", conductedBy: "NTA / DU", nextCycle: "Feb 2027", officialLink: "https://cuet.samarth.ac.in" },
-    { name: "IPU CET", fullName: "Indraprastha University Common Entrance Test", stream: "Commerce", level: "Govt · University", formStart: "Feb 2026", lastDateDisplay: "Apr 10, 2026", lastDate: "2026-04-10", examDate: "May 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "IPU Delhi", nextCycle: "Feb 2027", officialLink: "https://ipu.ac.in" },
-    // ── PHARMACY ──
-    { name: "GPAT", fullName: "Graduate Pharmacy Aptitude Test", stream: "Pharmacy", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 20, 2025", lastDate: "2025-12-20", examDate: "Feb 2026", fee: "₹2,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Nov 2026", officialLink: "https://gpat.nta.nic.in" },
-    { name: "MHT-CET PCB", fullName: "MHT-CET Biology (Pharmacy/Agriculture)", stream: "Pharmacy", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 10, 2026", lastDate: "2026-03-10", examDate: "Apr 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "State CET Cell", nextCycle: "Jan 2027", officialLink: "https://cetcell.mahacet.org" },
-    { name: "NIPER JEE", fullName: "National Institute Pharmaceutical Education Research JEE", stream: "Pharmacy", level: "Govt · National", formStart: "Mar 2026", lastDateDisplay: "May 10, 2026", lastDate: "2026-05-10", examDate: "Jun 2026", fee: "₹3,000", mode: "Online (CBT)", conductedBy: "NIPER", nextCycle: "Mar 2027", officialLink: "https://niperjee.nta.nic.in" },
-    // ── DESIGN / ARTS ──
-    { name: "UCEED", fullName: "Undergraduate Common Entrance Exam for Design", stream: "Architecture", level: "Govt · National", formStart: "Sep 2025", lastDateDisplay: "Oct 20, 2025", lastDate: "2025-10-20", examDate: "Jan 19, 2026", fee: "₹3,000", mode: "Online (CBT)", conductedBy: "IIT Bombay", nextCycle: "Sep 2026", officialLink: "https://uceed.iitb.ac.in" },
-    { name: "AIAPGET", fullName: "All India Ayush PG Entrance Test", stream: "Medical", level: "Govt · National", formStart: "Mar 2026", lastDateDisplay: "Apr 20, 2026", lastDate: "2026-04-20", examDate: "Jun 2026", fee: "₹2,000", mode: "Online (CBT)", conductedBy: "NTA", nextCycle: "Mar 2027", officialLink: "https://aiapget.nta.nic.in" },
-    // ── ENGINEERING – Additional State ──
-    { name: "OJEE", fullName: "Odisha Joint Entrance Examination", stream: "Engineering", level: "Govt · State", formStart: "Feb 2026", lastDateDisplay: "Apr 5, 2026", lastDate: "2026-04-05", examDate: "May 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "OJEE Board", nextCycle: "Feb 2027", officialLink: "https://ojee.nic.in" },
-    { name: "KEAM", fullName: "Kerala Engineering Architecture Medical", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 10, 2026", lastDate: "2026-03-10", examDate: "Apr 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "CEE Kerala", nextCycle: "Jan 2027", officialLink: "https://cee.kerala.gov.in" },
-    { name: "TANCET", fullName: "Tamil Nadu Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Feb 20, 2026", lastDate: "2026-02-20", examDate: "Mar 2026", fee: "₹500", mode: "Offline (OMR)", conductedBy: "Anna University", nextCycle: "Jan 2027", officialLink: "https://tancet.annauniv.edu" },
-    { name: "REAP", fullName: "Rajasthan Engineering Admission Process", stream: "Engineering", level: "Govt · State", formStart: "Jun 2026", lastDateDisplay: "Jul 15, 2026", lastDate: "2026-07-15", examDate: "Based on JEE", fee: "₹500", mode: "Online (CBT)", conductedBy: "Board of Technical Education Rajasthan", nextCycle: "Jun 2027", officialLink: "https://www.techedu.rajasthan.gov.in" },
-    { name: "GCET Goa", fullName: "Goa Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Feb 2026", lastDateDisplay: "Apr 10, 2026", lastDate: "2026-04-10", examDate: "May 2026", fee: "₹500", mode: "Offline (OMR)", conductedBy: "DHEQ Goa", nextCycle: "Feb 2027", officialLink: "https://www.dhegoa.gov.in" },
-    { name: "TSECET", fullName: "Telangana State Engineering Common Entrance Test", stream: "Engineering", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 25, 2026", lastDate: "2026-03-25", examDate: "May 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "JNTU Hyderabad", nextCycle: "Jan 2027", officialLink: "https://tsecet.nic.in" },
-    { name: "BCECE", fullName: "Bihar Combined Entrance Competitive Examination", stream: "Engineering", level: "Govt · State", formStart: "Feb 2026", lastDateDisplay: "Mar 31, 2026", lastDate: "2026-03-31", examDate: "May 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "BCECEB", nextCycle: "Feb 2027", officialLink: "https://bceceboard.bihar.gov.in" },
-    // ── ENGINEERING – Additional Private ──
-    { name: "AMUEEE", fullName: "Aligarh Muslim University Engineering Entrance Exam", stream: "Engineering", level: "Govt · University", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "AMU", nextCycle: "Jan 2027", officialLink: "https://amucontrollerexams.com" },
-    { name: "JUET", fullName: "Jaypee University Entrance Test", stream: "Engineering", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Apr 30, 2026", lastDate: "2026-04-30", examDate: "May 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "Jaypee University", nextCycle: "Nov 2026", officialLink: "https://juet.ac.in" },
-    { name: "LPUNEST", fullName: "LPU National Entrance and Scholarship Test", stream: "Engineering", level: "Private · National", formStart: "Oct 2025", lastDateDisplay: "Apr 25, 2026", lastDate: "2026-04-25", examDate: "Jan–May 2026", fee: "₹0", mode: "Online (CBT)", conductedBy: "LPU", nextCycle: "Oct 2026", officialLink: "https://lpunest.lpu.in" },
-    { name: "CUSAT CAT", fullName: "Cochin University Science Technology CAT", stream: "Engineering", level: "Govt · University", formStart: "Jan 2026", lastDateDisplay: "Mar 15, 2026", lastDate: "2026-03-15", examDate: "Apr 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "CUSAT", nextCycle: "Jan 2027", officialLink: "https://admissions.cusat.ac.in" },
-    // ── MEDICAL – Additional ──
-    { name: "AIIMS Nursing", fullName: "AIIMS BSc Nursing Entrance Exam", stream: "Medical", level: "Govt · National", formStart: "Feb 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "AIIMS", nextCycle: "Feb 2027", officialLink: "https://aiimsexams.ac.in" },
-    { name: "BHU PMT", fullName: "Banaras Hindu University Pre Medical Test", stream: "Medical", level: "Govt · University", formStart: "Mar 2026", lastDateDisplay: "Apr 15, 2026", lastDate: "2026-04-15", examDate: "Jun 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "BHU", nextCycle: "Mar 2027", officialLink: "https://bhuonline.in" },
-    { name: "VMMC MBBS", fullName: "Vardhman Mahavir Medical College MBBS", stream: "Medical", level: "Govt · University", formStart: "Feb 2026", lastDateDisplay: "Mar 5, 2026", lastDate: "2026-03-05", examDate: "May 2026", fee: "₹1,700", mode: "Offline (OMR)", conductedBy: "NTA / VMMC", nextCycle: "Feb 2027", officialLink: "https://vmmc-safdarjung.org" },
-    // ── MANAGEMENT – Additional ──
-    { name: "IBSAT", fullName: "ICFAI Business School Aptitude Test", stream: "Management", level: "Private · National", formStart: "Jul 2025", lastDateDisplay: "Dec 20, 2025", lastDate: "2025-12-20", examDate: "Dec 2025", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "ICFAI", nextCycle: "Jul 2026", officialLink: "https://ibsindia.org" },
-    { name: "ATMA", fullName: "AIMS Test for Management Admissions", stream: "Management", level: "Private · National", formStart: "Monthly", lastDateDisplay: "Rolling Dates", lastDate: "2026-12-31", examDate: "Monthly 2026", fee: "₹1,290", mode: "Online (CBT)", conductedBy: "AIMS", nextCycle: "Monthly", officialLink: "https://atmaaims.com" },
-    { name: "MICAT", fullName: "MICA Admission Test", stream: "Management", level: "Private · National", formStart: "Sep 2025", lastDateDisplay: "Nov 25, 2025", lastDate: "2025-11-25", examDate: "Dec 2025", fee: "₹2,006", mode: "Online (CBT)", conductedBy: "MICA Ahmedabad", nextCycle: "Sep 2026", officialLink: "https://mica.ac.in" },
-    { name: "IRMASAT", fullName: "Institute of Rural Management Anand Test", stream: "Management", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Jan 5, 2026", lastDate: "2026-01-05", examDate: "Feb 2026", fee: "₹1,500", mode: "Online (CBT)", conductedBy: "IRMA Anand", nextCycle: "Nov 2026", officialLink: "https://irma.ac.in" },
-    { name: "TISS BAT", fullName: "TISS Bachelor Admission Test", stream: "Management", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Jan 15, 2026", lastDate: "2026-01-15", examDate: "Feb 2026", fee: "₹1,030", mode: "Online (CBT)", conductedBy: "TISS Mumbai", nextCycle: "Nov 2026", officialLink: "https://tiss.edu" },
-    // ── LAW – Additional ──
-    { name: "CULEE", fullName: "Christ University Law Entrance Examination", stream: "Law", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Feb 15, 2026", lastDate: "2026-02-15", examDate: "Mar 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "Christ University", nextCycle: "Nov 2026", officialLink: "https://christuniversity.in" },
-    { name: "BHU LLB", fullName: "BHU BA LLB Entrance Test", stream: "Law", level: "Govt · University", formStart: "Mar 2026", lastDateDisplay: "Apr 20, 2026", lastDate: "2026-04-20", examDate: "Jun 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "BHU", nextCycle: "Mar 2027", officialLink: "https://bhuonline.in" },
-    { name: "AMU Law", fullName: "Aligarh Muslim University Law Entrance", stream: "Law", level: "Govt · University", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "AMU", nextCycle: "Jan 2027", officialLink: "https://amucontrollerexams.com" },
-    // ── SCIENCE – Additional ──
-    { name: "IISER Aptitude Test", fullName: "IISER Aptitude Test for BS-MS Program", stream: "Science", level: "Govt · National", formStart: "Mar 2026", lastDateDisplay: "May 1, 2026", lastDate: "2026-05-01", examDate: "Jun 2026", fee: "₹2,000", mode: "Online (CBT)", conductedBy: "IISER", nextCycle: "Mar 2027", officialLink: "https://iiseradmission.in" },
-    { name: "JEST", fullName: "Joint Entrance Screening Test", stream: "Science", level: "Govt · National", formStart: "Nov 2025", lastDateDisplay: "Dec 20, 2025", lastDate: "2025-12-20", examDate: "Feb 2026", fee: "₹0", mode: "Online (CBT)", conductedBy: "JEST Committee", nextCycle: "Nov 2026", officialLink: "https://www.jest.org.in" },
-    { name: "JAM", fullName: "Joint Admission Test for MSc", stream: "Science", level: "Govt · National", formStart: "Aug 2025", lastDateDisplay: "Oct 11, 2025", lastDate: "2025-10-11", examDate: "Feb 2026", fee: "₹1,800", mode: "Online (CBT)", conductedBy: "IIT Delhi", nextCycle: "Aug 2026", officialLink: "https://jam.iitd.ac.in" },
-    { name: "NEST", fullName: "National Entrance Screening Test", stream: "Science", level: "Govt · National", formStart: "Jan 2026", lastDateDisplay: "Mar 31, 2026", lastDate: "2026-03-31", examDate: "Jun 2026", fee: "₹1,000", mode: "Online (CBT)", conductedBy: "NISER / CEBS", nextCycle: "Jan 2027", officialLink: "https://www.nestexam.in" },
-    // ── ARCHITECTURE – Additional ──
-    { name: "HITSEEE", fullName: "Hindustan Institute of Technology Science Entrance", stream: "Architecture", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Apr 15, 2026", lastDate: "2026-04-15", examDate: "Apr–May 2026", fee: "₹500", mode: "Online (CBT)", conductedBy: "HITS Chennai", nextCycle: "Nov 2026", officialLink: "https://hindustanuniv.ac.in" },
-    { name: "Amity JEE", fullName: "Amity Joint Entrance Examination", stream: "Architecture", level: "Private · National", formStart: "Nov 2025", lastDateDisplay: "Apr 20, 2026", lastDate: "2026-04-20", examDate: "May 2026", fee: "₹1,100", mode: "Online (CBT)", conductedBy: "Amity University", nextCycle: "Nov 2026", officialLink: "https://amity.edu" },
-    // ── PHARMACY – Additional ──
-    { name: "TS EAMCET Pharmacy", fullName: "Telangana State EAMCET for Pharmacy", stream: "Pharmacy", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹800", mode: "Online (CBT)", conductedBy: "JNTU Hyderabad", nextCycle: "Jan 2027", officialLink: "https://tseamcet.nic.in" },
-    { name: "AP EAMCET Pharmacy", fullName: "Andhra Pradesh EAMCET for Pharmacy", stream: "Pharmacy", level: "Govt · State", formStart: "Jan 2026", lastDateDisplay: "Mar 20, 2026", lastDate: "2026-03-20", examDate: "May 2026", fee: "₹700", mode: "Online (CBT)", conductedBy: "JNTU Kakinada", nextCycle: "Jan 2027", officialLink: "https://sche.ap.gov.in/eamcet" },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      setDataLoading(true);
+      try {
+        const [examRes, collegeRes] = await Promise.all([
+          supabase.from("entrance_exams").select("*").eq("is_active", true).order("name"),
+          supabase.from("colleges").select("*").eq("is_active", true).order("name"),
+        ]);
+        if (examRes.data) setExams(examRes.data.map(e => ({
+          name: e.name,
+          fullName: e.full_name,
+          stream: e.stream,
+          level: e.level,
+          formStart: e.form_start,
+          lastDateDisplay: e.last_date_display,
+          lastDate: e.last_date,
+          examDate: e.exam_date,
+          fee: e.fee,
+          mode: e.mode,
+          conductedBy: e.conducted_by,
+          nextCycle: e.next_cycle,
+          officialLink: e.official_link,
+          lastVerified: e.last_verified,
+          id: e.id,
+        })));
+        if (collegeRes.data) setColleges(collegeRes.data);
+      } catch (e) { console.warn("Data load error:", e); }
+      setDataLoading(false);
+    };
+    loadData();
+  }, []);
 
   const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
+    <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+      <div style={{ fontSize: 40 }}>⏳</div>
+      <div style={{ fontSize: 16, color: "#90CAF9" }}>Loading colleges and exams...</div>
+    </div>
+  );
 
-  const filteredExams = EXAMS.filter(e =>
+  const filteredExams = exams.filter(e =>
     (activeStream === "All" || e.stream === activeStream) &&
     (search === "" || e.name.toLowerCase().includes(search.toLowerCase()) || e.fullName.toLowerCase().includes(search.toLowerCase()))
   );
