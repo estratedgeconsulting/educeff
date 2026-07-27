@@ -3372,18 +3372,20 @@ function AdminDashboard({ setPage }) {
             ))}
           </div>
         </div>
-        {navGroups.map(group => (
-          <div key={group.label} className="admin-nav-section">
-            <div className="admin-nav-label">{group.label}</div>
-            {group.items.map(item => (
-              <div key={item.id} className={`admin-nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
-                <div className="admin-nav-icon">{item.icon}</div>
-                {item.label}
-              </div>
-            ))}
-          </div>
-        ))}
-        <div style={{ marginTop: "auto", padding: "12px 12px 20px" }}>
+        <div style={{ flex: 1, overflowY: "auto", paddingBottom: 8 }}>
+          {navGroups.map(group => (
+            <div key={group.label} className="admin-nav-section">
+              <div className="admin-nav-label">{group.label}</div>
+              {group.items.map(item => (
+                <div key={item.id} className={`admin-nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
+                  <div className="admin-nav-icon">{item.icon}</div>
+                  {item.label}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: "10px 12px 16px", borderTop: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
           <div className="admin-nav-item" onClick={() => setPage("Home")} style={{ color: "rgba(100,181,246,0.8)" }}>
             <div className="admin-nav-icon">🌐</div> Back to Website
           </div>
@@ -3430,7 +3432,7 @@ function AdminOverview({ stats, setTab }) {
     { label: "Rejected Applications", val: stats.rejected, icon: "❌", color: "#DC2626", bg: "#FEF2F2" },
     { label: "Successful Payments", val: stats.payments, icon: "💳", color: "#7C3AED", bg: "#F5F3FF" },
     { label: "Counseling Booked", val: stats.counseling, icon: "🎓", color: "#0891B2", bg: "#ECFEFF" },
-    { label: "Success Rate", val: stats.applications > 0 ? `${Math.round((stats.approved / stats.applications) * 100)}%` : "—", icon: "\ud83d\udcc8", color: "#059669", bg: "#F0FDF4" },
+    { label: "Success Rate", val: stats.applications > 0 ? `${Math.round((stats.approved / stats.applications) * 100)}%` : "—", icon: "📈", color: "#059669", bg: "#F0FDF4" },
   ];
 
   return (
@@ -4902,12 +4904,14 @@ function AdminManageExams() {
 
 
 function AdminSettings() {
-
   const [saved, setSaved] = useState(false);
+  return (
+    <div>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 20 }}>Settings</h1>
       {saved && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 16px", marginBottom: 16, fontSize: 13, color: "#065F46" }}>✅ Settings saved!</div>}
       {[
-        { title: "\ud83c\udfe2 Organization Profile", fields: [["Organization Name","Educeff Aspire"],["Registration No.","U80900MH2015PTC123456"],["Email","Educeff.india@gmail.com"],["Phone","+91 98996 44633"],["Address","Baner, Pune 411045"]] },
-        { title: "\ud83d\udd12 Security Settings", fields: [["OTP Validity","10 minutes"],["JWT Expiry","24 hours"],["Max Login Attempts","5"],["Session Timeout","60 minutes"]] },
+        { title: "🏢 Organization Profile", fields: [["Organization Name","Educeff Aspire"],["Registration No.","U80900MH2015PTC123456"],["Email","Educeff.india@gmail.com"],["Phone","+91 98996 44633"],["Address","Baner, Pune 411045"]] },
+        { title: "🔒 Security Settings", fields: [["OTP Validity","10 minutes"],["JWT Expiry","24 hours"],["Max Login Attempts","5"],["Session Timeout","60 minutes"]] },
         { title: "🔔 Notification Settings", fields: [["SMS Notifications","Enabled"],["Email Notifications","Enabled"],["In-App Notifications","Enabled"],["Bulk SMS Limit","500/day"]] },
       ].map(s => (
         <div key={s.title} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 24, marginBottom: 20 }}>
@@ -5203,7 +5207,7 @@ function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
         <div style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 8, padding: "6px 10px" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: sc.text, letterSpacing: "0.05em" }}>{exam.stream}</div>
         </div>
-        <div style={{ background: "#F0F7FF", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, color: exam.level.includes("Govt") ? "#059669" : "#7C3AED" , background: exam.level.includes("Govt") ? "#ECFDF5" : "#F5F3FF" }}>{exam.level}</div>
+        <div style={{ background: exam.level.includes("Govt") ? "#ECFDF5" : "#F5F3FF", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, color: exam.level.includes("Govt") ? "#059669" : "#7C3AED" }}>{exam.level}</div>
       </div>
 
       {/* Exam Name */}
@@ -5358,6 +5362,8 @@ function CollegesPage({ setModal }) {
   }, []);
 
   const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
+
+  if (dataLoading) return (
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
       <div style={{ fontSize: 40 }}>⏳</div>
       <div style={{ fontSize: 16, color: "#90CAF9" }}>Loading colleges and exams...</div>
