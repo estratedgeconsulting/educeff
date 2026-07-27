@@ -2436,7 +2436,7 @@ function ApplicationsTab({ user }) {
 
   const filteredSuggestions = suggestions.filter(c => {
     const matchStream = searchStream === "All" || c.stream === searchStream;
-    const matchSearch = !collegeSearch || c.name.toLowerCase().includes(collegeSearch.toLowerCase()) || c.city.toLowerCase().includes(collegeSearch.toLowerCase());
+    const matchSearch = !collegeSearch || c.name.toLowerCase().includes(collegeSearch.toLowerCase()) || (c.city || "").toLowerCase().includes(collegeSearch.toLowerCase());
     return matchStream && matchSearch;
   });
 
@@ -5372,16 +5372,17 @@ function CollegesPage({ setModal }) {
 
   const filteredExams = exams.filter(e =>
     (activeStream === "All" || e.stream === activeStream) &&
-    (search === "" || e.name.toLowerCase().includes(search.toLowerCase()) || e.fullName.toLowerCase().includes(search.toLowerCase()))
+    (search === "" || (e.name || "").toLowerCase().includes(search.toLowerCase()) || (e.fullName || "").toLowerCase().includes(search.toLowerCase()))
   );
 
   const filteredColleges = colleges.filter(c =>
     (activeStream === "All" || c.stream === activeStream) &&
-    (search === "" || c.name.toLowerCase().includes(search.toLowerCase()) || c.city.toLowerCase().includes(search.toLowerCase()))
+    (search === "" || (c.name || "").toLowerCase().includes(search.toLowerCase()) || (c.city || "").toLowerCase().includes(search.toLowerCase()))
   );
 
-  const openCount = EXAMS.filter(e => !new Date(e.lastDate) < new Date()).length;
-  const urgentCount = EXAMS.filter(e => {
+  const openCount = exams.filter(e => e.lastDate && new Date(e.lastDate) >= new Date()).length;
+  const urgentCount = exams.filter(e => {
+    if (!e.lastDate) return false;
     const diff = new Date(e.lastDate) - new Date();
     return diff > 0 && diff <= 7 * 24 * 60 * 60 * 1000;
   }).length;
@@ -5396,8 +5397,8 @@ function CollegesPage({ setModal }) {
           <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, marginBottom: 28 }}>{SITE_STATS.partnerColleges}+ partner colleges listed · Maharashtra &amp; National · Live exam deadlines with countdown timers</p>
           {/* Summary Pills */}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "white", fontWeight: 600 }}>📋 {EXAMS.length} Exams Listed</div>
-            <div style={{ background: "rgba(5,150,105,0.3)", border: "1px solid rgba(5,150,105,0.5)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "#6EE7B7", fontWeight: 600 }}>✅ {EXAMS.filter(e => new Date(e.lastDate) > new Date()).length} Open Now</div>
+            <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "white", fontWeight: 600 }}>📋 {exams.length} Exams Listed</div>
+            <div style={{ background: "rgba(5,150,105,0.3)", border: "1px solid rgba(5,150,105,0.5)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "#6EE7B7", fontWeight: 600 }}>✅ {exams.filter(e => e.lastDate && new Date(e.lastDate) > new Date()).length} Open Now</div>
             {urgentCount > 0 && <div style={{ background: "rgba(220,38,38,0.3)", border: "1px solid rgba(220,38,38,0.5)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "#FCA5A5", fontWeight: 600 }}>⚠️ {urgentCount} Closing This Week</div>}
           </div>
         </div>
