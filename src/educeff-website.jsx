@@ -5178,14 +5178,30 @@ function ServicesPage() {
 function useCountdown(targetDate) {
   const [timeLeft, setTimeLeft] = useState({});
   useEffect(() => {
+    // If no date provided, don't mark as expired — show as open
+    if (!targetDate) {
+      setTimeLeft({ expired: false });
+      return;
+    }
     const calc = () => {
-      const diff = new Date(targetDate) - new Date();
+      // Parse date as local end-of-day (23:59:59) to avoid UTC timezone issues
+      // e.g. "2026-03-31" should expire at end of March 31 in local time, not UTC midnight
+      let target;
+      if (typeof targetDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
+        // Date-only string — treat as end of that day in local time
+        const [y, m, d] = targetDate.split("-").map(Number);
+        target = new Date(y, m - 1, d, 23, 59, 59);
+      } else {
+        target = new Date(targetDate);
+      }
+      const diff = target - new Date();
       if (diff <= 0) return setTimeLeft({ expired: true });
       setTimeLeft({
         days: Math.floor(diff / (1000 * 60 * 60 * 24)),
         hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
         mins: Math.floor((diff / 1000 / 60) % 60),
         secs: Math.floor((diff / 1000) % 60),
+        expired: false,
       });
     };
     calc();
@@ -5199,7 +5215,8 @@ function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
   const countdown = useCountdown(exam.lastDate);
   const daysLeft = countdown.days;
   const isUrgent = !countdown.expired && daysLeft !== undefined && daysLeft <= 7;
-  const isExpired = countdown.expired;
+  // Only mark expired when explicitly true — not when countdown is still loading ({})
+  const isExpired = countdown.expired === true;
 
   const streamColors = {
     Engineering: { bg: "#EFF6FF", border: "#BFDBFE", text: "#1D4ED8" },
