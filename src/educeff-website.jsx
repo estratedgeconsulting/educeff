@@ -2400,11 +2400,12 @@ function ApplicationsTab({ user }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ college: "", course: "", exam: "" });
   const [profile, setProfile] = useState(null);
-  const [activeSection, setActiveSection] = useState("suggestions"); // "suggestions" | "applications"
+  const [activeSection, setActiveSection] = useState("suggestions");
   const [searchStream, setSearchStream] = useState("All");
   const [collegeSearch, setCollegeSearch] = useState("");
   const [applyModal, setApplyModal] = useState(null);
   const [applying, setApplying] = useState({});
+  const [allColleges, setAllColleges] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -2412,9 +2413,13 @@ function ApplicationsTab({ user }) {
     supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
       .then(({ data }) => { setApps(data || []); setLoading(false); })
       .catch(() => setLoading(false));
-    // Load profile for smart suggestions
+    // Load profile
     supabase.from("students").select("course_interest, entrance_exam, score").eq("user_id", user.id).single()
       .then(({ data }) => { if (data) setProfile(data); })
+      .catch(() => {});
+    // Load colleges from Supabase
+    supabase.from("colleges").select("*").eq("is_active", true).order("name")
+      .then(({ data }) => { if (data) setAllColleges(data); })
       .catch(() => {});
   }, [user]);
 
@@ -2424,29 +2429,13 @@ function ApplicationsTab({ user }) {
     const exam = profile?.entrance_exam || "";
     const appliedColleges = new Set(apps.map(a => a.college));
 
-    let suggestions = ALL_COLLEGES.filter(c => !appliedColleges.has(c.name));
+    let suggestions = allColleges.filter(c => !appliedColleges.has(c.name));
 
-    // Filter by stream if profile has one
+    // Filter by stream
     if (stream && stream !== "All" && stream !== "Science / Commerce") {
-      const streamMap = {
-        "Engineering": "Engineering",
-        "Medical": "Medical",
-        "Law": "Law",
-        "Management": "Management",
-        "Architecture": "Architecture",
-        "Science / Commerce": null,
-      };
+      const streamMap = { "Engineering": "Engineering", "Medical": "Medical", "Law": "Law", "Management": "Management", "Architecture": "Architecture" };
       const mappedStream = streamMap[stream];
       if (mappedStream) suggestions = suggestions.filter(c => c.stream === mappedStream);
-    }
-
-    // Prioritize colleges matching their exam
-    if (exam) {
-      suggestions.sort((a, b) => {
-        const aMatch = a.exams.some(e => e.toLowerCase().includes(exam.toLowerCase())) ? -1 : 1;
-        const bMatch = b.exams.some(e => e.toLowerCase().includes(exam.toLowerCase())) ? -1 : 1;
-        return aMatch - bMatch;
-      });
     }
 
     return suggestions;
@@ -2456,7 +2445,7 @@ function ApplicationsTab({ user }) {
 
   const filteredSuggestions = suggestions.filter(c => {
     const matchStream = searchStream === "All" || c.stream === searchStream;
-    const matchSearch = !collegeSearch || c.name.toLowerCase().includes(collegeSearch.toLowerCase()) || (c.city || "").toLowerCase().includes(collegeSearch.toLowerCase());
+    const matchSearch = !collegeSearch || (c.name || "").toLowerCase().includes(collegeSearch.toLowerCase()) || (c.city || "").toLowerCase().includes(collegeSearch.toLowerCase());
     return matchStream && matchSearch;
   });
 
@@ -2501,12 +2490,6 @@ function ApplicationsTab({ user }) {
   const isApplied = (collegeName) => apps.some(a => a.college === collegeName);
 
   const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
-  if (dataLoading) return (
-    <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
-      <div style={{ fontSize: 40 }}>⏳</div>
-      <div style={{ fontSize: 16, color: "#90CAF9" }}>Loading colleges and exams...</div>
-    </div>
-  );
 
   const handleAdd = async () => {
     if (!form.college.trim() || !form.course.trim()) return;
