@@ -2467,8 +2467,14 @@ function ApplicationsTab({ user }) {
         college.stream === "Medical" ? "MBBS" :
         college.stream === "Law" ? "LLB / BA LLB" :
         college.stream === "Management" ? "MBA" :
-        college.stream === "Architecture" ? "B.Arch" : college.stream;
-      const exam = college.exams[0] || profile?.entrance_exam || "";
+        college.stream === "Architecture" ? "B.Arch" :
+        college.stream === "Pharmacy" ? "B.Pharm" :
+        college.stream === "Science" ? "B.Sc." :
+        college.stream === "Commerce" ? "B.Com" : college.stream || "General";
+
+      // college.exams may not exist for Supabase-fetched colleges — use profile exam as fallback
+      const exam = (college.exams && college.exams[0]) || profile?.entrance_exam || "";
+
       const { data, error } = await supabase.from("applications").insert({
         user_id: user.id,
         college: college.name,
@@ -2477,11 +2483,18 @@ function ApplicationsTab({ user }) {
         status: "pending",
         created_at: new Date().toISOString(),
       }).select().single();
-      if (!error && data) {
+
+      if (error) {
+        console.warn("Application insert error:", error.message);
+        alert("Could not submit application: " + error.message);
+      } else if (data) {
         setApps(a => [data, ...a]);
         setApplyModal({ college, success: true });
       }
-    } catch(e) { console.warn(e); }
+    } catch(e) {
+      console.warn("Apply error:", e);
+      alert("Something went wrong. Please try again.");
+    }
     setApplying(p => ({ ...p, [college.name]: false }));
   };
 
@@ -2499,11 +2512,26 @@ function ApplicationsTab({ user }) {
     if (!form.college.trim() || !form.course.trim()) return;
     try {
       const { data, error } = await supabase.from("applications").insert({
-        user_id: user.id, college: form.college, course: form.course,
-        exam: form.exam, status: "pending", created_at: new Date().toISOString()
+        user_id: user.id,
+        college: form.college.trim(),
+        course: form.course.trim(),
+        exam: form.exam.trim(),
+        status: "pending",
+        created_at: new Date().toISOString()
       }).select().single();
-      if (!error && data) { setApps(a => [data, ...a]); setShowForm(false); setForm({ college: "", course: "", exam: "" }); }
-    } catch(e) { console.warn(e); }
+      if (error) {
+        console.warn("Custom apply error:", error.message);
+        alert("Could not submit: " + error.message);
+      } else if (data) {
+        setApps(a => [data, ...a]);
+        setShowForm(false);
+        setForm({ college: "", course: "", exam: "" });
+        setActiveSection("applications");
+      }
+    } catch(e) {
+      console.warn(e);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -5215,7 +5243,6 @@ function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
   const countdown = useCountdown(exam.lastDate);
   const daysLeft = countdown.days;
   const isUrgent = !countdown.expired && daysLeft !== undefined && daysLeft <= 7;
-  // Only mark expired when explicitly true — not when countdown is still loading ({})
   const isExpired = countdown.expired === true;
 
   const streamColors = {
