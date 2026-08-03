@@ -296,50 +296,85 @@ const css = `
 
   /* ── MOBILE & TABLET (max 768px) ── */
   @media (max-width: 768px) {
-    /* Navbar */
+    /* ── NAVBAR ── */
     .hamburger { display: flex; }
     .desktop-nav { display: none !important; }
     .desktop-btns { display: none !important; }
     .mobile-menu {
       display: block;
       position: fixed;
-      top: 64px; left: 0; right: 0;
-      background: #64B5F6;
-      padding: 16px 20px;
+      top: 60px; left: 0; right: 0;
+      background: #1565C0;
+      padding: 16px 20px 20px;
       z-index: 99;
       border-top: 1px solid rgba(255,255,255,0.15);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
-    .mobile-menu .nav-link { display: block; padding: 12px 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .mobile-menu .nav-link { display: block; padding: 14px 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); color: white; }
     .mobile-menu-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 
-    /* General */
-    .section { padding: 40px 0; }
+    /* ── GENERAL ── */
+    .section { padding: 36px 0; }
     .container { padding: 0 16px; }
-    .card { padding: 18px !important; }
+    .card { padding: 16px !important; }
+    * { -webkit-tap-highlight-color: transparent; }
 
-    /* Modal */
-    .modal { padding: 20px 16px !important; margin: 8px; max-width: calc(100vw - 16px) !important; }
-    .modal-overlay { padding: 8px; align-items: flex-end; }
+    /* ── TYPOGRAPHY ── */
+    .hero-title { font-size: 26px !important; line-height: 1.25 !important; }
+    .section-title { font-size: 22px !important; }
+    h1 { font-size: clamp(20px, 5vw, 32px) !important; }
+    h2 { font-size: clamp(18px, 4.5vw, 28px) !important; }
+    h3 { font-size: clamp(15px, 3.5vw, 20px) !important; }
 
-    /* Tables - always scroll */
-    table { min-width: 480px; font-size: 12px; }
-    th, td { padding: 8px 10px !important; }
+    /* ── HERO ── */
+    .hero-stats { flex-wrap: wrap; gap: 12px !important; justify-content: center; }
+    .hero-stats > div { min-width: 80px; flex: 1 1 80px; }
+    .hero-btns { flex-direction: column !important; width: 100% !important; gap: 10px !important; }
+    .hero-btns button, .hero-btns a { width: 100% !important; text-align: center !important; padding: 14px !important; font-size: 15px !important; }
 
-    /* Hero */
-    .hero-title { font-size: 28px !important; }
-    .hero-stats { flex-wrap: wrap; gap: 16px !important; }
+    /* ── MODAL ── */
+    .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
+    .modal {
+      padding: 20px 16px !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      border-radius: 20px 20px 0 0 !important;
+      max-height: 92vh !important;
+      overflow-y: auto !important;
+    }
 
-    /* All auto-fit grids already handle themselves */
-    /* Force 1-col on specific layouts */
-    .section-title { font-size: 26px !important; }
+    /* ── FORMS ── */
+    input, select, textarea {
+      font-size: 16px !important; /* Prevents iOS zoom on focus */
+      padding: 12px 14px !important;
+    }
+    label { font-size: 13px !important; }
+    .btn-primary, .btn-outline, .btn-navy {
+      padding: 13px 20px !important;
+      font-size: 14px !important;
+      min-height: 44px;
+    }
 
-    /* Footer */
+    /* ── GRIDS → SINGLE COLUMN ── */
+    .modal .grid-2-col { grid-template-columns: 1fr !important; }
     .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
-
-    /* CTA buttons */
+    .about-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+    .about-stats { grid-template-columns: 1fr 1fr !important; }
+    .team-grid { grid-template-columns: 1fr 1fr !important; }
+    .booking-inner { grid-template-columns: 1fr !important; }
+    .profile-form-inner { grid-template-columns: 1fr !important; }
+    .payments-grid { grid-template-columns: 1fr !important; }
     .cta-btns { flex-direction: column !important; align-items: stretch !important; }
     .cta-btns button { width: 100% !important; }
+
+    /* ── TABLES ── */
+    table { min-width: 500px; font-size: 12px; }
+    th, td { padding: 10px 10px !important; }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    /* ── FOOTER ── */
+    .footer-grid { gap: 24px !important; }
 
     /* ── STUDENT PORTAL ── */
     .portal-wrap { flex-direction: column !important; }
@@ -353,13 +388,14 @@ const css = `
       overflow-x: auto !important;
       overflow-y: hidden !important;
       padding: 0 !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15) !important;
     }
     .portal-sidebar-top { display: none !important; }
     .portal-user-card { display: none !important; }
     .portal-nav-section {
       display: flex !important;
       flex-direction: row !important;
-      padding: 4px 8px !important;
+      padding: 4px 6px !important;
       gap: 2px;
       flex-shrink: 0;
     }
@@ -375,25 +411,19 @@ const css = `
       border-bottom: 3px solid transparent !important;
       border-radius: 0 !important;
       white-space: nowrap;
+      min-height: 52px;
     }
     .portal-nav-item.active {
       background: rgba(255,255,255,0.2) !important;
       border-bottom-color: white !important;
       border-left: none !important;
     }
-    .portal-nav-item .nav-icon {
-      width: 26px !important;
-      height: 26px !important;
-      font-size: 13px !important;
-      margin: 0 auto;
-    }
+    .portal-nav-item .nav-icon { width: 26px !important; height: 26px !important; font-size: 14px !important; margin: 0 auto; }
     .portal-badge { font-size: 8px !important; padding: 1px 4px !important; }
     .portal-main { overflow: visible !important; }
     .portal-topbar { padding: 10px 14px !important; }
-    .portal-topbar > div:first-child > div:first-child { font-size: 15px !important; }
-    .portal-content-area { padding: 16px 14px !important; }
-
-    /* Portal sidebar logout */
+    .portal-topbar > div:first-child > div:first-child { font-size: 14px !important; }
+    .portal-content-area { padding: 14px 12px !important; }
     .portal-wrap > div:first-child > div:last-child { display: none !important; }
 
     /* ── ADMIN DASHBOARD ── */
@@ -408,13 +438,16 @@ const css = `
       overflow-x: auto !important;
       overflow-y: hidden !important;
       padding: 0 !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important;
     }
+    .admin-sidebar > div:first-child { display: none !important; }
+    .admin-sidebar > div:nth-child(2) { display: none !important; }
     .admin-sidebar-top { display: none !important; }
     .admin-user-card { display: none !important; }
     .admin-nav-section {
       display: flex !important;
       flex-direction: row !important;
-      padding: 4px 6px !important;
+      padding: 4px 4px !important;
       gap: 2px;
       flex-shrink: 0;
     }
@@ -423,89 +456,76 @@ const css = `
       flex-direction: column !important;
       font-size: 9px !important;
       gap: 2px !important;
-      padding: 8px 10px !important;
+      padding: 8px 8px !important;
       min-width: 52px !important;
+      min-height: 52px !important;
       text-align: center !important;
       border-left: none !important;
       border-bottom: 3px solid transparent !important;
       border-radius: 0 !important;
+      white-space: nowrap;
     }
     .admin-nav-item.active {
       background: rgba(100,181,246,0.2) !important;
       border-bottom-color: #64B5F6 !important;
       border-left: none !important;
     }
-    .admin-nav-icon { width: 24px !important; height: 24px !important; font-size: 13px !important; margin: 0 auto; }
+    .admin-nav-icon { width: 24px !important; height: 24px !important; font-size: 14px !important; margin: 0 auto; }
     .admin-main { overflow: visible !important; }
-    .admin-topbar { padding: 10px 14px !important; }
-    .admin-content { padding: 14px !important; }
-
-    /* Hide back to website in mobile admin */
+    .admin-topbar { padding: 10px 12px !important; }
+    .admin-content { padding: 12px 10px !important; }
     .admin-sidebar > div:last-child { display: none !important; }
 
-    /* Welcome banners */
-    .premium-welcome-banner { padding: 20px 18px !important; border-radius: 14px !important; }
-    .premium-welcome-banner h1 { font-size: 20px !important; }
-
-    /* Stat cards 2-col */
+    /* ── CARDS GRID ── */
+    .premium-welcome-banner { padding: 18px !important; border-radius: 14px !important; }
+    .premium-welcome-banner h1 { font-size: 18px !important; }
     .admin-stat-card { padding: 14px !important; }
     .premium-stat-card { padding: 14px !important; }
 
-    /* Detail modal full screen on mobile */
-    .detail-modal { max-width: 100% !important; margin: 0 !important; border-radius: 12px !important; }
-    .detail-modal-overlay { padding: 10px !important; align-items: flex-end !important; }
+    /* ── DETAIL MODAL ── */
+    .detail-modal {
+      max-width: 100% !important;
+      margin: 0 !important;
+      border-radius: 20px 20px 0 0 !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+    }
+    .detail-modal-overlay { padding: 0 !important; align-items: flex-end !important; }
 
-    /* Registration modal 2-col grid → 1 col */
-    .modal .grid-2-col { grid-template-columns: 1fr !important; }
-
-    /* Document center */
+    /* ── COLLEGES & EXAMS ── */
     .upload-zone { padding: 18px !important; }
-
-    /* Payments grid */
-    .payments-grid { grid-template-columns: 1fr !important; }
-
-    /* Profile form 2-col → 1 col */
-    .profile-form-inner { grid-template-columns: 1fr !important; }
-
-    /* About page */
-    .about-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-    .about-stats { grid-template-columns: 1fr 1fr !important; }
-    .team-grid { grid-template-columns: 1fr 1fr !important; }
-
-    /* Counseling booking form */
-    .booking-inner { grid-template-columns: 1fr !important; }
-
-    /* FAQ */
-    .faq-q { font-size: 14px !important; }
-
-    /* Hero buttons */
-    .hero-btns { flex-direction: column !important; width: 100% !important; }
-    .hero-btns button { width: 100% !important; text-align: center !important; }
-
-    /* Exam cards */
     .exam-countdown { flex-wrap: wrap; gap: 6px !important; }
     .exam-countdown > div { min-width: 38px !important; }
+    .college-tabs button { padding: 12px 14px !important; font-size: 12px !important; }
+    .stream-filters { gap: 6px !important; overflow-x: auto; flex-wrap: nowrap !important; padding-bottom: 4px; }
+    .stream-filters button { font-size: 11px !important; padding: 5px 10px !important; white-space: nowrap; flex-shrink: 0; }
 
-    /* College page tabs */
-    .college-tabs button { padding: 12px 16px !important; font-size: 13px !important; }
-    .stream-filters { gap: 6px !important; }
-    .stream-filters button { font-size: 11px !important; padding: "5px 10px" !important; }
+    /* ── FAQ ── */
+    .faq-q { font-size: 14px !important; }
+
+    /* ── ABOUT ── */
+    .about-grid { gap: 32px !important; }
+
+    /* ── SERVICES ── */
+    .services-grid { grid-template-columns: 1fr !important; }
   }
 
-  /* ── SMALL MOBILE (max 480px) ── */
+  /* ── SMALL PHONES (max 480px) ── */
   @media (max-width: 480px) {
     .container { padding: 0 12px; }
-    .hero-title { font-size: 24px !important; }
-    .section-title { font-size: 22px !important; }
+    .hero-title { font-size: 22px !important; }
+    .section-title { font-size: 20px !important; }
     .footer-grid { grid-template-columns: 1fr !important; }
     .team-grid { grid-template-columns: 1fr !important; }
     .about-stats { grid-template-columns: 1fr 1fr !important; }
     .modal { padding: 16px 14px !important; }
-    .portal-nav-item { min-width: 48px !important; padding: 6px 8px !important; }
-    .admin-nav-item { min-width: 44px !important; padding: 6px 8px !important; }
+    .portal-nav-item { min-width: 48px !important; padding: 6px 8px !important; font-size: 8px !important; }
+    .admin-nav-item { min-width: 44px !important; padding: 6px 6px !important; font-size: 8px !important; }
     table { min-width: 420px; font-size: 11px; }
-    .premium-welcome-banner { padding: 16px !important; }
-    .premium-welcome-banner h1 { font-size: 18px !important; }
+    .premium-welcome-banner { padding: 14px !important; }
+    .premium-welcome-banner h1 { font-size: 16px !important; }
+    .hero-btns button { font-size: 14px !important; padding: 12px !important; }
+    input, select { font-size: 16px !important; }
   }
   tr:hover td { background: #FAFCFF; }
   
@@ -686,13 +706,13 @@ function Hero({ setPage, setModal }) {
       <div className="container" style={{ padding: "80px 24px" }}>
         <div style={{ maxWidth: 640 }} className="fade-in">
           <div className="tag" style={{ color: "#ffffff", borderColor: "rgba(255,255,255,0.7)", background: "rgba(255,255,255,0.15)" }}>India's Trusted Education Consultancy</div>
-          <h1 className="font-display" style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.12, marginBottom: 20, letterSpacing: "-0.02em" }}>
+          <h1 className="font-display hero-title" style={{ fontSize: "clamp(26px, 5vw, 52px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.12, marginBottom: 20, letterSpacing: "-0.02em" }}>
             Your One-Stop Solution for College Admissions & Counseling
           </h1>
           <p style={{ fontSize: 17, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, marginBottom: 36, maxWidth: 520 }}>
             Expert guidance for exam forms, educational counseling, and college admissions — from JEE to NEET to MBA, we help thousands of students achieve their academic dreams each year.
           </p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <div className="hero-btns" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button className="btn-primary" style={{ padding: "14px 32px", fontSize: 16, fontWeight: 700 }} onClick={() => setModal("counseling")}>Book Free Counseling →</button>
             <button className="btn-outline" style={{ fontSize: 14 }} onClick={() => setModal("register")}>Register Free</button>
             <button style={{ background: "none", border: "none", color: "rgba(255,255,255,0.65)", fontSize: 13, cursor: "pointer", textDecoration: "underline", padding: "8px 4px" }} onClick={() => setModal("login")}>Student Login</button>
