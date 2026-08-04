@@ -5156,36 +5156,92 @@ function AboutPage() {
         </div>
       </section>
 
-      {/* ── WHY PUNE STUDENTS TRUST US ── */}
-      <section className="section" style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", padding: "56px 0" }}>
+      {/* ── WHY STUDENTS & FAMILIES TRUST US ── */}
+      <section className="section" style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", padding: "64px 0" }}>
         <div className="container">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 32, alignItems: "center" }}>
-            <div>
-              <h2 className="font-display" style={{ fontSize: "clamp(22px,3.5vw,34px)", fontWeight: 700, color: "white", marginBottom: 16 }}>Why Pune Families Trust Educeff</h2>
-              <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, lineHeight: 1.8, marginBottom: 24 }}>
-                We are not a generic coaching class or an online platform. We are a Pune-based team with deep roots in Maharashtra&#39;s education system — we know the DTE counseling process, the MUHS seat matrix, and the Symbiosis admission calendar inside out.
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {[
-                  "Real counselors — not bots or call centres",
-                  "Maharashtra-specific expertise: DTE, MUHS, MHCET Law",
-                  "Transparent pricing — see all costs before you pay",
-                  "Office in Baner, Pune — walk in anytime",
-                  "Serving students across 15+ districts in Maharashtra",
-                ].map(p => (
-                  <div key={p} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0, marginTop: 1 }}>✓</div>
-                    <span style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{p}</span>
-                  </div>
-                ))}
-              </div>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "6px 16px", fontSize: 12, fontWeight: 600, color: "white", marginBottom: 16 }}>
+              ⭐ Trusted by Families Across India
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              {whyUs.map(s => (
-                <div key={s.label} style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 14, padding: 20, textAlign: "center" }}>
+            <h2 className="font-display" style={{ fontSize: "clamp(22px,3.5vw,36px)", fontWeight: 800, color: "white", marginBottom: 12 }}>
+              Why Students &amp; Families Trust Educeff
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 15, maxWidth: 560, margin: "0 auto", lineHeight: 1.8 }}>
+              Thousands of families trust us every admission season — not because we promise miracles, but because we deliver clarity, honesty and results.
+            </p>
+          </div>
+
+          {/* Trust pillars */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginBottom: 48 }}>
+            {[
+              {
+                icon: "🤝",
+                title: "No Pressure, Ever",
+                desc: "We never push students toward a college that pays us commission. Our only incentive is your admission — not a referral fee. Every shortlist is based purely on your marks, preferences and goals.",
+              },
+              {
+                icon: "💬",
+                title: "Real Humans, Real Answers",
+                desc: "Every query is answered by a certified counselor — not a chatbot or a call centre. You get a direct line to someone who knows your file, your marks and your options inside out.",
+              },
+              {
+                icon: "📋",
+                title: "We Handle the Paperwork",
+                desc: "Exam forms, college applications, scholarship filings, document checklists — we take the bureaucratic burden off families so students can focus on preparation, not administration.",
+              },
+              {
+                icon: "🕐",
+                title: "We Never Miss a Deadline",
+                desc: "Missing a form deadline can cost a student an entire exam cycle. Our internal calendar tracks every deadline for every exam and every counseling round — we remind you before you even think to ask.",
+              },
+              {
+                icon: "🔍",
+                title: "Honest Shortlists Only",
+                desc: "We tell you which colleges are realistic, which are reach, and which are safe — based on actual cutoff data, not optimism. Parents appreciate the honesty even when the news is not what they hoped.",
+              },
+              {
+                icon: "🌍",
+                title: "We Cover Every Stream",
+                desc: "Engineering, Medical, Law, Management, Architecture, Science, Commerce, Pharmacy — our counselors have first-hand knowledge of every admission process across every major stream in India.",
+              },
+              {
+                icon: "📱",
+                title: "Always Accessible",
+                desc: "WhatsApp, phone, email or walk-in — we respond within 4 hours on weekdays and 8 hours on weekends. During peak counseling season, our team is available round the clock.",
+              },
+              {
+                icon: "💰",
+                title: "Transparent, Fair Pricing",
+                desc: "You see every price before you pay — no hidden charges, no surprise fees mid-process. Our first counseling session is always free so families can judge our value before committing.",
+              },
+              {
+                icon: "🏆",
+                title: "Track Record That Speaks",
+                desc: "Over 1,100 students guided into IITs, NITs, AIIMS, NLSIU, IIMs and top private colleges. Not because we promised the best — but because we prepared and guided them properly.",
+              },
+            ].map(p => (
+              <div key={p.title} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 14, padding: 22, backdropFilter: "blur(8px)" }}>
+                <div style={{ fontSize: 28, marginBottom: 10 }}>{p.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "white", marginBottom: 8 }}>{p.title}</div>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: 0 }}>{p.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Quote bar */}
+          <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 16, padding: "28px 32px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 24, textAlign: "center" }}>
+              {[
+                { num: SITE_STATS.studentsGuided, label: "Students Guided", sub: "Across all streams" },
+                { num: SITE_STATS.yearsExcellence + " Yrs", label: "Of Experience", sub: "Founded 2018, Pune" },
+                { num: SITE_STATS.counselors, label: "Certified Counselors", sub: "Real experts, not bots" },
+                { num: "4 Hrs", label: "Response Time", sub: "Weekday guarantee" },
+                { num: "Free", label: "First Session", sub: "No card required" },
+              ].map(s => (
+                <div key={s.label} style={{ padding: "8px 0" }}>
                   <div style={{ fontSize: "clamp(22px,3vw,30px)", fontWeight: 800, color: "white", fontFamily: "Sora" }}>{s.num}</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", marginTop: 4, fontWeight: 600 }}>{s.label}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{s.sub}</div>
+                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", fontWeight: 600, marginTop: 4 }}>{s.label}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{s.sub}</div>
                 </div>
               ))}
             </div>
