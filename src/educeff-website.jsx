@@ -2406,93 +2406,68 @@ function ApplicationsTab({ user }) {
   const [applyModal, setApplyModal] = useState(null);
   const [applying, setApplying] = useState({});
   const [allColleges, setAllColleges] = useState([]);
+  const [applyError, setApplyError] = useState("");
 
   useEffect(() => {
     if (!user) return;
-    // Load applications
     supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
       .then(({ data }) => { setApps(data || []); setLoading(false); })
       .catch(() => setLoading(false));
-    // Load profile
     supabase.from("students").select("course_interest, entrance_exam, score").eq("user_id", user.id).single()
       .then(({ data }) => { if (data) setProfile(data); })
       .catch(() => {});
-    // Load colleges from Supabase
-    supabase.from("colleges").select("*").eq("is_active", true).order("name")
+    supabase.from("colleges").select("id, name, city, stream, type, ranking, affiliation").eq("is_active", true).order("name")
       .then(({ data }) => { if (data) setAllColleges(data); })
       .catch(() => {});
   }, [user]);
 
-  // Smart suggestions based on profile
-  const getSuggestions = () => {
-    const stream = profile?.course_interest || "All";
-    const exam = profile?.entrance_exam || "";
-    const appliedColleges = new Set(apps.map(a => a.college));
+  const appliedSet = new Set(apps.map(a => a.college));
 
-    let suggestions = allColleges.filter(c => !appliedColleges.has(c.name));
-
-    // Filter by stream
-    if (stream && stream !== "All" && stream !== "Science / Commerce") {
-      const streamMap = { "Engineering": "Engineering", "Medical": "Medical", "Law": "Law", "Management": "Management", "Architecture": "Architecture" };
-      const mappedStream = streamMap[stream];
-      if (mappedStream) suggestions = suggestions.filter(c => c.stream === mappedStream);
-    }
-
-    return suggestions;
-  };
-
-  const suggestions = getSuggestions();
-
-  const filteredSuggestions = suggestions.filter(c => {
+  const filteredSuggestions = allColleges.filter(c => {
     const matchStream = searchStream === "All" || c.stream === searchStream;
-    const matchSearch = !collegeSearch || (c.name || "").toLowerCase().includes(collegeSearch.toLowerCase()) || (c.city || "").toLowerCase().includes(collegeSearch.toLowerCase());
-    return matchStream && matchSearch;
+    const matchSearch = !collegeSearch ||
+      (c.name || "").toLowerCase().includes(collegeSearch.toLowerCase()) ||
+      (c.city || "").toLowerCase().includes(collegeSearch.toLowerCase());
+    const notApplied = !appliedSet.has(c.name);
+    // Filter by profile stream
+    const profileStream = profile?.course_interest;
+    const matchProfile = !profileStream || profileStream === "All" || !c.stream || c.stream === profileStream;
+    return matchStream && matchSearch && notApplied;
   });
 
+  const courseForStream = (stream) => ({
+    Engineering: "B.E. / B.Tech", Medical: "MBBS", Law: "LLB / BA LLB",
+    Management: "MBA", Architecture: "B.Arch", Pharmacy: "B.Pharm",
+    Science: "B.Sc.", Commerce: "B.Com"
+  })[stream] || stream || "General";
+
   const handleQuickApply = async (college) => {
+    setApplyError("");
     setApplying(p => ({ ...p, [college.name]: true }));
     try {
-      const course = college.stream === "Engineering" ? "B.E. / B.Tech" :
-        college.stream === "Medical" ? "MBBS" :
-        college.stream === "Law" ? "LLB / BA LLB" :
-        college.stream === "Management" ? "MBA" :
-        college.stream === "Architecture" ? "B.Arch" :
-        college.stream === "Pharmacy" ? "B.Pharm" :
-        college.stream === "Science" ? "B.Sc." :
-        college.stream === "Commerce" ? "B.Com" : college.stream || "General";
-
-      // college.exams may not exist for Supabase-fetched colleges — use profile exam as fallback
-      const exam = (college.exams && college.exams[0]) || profile?.entrance_exam || "";
-
       const { data, error } = await supabase.from("applications").insert({
         user_id: user.id,
         college: college.name,
-        course,
-        exam,
+        course: courseForStream(college.stream),
+        exam: profile?.entrance_exam || "",
         status: "pending",
         created_at: new Date().toISOString(),
       }).select().single();
-
       if (error) {
-        console.warn("Application insert error:", error.message);
-        alert("Could not submit application: " + error.message);
+        setApplyError(error.message);
       } else if (data) {
         setApps(a => [data, ...a]);
-        setApplyModal({ college, success: true });
+        setApplyModal(college);
       }
-    } catch(e) {
-      console.warn("Apply error:", e);
-      alert("Something went wrong. Please try again.");
+    } catch (e) {
+      setApplyError(e.message || "Something went wrong.");
     }
     setApplying(p => ({ ...p, [college.name]: false }));
   };
 
-  const isApplied = (collegeName) => apps.some(a => a.college === collegeName);
-
-  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
-
   const handleAdd = async () => {
     if (!form.college.trim() || !form.course.trim()) return;
+    setApplyError("");
     try {
       const { data, error } = await supabase.from("applications").insert({
         user_id: user.id,
@@ -2500,40 +2475,61 @@ function ApplicationsTab({ user }) {
         course: form.course.trim(),
         exam: form.exam.trim(),
         status: "pending",
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       }).select().single();
       if (error) {
-        console.warn("Custom apply error:", error.message);
-        alert("Could not submit: " + error.message);
+        setApplyError(error.message);
       } else if (data) {
         setApps(a => [data, ...a]);
         setShowForm(false);
         setForm({ college: "", course: "", exam: "" });
         setActiveSection("applications");
       }
-    } catch(e) {
-      console.warn(e);
-      alert("Something went wrong. Please try again.");
+    } catch (e) {
+      setApplyError(e.message || "Something went wrong.");
     }
   };
+
+  const streamColors = {
+    Engineering: { bg: "#EFF6FF", color: "#1565C0" },
+    Medical: { bg: "#F0FDF4", color: "#059669" },
+    Law: { bg: "#FFF7ED", color: "#EA580C" },
+    Management: { bg: "#F5F3FF", color: "#7C3AED" },
+    Architecture: { bg: "#ECFEFF", color: "#0891B2" },
+    Science: { bg: "#FFFBEB", color: "#D97706" },
+    Commerce: { bg: "#F0FDFA", color: "#0D9488" },
+    Pharmacy: { bg: "#FDF2F8", color: "#9D174D" },
+  };
+  const getStreamStyle = (stream) => streamColors[stream] || { bg: "#F8FAFF", color: "#6B7280" };
+  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
 
   return (
     <div>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", fontFamily: "Sora" }}>Applications</h1>
           <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} application{apps.length !== 1 ? "s" : ""} submitted</div>
         </div>
-        <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => setShowForm(s => !s)}>+ Custom Apply</button>
+        <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => { setShowForm(s => !s); setApplyError(""); }}>+ Custom Apply</button>
       </div>
 
+      {/* Error banner */}
+      {applyError && (
+        <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 16px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>
+          ⚠️ {applyError}
+        </div>
+      )}
+
       {/* Tab Switch */}
-      <div style={{ display: "flex", gap: 0, background: "#F0F7FF", borderRadius: 10, padding: 4, marginBottom: 20, width: "fit-content" }}>
-        {[{ id: "suggestions", label: "🎯 College Suggestions", count: suggestions.length }, { id: "applications", label: "📋 My Applications", count: apps.length }].map(t => (
+      <div style={{ display: "flex", gap: 0, background: "#F0F7FF", borderRadius: 10, padding: 4, marginBottom: 20, width: "fit-content", flexWrap: "wrap" }}>
+        {[
+          { id: "suggestions", label: "🎯 Suggestions", count: filteredSuggestions.length },
+          { id: "applications", label: "📋 My Applications", count: apps.length }
+        ].map(t => (
           <button key={t.id} onClick={() => setActiveSection(t.id)}
-            style={{ padding: "8px 16px", border: "none", borderRadius: 8, background: activeSection === t.id ? "white" : "transparent", color: activeSection === t.id ? "#1565C0" : "#6D28D9", fontWeight: activeSection === t.id ? 700 : 500, fontSize: 13, cursor: "pointer", boxShadow: activeSection === t.id ? "0 2px 8px rgba(0,0,0,0.08)" : "none", transition: "all 0.2s" }}>
-            {t.label} <span style={{ background: activeSection === t.id ? "#EFF6FF" : "transparent", color: "#64B5F6", borderRadius: 10, padding: "1px 6px", fontSize: 11, fontWeight: 700 }}>{t.count}</span>
+            style={{ padding: "8px 14px", border: "none", borderRadius: 8, background: activeSection === t.id ? "white" : "transparent", color: activeSection === t.id ? "#1565C0" : "#6D28D9", fontWeight: activeSection === t.id ? 700 : 500, fontSize: 13, cursor: "pointer", boxShadow: activeSection === t.id ? "0 2px 8px rgba(0,0,0,0.08)" : "none" }}>
+            {t.label} <span style={{ background: "#EFF6FF", color: "#64B5F6", borderRadius: 10, padding: "1px 6px", fontSize: 11, fontWeight: 700 }}>{t.count}</span>
           </button>
         ))}
       </div>
@@ -2547,24 +2543,24 @@ function ApplicationsTab({ user }) {
             <div><label>Course *</label><input placeholder="e.g. B.E. Computer" value={form.course} onChange={e => setForm(f => ({ ...f, course: e.target.value }))} /></div>
             <div><label>Entrance Exam</label><input placeholder="e.g. JEE Main" value={form.exam} onChange={e => setForm(f => ({ ...f, exam: e.target.value }))} /></div>
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <button className="btn-primary" style={{ fontSize: 13 }} onClick={handleAdd}>Submit Application</button>
-            <button style={{ fontSize: 13, padding: "10px 20px", background: "transparent", color: "#64B5F6", border: "1px solid #BFDBFE", borderRadius: 8, cursor: "pointer" }} onClick={() => setShowForm(false)}>Cancel</button>
+            <button style={{ fontSize: 13, padding: "10px 20px", background: "transparent", border: "1px solid #BFDBFE", borderRadius: 8, cursor: "pointer", color: "#64B5F6" }} onClick={() => { setShowForm(false); setApplyError(""); }}>Cancel</button>
           </div>
         </div>
       )}
 
-      {/* ── SUGGESTIONS SECTION ── */}
+      {/* ── SUGGESTIONS ── */}
       {activeSection === "suggestions" && (
         <div>
-          {/* Profile match banner */}
+          {/* Profile banner */}
           {profile?.course_interest && (
-            <div style={{ background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE", borderRadius: 12, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE", borderRadius: 12, padding: "14px 18px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <span style={{ fontSize: 24 }}>🎯</span>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>Personalized for you</div>
                 <div style={{ fontSize: 12, color: "#6B7280" }}>
-                  Showing colleges for <strong>{profile.course_interest}</strong>
+                  Stream: <strong>{profile.course_interest}</strong>
                   {profile.entrance_exam ? ` · ${profile.entrance_exam}` : ""}
                   {profile.score ? ` · ${profile.score}` : ""}
                 </div>
@@ -2574,80 +2570,77 @@ function ApplicationsTab({ user }) {
           )}
 
           {/* Filters */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
-            <input value={collegeSearch} onChange={e => setCollegeSearch(e.target.value)} placeholder="🔍 Search college or city..." style={{ flex: 1, minWidth: 180, marginBottom: 0, fontSize: 13 }} />
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+            <input value={collegeSearch} onChange={e => setCollegeSearch(e.target.value)} placeholder="Search college or city..." style={{ flex: 1, minWidth: 160, marginBottom: 0, fontSize: 13 }} />
             <select value={searchStream} onChange={e => setSearchStream(e.target.value)} style={{ width: 160, marginBottom: 0, fontSize: 13 }}>
               {streams.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
 
-          {/* College Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
-            {filteredSuggestions.length === 0 ? (
-              <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "48px 0" }}>
-                <div style={{ fontSize: 40, marginBottom: 10 }}>🔍</div>
-                <div style={{ fontSize: 14, color: "#6B7280" }}>No colleges found for your search</div>
+          {/* Loading colleges */}
+          {allColleges.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>⏳</div>
+              <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading colleges...</div>
+            </div>
+          ) : filteredSuggestions.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "48px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
+              <div style={{ fontSize: 40, marginBottom: 10 }}>🔍</div>
+              <div style={{ fontSize: 14, color: "#6B7280" }}>
+                {appliedSet.size === allColleges.length ? "You have applied to all colleges!" : "No colleges match your search"}
               </div>
-            ) : filteredSuggestions.map(c => {
-              const applied = isApplied(c.name);
-              const isApplying = applying[c.name];
-              const typeColor = c.type === "Government" ? "#059669" : c.type === "Autonomous" ? "#7C3AED" : "#1565C0";
-              const typeBg = c.type === "Government" ? "#ECFDF5" : c.type === "Autonomous" ? "#F5F3FF" : "#EFF6FF";
-              return (
-                <div key={c.name} style={{ background: "white", borderRadius: 14, border: `1px solid ${applied ? "#A7F3D0" : "#E3F2FD"}`, padding: 18, transition: "all 0.2s", position: "relative", overflow: "hidden" }}>
-                  {applied && <div style={{ position: "absolute", top: 0, right: 0, background: "#059669", color: "white", fontSize: 9, fontWeight: 700, padding: "3px 10px", borderBottomLeftRadius: 8 }}>✓ APPLIED</div>}
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 14 }}>
+              {filteredSuggestions.map(c => {
+                const st = getStreamStyle(c.stream);
+                const isApplying = applying[c.name];
+                return (
+                  <div key={c.id || c.name} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+                    <div style={{ height: 4, background: `linear-gradient(90deg, ${st.color}, #7C3AED)` }} />
+                    <div style={{ padding: 16 }}>
+                      {/* College header */}
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
+                        <div style={{ width: 38, height: 38, borderRadius: 9, background: `linear-gradient(135deg, ${st.color}, #7C3AED)`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 16, flexShrink: 0 }}>
+                          {(c.name || "C")[0]}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E", lineHeight: 1.3 }}>{c.name}</div>
+                          <div style={{ fontSize: 11, color: "#90CAF9" }}>📍 {c.city}</div>
+                        </div>
+                      </div>
 
-                  {/* Header */}
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 16, flexShrink: 0 }}>{c.name[0]}</div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E", lineHeight: 1.3 }}>{c.name}</div>
-                      <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>📍 {c.city}</div>
+                      {/* Badges */}
+                      <div style={{ display: "flex", gap: 5, marginBottom: 8, flexWrap: "wrap" }}>
+                        <span style={{ background: st.bg, color: st.color, fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{c.stream}</span>
+                        <span style={{ background: c.type === "Government" ? "#ECFDF5" : "#EFF6FF", color: c.type === "Government" ? "#059669" : "#1565C0", fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{c.type}</span>
+                      </div>
+
+                      {c.ranking && <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 6 }}>🏆 {c.ranking}</div>}
+                      {c.affiliation && <div style={{ fontSize: 10, color: "#90CAF9", marginBottom: 12 }}>Affiliated: {c.affiliation}</div>}
+
+                      {/* Apply button */}
+                      <button className="btn-primary" style={{ width: "100%", fontSize: 12, padding: "9px 0", opacity: isApplying ? 0.7 : 1 }}
+                        onClick={() => handleQuickApply(c)} disabled={isApplying}>
+                        {isApplying ? "Applying..." : "⚡ Quick Apply →"}
+                      </button>
                     </div>
                   </div>
-
-                  {/* Tags */}
-                  <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
-                    <span style={{ background: typeBg, color: typeColor, fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{c.type}</span>
-                    <span style={{ background: "#EFF6FF", color: "#1565C0", fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{c.stream}</span>
-                  </div>
-
-                  {/* Ranking */}
-                  <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 8 }}>🏆 {c.ranking}</div>
-
-                  {/* Affiliated */}
-                  <div style={{ fontSize: 10, color: "#90CAF9", marginBottom: 10 }}>Affiliated: {c.affiliation}</div>
-
-                  {/* Exams */}
-                  <div style={{ display: "flex", gap: 4, marginBottom: 14, flexWrap: "wrap" }}>
-                    {c.exams.map(e => (
-                      <span key={e} style={{ background: profile?.entrance_exam && e.includes(profile.entrance_exam.split(" ")[0]) ? "#DBEAFE" : "#F8FAFF", color: profile?.entrance_exam && e.includes(profile.entrance_exam.split(" ")[0]) ? "#1D4ED8" : "#90CAF9", fontSize: 10, padding: "2px 8px", borderRadius: 6, border: `1px solid ${profile?.entrance_exam && e.includes(profile.entrance_exam.split(" ")[0]) ? "#BFDBFE" : "#E3F2FD"}`, fontWeight: profile?.entrance_exam && e.includes(profile.entrance_exam.split(" ")[0]) ? 700 : 400 }}>
-                        {e}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Apply Button */}
-                  {applied ? (
-                    <div style={{ background: "#ECFDF5", borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#065F46", fontWeight: 600, textAlign: "center" }}>✅ Application Submitted</div>
-                  ) : (
-                    <button className="btn-primary" style={{ width: "100%", fontSize: 12, padding: "9px 0", opacity: isApplying ? 0.7 : 1 }}
-                      onClick={() => handleQuickApply(c)} disabled={isApplying}>
-                      {isApplying ? "Applying..." : "⚡ Quick Apply →"}
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
-      {/* ── MY APPLICATIONS SECTION ── */}
+      {/* ── MY APPLICATIONS ── */}
       {activeSection === "applications" && (
         <div>
           {loading ? (
-            <div style={{ textAlign: "center", padding: "48px 0" }}><div style={{ fontSize: 32 }}>⏳</div><div style={{ color: "#90CAF9", fontSize: 14, marginTop: 8 }}>Loading...</div></div>
+            <div style={{ textAlign: "center", padding: "48px 0" }}>
+              <div style={{ fontSize: 32 }}>⏳</div>
+              <div style={{ color: "#90CAF9", fontSize: 14, marginTop: 8 }}>Loading...</div>
+            </div>
           ) : apps.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 16, border: "1px solid #E3F2FD" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>📋</div>
@@ -2656,34 +2649,41 @@ function ApplicationsTab({ user }) {
               <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => setActiveSection("suggestions")}>🎯 Browse Suggestions →</button>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
-              {apps.map(a => (
-                <div key={a.id} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 18 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 15 }}>{a.college?.[0] || "C"}</div>
-                    <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`} style={{ fontSize: 10 }}>{a.status?.replace("_", " ")}</span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 14 }}>
+              {apps.map(a => {
+                const st = getStreamStyle("");
+                return (
+                  <div key={a.id} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 18 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                      <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 15 }}>
+                        {(a.college || "C")[0]}
+                      </div>
+                      <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`} style={{ fontSize: 10 }}>
+                        {(a.status || "pending").replace("_", " ")}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", marginBottom: 4 }}>{a.college}</div>
+                    <div style={{ fontSize: 12, color: "#90CAF9", marginBottom: 4 }}>{a.course}</div>
+                    {a.exam && <div style={{ fontSize: 11, color: "#64B5F6", marginBottom: 8 }}>📝 {a.exam}</div>}
+                    <div style={{ fontSize: 10, color: "#C8E4FA" }}>Applied: {new Date(a.created_at).toLocaleDateString("en-IN")}</div>
+                    <div style={{ fontSize: 10, color: "#C8E4FA", marginTop: 2 }}>ID: APP-{String(a.id || "").slice(-8).toUpperCase()}</div>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", marginBottom: 4 }}>{a.college}</div>
-                  <div style={{ fontSize: 12, color: "#90CAF9", marginBottom: 4 }}>{a.course}</div>
-                  {a.exam && <div style={{ fontSize: 11, color: "#64B5F6", marginBottom: 8 }}>📝 {a.exam}</div>}
-                  <div style={{ fontSize: 10, color: "#C8E4FA" }}>Applied: {new Date(a.created_at).toLocaleDateString("en-IN")}</div>
-                  <div style={{ fontSize: 10, color: "#C8E4FA", marginTop: 2 }}>ID: APP-{String(a.id).slice(-8).toUpperCase()}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
-      {/* Quick Apply Success Modal */}
+      {/* Success Modal */}
       {applyModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(13,27,75,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }}
           onClick={() => setApplyModal(null)}>
           <div style={{ background: "white", borderRadius: 16, padding: 36, maxWidth: 380, width: "100%", textAlign: "center" }} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
             <h3 style={{ fontSize: 20, fontWeight: 800, color: "#059669", marginBottom: 8, fontFamily: "Sora" }}>Application Submitted!</h3>
-            <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 6 }}>Your application to <strong>{applyModal.college.name}</strong> has been submitted.</p>
-            <p style={{ fontSize: 13, color: "#90CAF9", marginBottom: 24 }}>Our counselors will contact you to guide you through the next steps.</p>
+            <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 6 }}>Your application to <strong>{applyModal.name}</strong> has been submitted.</p>
+            <p style={{ fontSize: 13, color: "#90CAF9", marginBottom: 24 }}>Our counselors will guide you through the next steps.</p>
             <button className="btn-primary" style={{ width: "100%", padding: 12 }} onClick={() => { setApplyModal(null); setActiveSection("applications"); }}>View My Applications →</button>
           </div>
         </div>
