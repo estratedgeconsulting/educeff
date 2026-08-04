@@ -1650,7 +1650,7 @@ function StudentPortal({ setPage, user }) {
           {tab === "payments" && <PaymentsTab user={user} profile={profile} />}
           {tab === "tracking" && <TrackingTab user={user} />}
           {tab === "notifications" && <NotificationsTab user={user} />}
-          {tab === "support" && <SupportTab user={user} />}
+          {tab === "support" && <SupportTab user={user} setTab={setTab} />}
         </div>
       </div>
     </div>
@@ -3152,12 +3152,17 @@ function NotificationsTab({ user }) {
   );
 }
 
-function SupportTab({ user }) {
+function SupportTab({ user, setTab }) {
   const [form, setForm] = useState({ category: "", description: "" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [tickets, setTickets] = useState([]);
   const [error, setError] = useState("");
+  const [showBooking, setShowBooking] = useState(false);
+  const [bookForm, setBookForm] = useState({ name: "", mobile: "", stream: "", preferred_date: "", message: "" });
+  const [bookLoading, setBookLoading] = useState(false);
+  const [bookDone, setBookDone] = useState(false);
+  const [bookError, setBookError] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -3184,6 +3189,26 @@ function SupportTab({ user }) {
     setLoading(false);
   };
 
+  const handleBookSession = async () => {
+    if (!bookForm.name.trim() || !bookForm.mobile.trim()) { setBookError("Please enter your name and mobile number."); return; }
+    setBookError(""); setBookLoading(true);
+    try {
+      const { error: err } = await supabase.from("counseling_bookings").insert({
+        full_name: sanitize(bookForm.name),
+        mobile: bookForm.mobile.trim(),
+        stream: bookForm.stream,
+        preferred_date: bookForm.preferred_date || null,
+        message: sanitize(bookForm.message),
+        status: "pending",
+        created_at: new Date().toISOString(),
+      });
+      if (err) throw err;
+      setBookDone(true);
+      setBookForm({ name: "", mobile: "", stream: "", preferred_date: "", message: "" });
+    } catch (e) { setBookError(e.message || "Booking failed. Please try WhatsApp instead."); }
+    setBookLoading(false);
+  };
+
   return (
     <div>
       <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#1565C0", marginBottom: 20, fontFamily: "Sora" }}>Support Center</h1>
@@ -3194,7 +3219,7 @@ function SupportTab({ user }) {
           { icon: "📞", title: "Call Us", desc: "+91 98996 44633", sub: "Mon–Sat, 9AM–7PM", color: "#EFF6FF", border: "#BFDBFE", action: () => window.open("tel:+919899644633") },
           { icon: "✉️", title: "Email Us", desc: "Educeff.india@gmail.com", sub: "Reply within 4 hours", color: "#F0FDF4", border: "#A7F3D0", action: () => window.open("mailto:Educeff.india@gmail.com") },
           { icon: "💬", title: "WhatsApp", desc: "+91 98996 44633", sub: "Quick responses", color: "#F5F3FF", border: "#DDD6FE", action: () => window.open("https://wa.me/919899644633") },
-          { icon: "📅", title: "Book Session", desc: "Free counseling", sub: "45 min call", color: "#FFFBEB", border: "#FDE68A", action: () => {} },
+          { icon: "📅", title: "Book Session", desc: "Free counseling", sub: "45 min call", color: "#FFFBEB", border: "#FDE68A", action: () => { setShowBooking(true); setBookDone(false); setBookError(""); } },
         ].map(s => (
           <div key={s.title} onClick={s.action} style={{ background: s.color, border: `1px solid ${s.border}`, borderRadius: 12, padding: "16px 14px", cursor: "pointer", transition: "all 0.2s", display: "flex", gap: 12, alignItems: "center" }}
             onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
@@ -3208,6 +3233,55 @@ function SupportTab({ user }) {
           </div>
         ))}
       </div>
+
+      {/* Book Session Inline Panel */}
+      {showBooking && (
+        <div style={{ background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE", borderRadius: 16, padding: 24, marginBottom: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>📅 Book a Free Counseling Session</h3>
+              <p style={{ fontSize: 12, color: "#6B7280", margin: "4px 0 0" }}>45-minute call with a certified counselor — completely free for registered students.</p>
+            </div>
+            <button onClick={() => setShowBooking(false)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6B7280" }}>×</button>
+          </div>
+
+          {bookDone ? (
+            <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 10, padding: 20, textAlign: "center" }}>
+              <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "#065F46", marginBottom: 6 }}>Session Booked!</div>
+              <p style={{ fontSize: 13, color: "#374151", marginBottom: 14 }}>Our counselor will call you on your preferred date. You can also reach us on WhatsApp at <strong>+91 98996 44633</strong>.</p>
+              <button className="btn-primary" style={{ fontSize: 13, padding: "10px 24px" }} onClick={() => { setShowBooking(false); setBookDone(false); }}>Done ✓</button>
+            </div>
+          ) : (
+            <>
+              {bookError && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{bookError}</div>}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0 16px" }}>
+                <div><label>Your Name *</label><input placeholder="Full name" value={bookForm.name} onChange={e => setBookForm(f => ({ ...f, name: e.target.value }))} /></div>
+                <div><label>Mobile Number *</label><input placeholder="+91 98765 43210" value={bookForm.mobile} onChange={e => setBookForm(f => ({ ...f, mobile: e.target.value }))} /></div>
+                <div><label>Stream / Interest</label>
+                  <select value={bookForm.stream} onChange={e => setBookForm(f => ({ ...f, stream: e.target.value }))}>
+                    <option value="">Select stream</option>
+                    <option>Engineering</option><option>Medical</option><option>Law</option>
+                    <option>Management</option><option>Architecture</option><option>Science</option>
+                    <option>Commerce</option><option>Career Guidance</option><option>Other</option>
+                  </select>
+                </div>
+                <div><label>Preferred Date</label><input type="date" value={bookForm.preferred_date} min={new Date().toISOString().split("T")[0]} onChange={e => setBookForm(f => ({ ...f, preferred_date: e.target.value }))} /></div>
+                <div style={{ gridColumn: "span 2" }}><label>Any specific questions? (optional)</label><textarea rows={2} placeholder="e.g. I need help with MHT-CET college choice filling..." style={{ resize: "none" }} value={bookForm.message} onChange={e => setBookForm(f => ({ ...f, message: e.target.value }))} /></div>
+              </div>
+              <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                <button className="btn-primary" style={{ fontSize: 13, opacity: bookLoading ? 0.7 : 1 }} onClick={handleBookSession} disabled={bookLoading}>
+                  {bookLoading ? "Booking..." : "📅 Confirm Booking →"}
+                </button>
+                <a href="https://wa.me/919899644633?text=Hi, I want to book a free counseling session" target="_blank" rel="noreferrer"
+                  style={{ fontSize: 13, padding: "10px 18px", background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, cursor: "pointer", color: "#065F46", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  💬 Book via WhatsApp
+                </a>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
         {/* Submit Ticket */}
