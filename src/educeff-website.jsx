@@ -31,36 +31,36 @@ const supabase = supabaseConfigured
     };
 
 const COLORS = {
-  navy: "#64B5F6",
-  navyLight: "#A8D4F5",
-  gold: "#A8D4F5",
-  goldLight: "#C8E4FA",
-  teal: "#C8E4FA",
-  tealLight: "#A8D4F5",
-  cream: "#FAFCFF",
+  navy: "#1565C0",
+  navyLight: "#BFDBFE",
+  gold: "#BFDBFE",
+  goldLight: "#BFDBFE",
+  teal: "#BFDBFE",
+  tealLight: "#BFDBFE",
+  cream: "#F8FAFF",
   white: "#FFFFFF",
   gray50: "#FFFFFF",
-  gray100: "#F5FAFF",
-  gray200: "#F5FAFF",
-  gray400: "#F5FAFF",
+  gray100: "#EFF6FF",
+  gray200: "#EFF6FF",
+  gray400: "#EFF6FF",
   gray600: "#7C3AED",
-  gray800: "#64B5F6",
+  gray800: "#1565C0",
   success: "#059669",
   warning: "#D97706",
   danger: "#DC2626",
-  info: "#64B5F6",
+  info: "#1565C0",
 };
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap');
   
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #FAFCFF; color: #7C3AED; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8FAFF; color: #7C3AED; }
   
   .font-display { font-family: 'Sora', sans-serif; }
   
   .btn-primary {
-    background: #64B5F6;
+    background: #1565C0;
     color: #FFFFFF;
     border: none;
     padding: 12px 28px;
@@ -90,7 +90,7 @@ const css = `
   .btn-outline:hover { background: rgba(255,255,255,0.25); border-color: white; }
   
   .btn-navy {
-    background: #64B5F6;
+    background: #1565C0;
     color: #FFFFFF;
     border: none;
     padding: 12px 28px;
@@ -101,10 +101,10 @@ const css = `
     cursor: pointer;
     transition: all 0.2s;
   }
-  .btn-navy:hover { background: #6D28D9; }
+  .btn-navy:hover { background: #7C3AED; }
   
   .btn-teal {
-    background: #A8D4F5;
+    background: #BFDBFE;
     color: #FFFFFF;
     border: none;
     padding: 10px 24px;
@@ -115,10 +115,10 @@ const css = `
     cursor: pointer;
     transition: all 0.2s;
   }
-  .btn-teal:hover { background: #7EC8F0; }
+  .btn-teal:hover { background: #1565C0; }
 
   .section { padding: 80px 0; background: #FFFFFF; }
-  .section-alt { background: #F4F9FF; }
+  .section-alt { background: #EFF6FF; }
   .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
   
   .tag {
@@ -138,7 +138,7 @@ const css = `
   input, select, textarea {
     width: 100%;
     padding: 11px 14px;
-    border: 1.5px solid #C8E4FA;
+    border: 1.5px solid #BFDBFE;
     border-radius: 8px;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 14px;
@@ -150,12 +150,12 @@ const css = `
   }
   input:focus, select:focus, textarea:focus { border-color: #7C3AED; }
   
-  label { font-size: 13px; font-weight: 600; color: #6D28D9; display: block; margin-bottom: 5px; }
+  label { font-size: 13px; font-weight: 600; color: #7C3AED; display: block; margin-bottom: 5px; }
 
   .card {
     background: #FFFFFF;
     border-radius: 12px;
-    border: 1px solid #C8E4FA;
+    border: 1px solid #BFDBFE;
     padding: 28px;
     transition: box-shadow 0.2s, transform 0.2s;
   }
@@ -192,7 +192,7 @@ const css = `
   .stat-card {
     background: #FFFFFF;
     border-radius: 12px;
-    border: 1px solid #C8E4FA;
+    border: 1px solid #BFDBFE;
     padding: 20px 24px;
   }
 
@@ -206,21 +206,21 @@ const css = `
   .badge-success { background: #ECFDF5; color: #065F46; }
   .badge-warning { background: #FFFBEB; color: #92400E; }
   .badge-danger { background: #FEF2F2; color: #991B1B; }
-  .badge-info { background: #DDEEFF; color: #7C3AED; }
-  .badge-gray { background: #DDEEFF; color: #6D28D9; }
+  .badge-info { background: #EFF6FF; color: #7C3AED; }
+  .badge-gray { background: #EFF6FF; color: #7C3AED; }
 
   .upload-zone {
-    border: 2px dashed #C8E4FA;
+    border: 2px dashed #BFDBFE;
     border-radius: 10px;
     padding: 32px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
-    background: #FAFCFF;
+    background: #F8FAFF;
   }
   .upload-zone:hover { border-color: #7C3AED; }
 
-  .faq-item { border-bottom: 1px solid #C8E4FA; }
+  .faq-item { border-bottom: 1px solid #BFDBFE; }
   .faq-q {
     padding: 18px 0;
     cursor: pointer;
@@ -230,7 +230,7 @@ const css = `
     font-weight: 600;
     font-size: 15px;
   }
-  .faq-a { padding: 0 0 18px; color: #6D28D9; font-size: 14px; line-height: 1.7; }
+  .faq-a { padding: 0 0 18px; color: #7C3AED; font-size: 14px; line-height: 1.7; }
 
   .timeline-step {
     display: flex;
@@ -242,7 +242,7 @@ const css = `
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: #64B5F6;
+    background: #1565C0;
     color: #FFFFFF;
     display: flex;
     align-items: center;
@@ -269,7 +269,7 @@ const css = `
     width: 100%;
     max-width: 480px;
     position: relative;
-    border: 1px solid #C8E4FA;
+    border: 1px solid #BFDBFE;
     max-height: 90vh;
     overflow-y: auto;
   }
@@ -280,8 +280,8 @@ const css = `
   @keyframes countUp { from { opacity: 0; } to { opacity: 1; } }
   
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: #EEF5FF; color: #6D28D9; font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 1px solid #C8E4FA; }
-  td { padding: 12px 14px; border-bottom: 1px solid #EEF5FF; color: #6D28D9; }
+  th { background: #EFF6FF; color: #7C3AED; font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 1px solid #BFDBFE; }
+  td { padding: 12px 14px; border-bottom: 1px solid #EFF6FF; color: #7C3AED; }
 
   /* ── MOBILE HAMBURGER ── */
   .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
@@ -467,7 +467,7 @@ const css = `
     }
     .admin-nav-item.active {
       background: rgba(100,181,246,0.2) !important;
-      border-bottom-color: #64B5F6 !important;
+      border-bottom-color: #1565C0 !important;
       border-left: none !important;
     }
     .admin-nav-icon { width: 24px !important; height: 24px !important; font-size: 14px !important; margin: 0 auto; }
@@ -527,7 +527,7 @@ const css = `
     .hero-btns button { font-size: 14px !important; padding: 12px !important; }
     input, select { font-size: 16px !important; }
   }
-  tr:hover td { background: #FAFCFF; }
+  tr:hover td { background: #F8FAFF; }
   
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -577,12 +577,12 @@ const sanitizeForm = (obj) => {
 // ─── DATA ───────────────────────────────────────────────────────────────────
 
 const SERVICES = [
-  { icon: "📋", title: "Exam Form Filling", desc: "Expert assistance with entrance exam registrations — JEE, NEET, MHT-CET, and more — ensuring accuracy and timely submission.", color: "#6D28D9" },
-  { icon: "🎓", title: "Educational Counseling", desc: "Personalized academic guidance to help students identify the right stream, college, and course aligned with their strengths.", color: "#E1F5FE" },
-  { icon: "🧭", title: "Career Counseling", desc: "Data-driven career mapping sessions with certified counselors to chart a clear professional path for your future.", color: "#E8F4FD" },
-  { icon: "🏛️", title: "College Admission", desc: "End-to-end admission assistance from shortlisting colleges to application submission and counseling rounds.", color: "#EDE7F6" },
-  { icon: "💰", title: "Scholarship Assistance", desc: "Identify and apply for government and private scholarships — merit, need-based, and category-specific opportunities.", color: "#E0F2F1" },
-  { icon: "📄", title: "Document Verification", desc: "Professional verification and attestation of academic documents ensuring compliance with university and government requirements.", color: "#F3E5F5" },
+  { icon: "📋", title: "Exam Form Filling", desc: "Expert assistance with entrance exam registrations — JEE, NEET, MHT-CET, and more — ensuring accuracy and timely submission.", color: "#7C3AED" },
+  { icon: "🎓", title: "Educational Counseling", desc: "Personalized academic guidance to help students identify the right stream, college, and course aligned with their strengths.", color: "#EFF6FF" },
+  { icon: "🧭", title: "Career Counseling", desc: "Data-driven career mapping sessions with certified counselors to chart a clear professional path for your future.", color: "#EFF6FF" },
+  { icon: "🏛️", title: "College Admission", desc: "End-to-end admission assistance from shortlisting colleges to application submission and counseling rounds.", color: "#F5F3FF" },
+  { icon: "💰", title: "Scholarship Assistance", desc: "Identify and apply for government and private scholarships — merit, need-based, and category-specific opportunities.", color: "#ECFDF5" },
+  { icon: "📄", title: "Document Verification", desc: "Professional verification and attestation of academic documents ensuring compliance with university and government requirements.", color: "#F5F3FF" },
 ];
 
 const STATS = [
@@ -631,7 +631,7 @@ function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
   const publicPages = ["Home", "About", "Services", "Colleges", "Contact"];
 
   return (
-    <nav style={{ background: "#64B5F6", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+    <nav style={{ background: "#1565C0", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
       <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px" }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => { setPage("Home"); setMenuOpen(false); }}>
@@ -640,7 +640,7 @@ function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
             <polygon points="30,8 50,19 50,41 30,52 10,41 10,19" fill="none" stroke="white" strokeWidth="2"/>
             <text x="30" y="38" textAnchor="middle" fontFamily="Sora,sans-serif" fontSize="22" fontWeight="700" fill="white">E</text>
           </svg>
-          <span className="font-display" style={{ fontSize: 20, fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.01em" }}>Edu<span style={{color:"#E0D4FC"}}>ceff</span></span>
+          <span className="font-display" style={{ fontSize: 20, fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.01em" }}>Edu<span style={{color:"#F5F3FF"}}>ceff</span></span>
         </div>
 
         {/* Desktop Nav */}
@@ -700,7 +700,7 @@ function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
 
 function Hero({ setPage, setModal }) {
   return (
-    <section style={{ background: `linear-gradient(135deg, #7C3AED 0%, #64B5F6 50%, #7C3AED 100%)`, minHeight: 600, display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
+    <section style={{ background: `linear-gradient(135deg, #7C3AED 0%, #1565C0 50%, #7C3AED 100%)`, minHeight: 600, display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", top: 0, right: 0, width: 500, height: 500, background: "radial-gradient(circle, rgba(144,202,249,0.18) 0%, transparent 70%)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: 0, left: "30%", width: 300, height: 300, background: "radial-gradient(circle, rgba(227,242,253,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
       <div className="container" style={{ padding: "80px 24px" }}>
@@ -720,7 +720,7 @@ function Hero({ setPage, setModal }) {
           <div style={{ display: "flex", gap: 24, marginTop: 48, flexWrap: "wrap" }}>
             {STATS.map(s => (
               <div key={s.label}>
-                <div className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#6D28D9" }}>{s.num}</div>
+                <div className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#7C3AED" }}>{s.num}</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", marginTop: 2 }}>{s.label}</div>
               </div>
             ))}
@@ -737,17 +737,17 @@ function ServicesSection({ setPage }) {
       <div className="container">
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <div className="tag">What We Offer</div>
-          <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Comprehensive Education Services</h2>
-          <p style={{ color: "#6D28D9", marginTop: 12, fontSize: 15, maxWidth: 520, margin: "12px auto 0" }}>
+          <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#1565C0", letterSpacing: "-0.02em" }}>Comprehensive Education Services</h2>
+          <p style={{ color: "#7C3AED", marginTop: 12, fontSize: 15, maxWidth: 520, margin: "12px auto 0" }}>
             End-to-end support from exam registration to college admission — every step covered by our expert team.
           </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
           {SERVICES.map(s => (
-            <div key={s.title} className="card" style={{ borderTop: `3px solid #64B5F6` }}>
+            <div key={s.title} className="card" style={{ borderTop: `3px solid #1565C0` }}>
               <div style={{ fontSize: 32, marginBottom: 14, background: s.color, width: 52, height: 52, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>{s.icon}</div>
-              <h3 className="font-display" style={{ fontSize: 18, fontWeight: 600, marginBottom: 10, color: "#64B5F6" }}>{s.title}</h3>
-              <p style={{ fontSize: 14, color: "#6D28D9", lineHeight: 1.7 }}>{s.desc}</p>
+              <h3 className="font-display" style={{ fontSize: 18, fontWeight: 600, marginBottom: 10, color: "#1565C0" }}>{s.title}</h3>
+              <p style={{ fontSize: 14, color: "#7C3AED", lineHeight: 1.7 }}>{s.desc}</p>
             </div>
           ))}
         </div>
@@ -774,8 +774,8 @@ function WhyUs() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40, alignItems: "center" }}>
           <div>
             <div className="tag">Why Choose Us</div>
-            <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em", marginBottom: 16 }}>Trusted by Students Across Maharashtra</h2>
-            <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>
+            <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#1565C0", letterSpacing: "-0.02em", marginBottom: 16 }}>Trusted by Students Across Maharashtra</h2>
+            <p style={{ color: "#7C3AED", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>
               Educeff combines deep domain expertise with modern technology to deliver a seamless, transparent, and successful admission experience for every student.
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
@@ -783,21 +783,21 @@ function WhyUs() {
                 <div key={r.title} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                   <span style={{ fontSize: 20 }}>{r.icon}</span>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: 14, color: "#64B5F6", marginBottom: 3 }}>{r.title}</div>
-                    <div style={{ fontSize: 13, color: "#6D28D9", lineHeight: 1.6 }}>{r.desc}</div>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: "#1565C0", marginBottom: 3 }}>{r.title}</div>
+                    <div style={{ fontSize: 13, color: "#7C3AED", lineHeight: 1.6 }}>{r.desc}</div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{ background: "#64B5F6", borderRadius: 12, padding: 36, color: "white" }}>
-            <h3 className="font-display" style={{ fontSize: 24, marginBottom: 28, color: "#6D28D9" }}>Book Your Free Counseling</h3>
+          <div style={{ background: "#1565C0", borderRadius: 12, padding: 36, color: "white" }}>
+            <h3 className="font-display" style={{ fontSize: 24, marginBottom: 28, color: "#7C3AED" }}>Book Your Free Counseling</h3>
             <label style={{ color: "rgba(255,255,255,0.8)" }}>Full Name</label>
             <input placeholder="Enter your full name" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)", color: "white", marginBottom: 14 }} />
             <label style={{ color: "rgba(255,255,255,0.8)" }}>Mobile Number</label>
             <input placeholder="+91 98996 44633" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)", color: "white", marginBottom: 14 }} />
             <label style={{ color: "rgba(255,255,255,0.8)" }}>Course Interest</label>
-            <select style={{ background: "#64B5F6", border: "1px solid rgba(255,255,255,0.25)", color: "white", marginBottom: 14 }}>
+            <select style={{ background: "#1565C0", border: "1px solid rgba(255,255,255,0.25)", color: "white", marginBottom: 14 }}>
               <option>Select a course</option>
               <option>Engineering (B.E./B.Tech)</option>
               <option>Medical (MBBS/BDS)</option>
@@ -821,21 +821,21 @@ function Testimonials() {
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <div className="tag">Student Stories</div>
           <h2 className="font-display" style={{ fontSize: "clamp(24px,4vw,38px)", fontWeight: 700, color: "#1A1A2E", letterSpacing: "-0.02em" }}>Student Experiences</h2>
-          <p style={{ fontSize: 13, color: "#90CAF9", marginTop: 8, maxWidth: 500, margin: "8px auto 0" }}>
+          <p style={{ fontSize: 13, color: "#6B7280", marginTop: 8, maxWidth: 500, margin: "8px auto 0" }}>
             * These are illustrative testimonials representing typical student journeys. Real testimonials with consent will be added as received.
           </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
           {TESTIMONIALS.map(t => (
-            <div key={t.name} className="card" style={{ borderLeft: `4px solid #64B5F6` }}>
-              <div style={{ fontSize: 32, color: "#64B5F6", marginBottom: 12, lineHeight: 1 }}>"</div>
-              <p style={{ fontSize: 14, color: "#6D28D9", lineHeight: 1.75, marginBottom: 20 }}>{t.quote}</p>
+            <div key={t.name} className="card" style={{ borderLeft: `4px solid #1565C0` }}>
+              <div style={{ fontSize: 32, color: "#1565C0", marginBottom: 12, lineHeight: 1 }}>"</div>
+              <p style={{ fontSize: 14, color: "#7C3AED", lineHeight: 1.75, marginBottom: 20 }}>{t.quote}</p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#F5FAFF", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13 }}>{t.avatar}</div>
+                <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#EFF6FF", color: "#1565C0", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13 }}>{t.avatar}</div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 14, color: "#64B5F6" }}>{t.name}</div>
-                  <div style={{ fontSize: 12, color: "#64B5F6" }}>{t.college}</div>
-                  <div style={{ fontSize: 11, color: "#6D28D9", marginTop: 1 }}>{t.score}</div>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: "#1565C0" }}>{t.name}</div>
+                  <div style={{ fontSize: 12, color: "#1565C0" }}>{t.college}</div>
+                  <div style={{ fontSize: 11, color: "#7C3AED", marginTop: 1 }}>{t.score}</div>
                 </div>
               </div>
             </div>
@@ -852,15 +852,15 @@ function AdmissionProcess() {
       <div className="container">
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <div className="tag">How It Works</div>
-          <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Simple 4-Step Admission Process</h2>
+          <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#1565C0", letterSpacing: "-0.02em" }}>Simple 4-Step Admission Process</h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 24 }}>
           {PROCESS_STEPS.map((s, i) => (
             <div key={s.title} style={{ textAlign: "center", position: "relative" }}>
-              {i < 3 && <div style={{ position: "absolute", top: 20, left: "70%", width: "60%", height: 1, background: `linear-gradient(to right, #C8E4FA, #E3F2FD)` }} />}
-              <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#64B5F6", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16, margin: "0 auto 16px" }}>{i + 1}</div>
-              <h4 className="font-display" style={{ fontSize: 17, fontWeight: 600, color: "#64B5F6", marginBottom: 8 }}>{s.title}</h4>
-              <p style={{ fontSize: 13, color: "#6D28D9", lineHeight: 1.7 }}>{s.desc}</p>
+              {i < 3 && <div style={{ position: "absolute", top: 20, left: "70%", width: "60%", height: 1, background: `linear-gradient(to right, #BFDBFE, #E3F2FD)` }} />}
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#1565C0", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16, margin: "0 auto 16px" }}>{i + 1}</div>
+              <h4 className="font-display" style={{ fontSize: 17, fontWeight: 600, color: "#1565C0", marginBottom: 8 }}>{s.title}</h4>
+              <p style={{ fontSize: 13, color: "#7C3AED", lineHeight: 1.7 }}>{s.desc}</p>
             </div>
           ))}
         </div>
@@ -877,13 +877,13 @@ function FAQ() {
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <div className="tag">FAQ</div>
-            <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#64B5F6", letterSpacing: "-0.02em" }}>Frequently Asked Questions</h2>
+            <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, color: "#1565C0", letterSpacing: "-0.02em" }}>Frequently Asked Questions</h2>
           </div>
           {FAQS.map((f, i) => (
             <div key={i} className="faq-item">
               <div className="faq-q" onClick={() => setOpen(open === i ? null : i)}>
                 {f.q}
-                <span style={{ color: "#64B5F6", fontSize: 20, transition: "transform 0.2s", transform: open === i ? "rotate(45deg)" : "none", display: "inline-block" }}>+</span>
+                <span style={{ color: "#1565C0", fontSize: 20, transition: "transform 0.2s", transform: open === i ? "rotate(45deg)" : "none", display: "inline-block" }}>+</span>
               </div>
               {open === i && <div className="faq-a">{f.a}</div>}
             </div>
@@ -929,8 +929,8 @@ function ContactForm() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40 }}>
           <div>
             <div className="tag">Get In Touch</div>
-            <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#64B5F6", marginBottom: 16, letterSpacing: "-0.02em" }}>Let&#39;s Start Your Journey Today</h2>
-            <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>Reach out to our team for any queries about admissions, counseling, or services. We typically respond within 2 hours.</p>
+            <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#1565C0", marginBottom: 16, letterSpacing: "-0.02em" }}>Let&#39;s Start Your Journey Today</h2>
+            <p style={{ color: "#7C3AED", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>Reach out to our team for any queries about admissions, counseling, or services. We typically respond within 2 hours.</p>
             {[
               { icon: "📍", label: "Address", val: "123 Pimpri Road, Pimpri-Chinchwad, Pune 411045" },
               { icon: "📞", label: "Phone", val: "+91 98996 44633" },
@@ -940,14 +940,14 @@ function ContactForm() {
               <div key={c.label} style={{ display: "flex", gap: 14, marginBottom: 18, alignItems: "flex-start" }}>
                 <span style={{ fontSize: 20, marginTop: 1 }}>{c.icon}</span>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#6D28D9", textTransform: "uppercase", letterSpacing: "0.08em" }}>{c.label}</div>
-                  <div style={{ fontSize: 14, color: "#64B5F6", marginTop: 2 }}>{c.val}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#7C3AED", textTransform: "uppercase", letterSpacing: "0.08em" }}>{c.label}</div>
+                  <div style={{ fontSize: 14, color: "#1565C0", marginTop: 2 }}>{c.val}</div>
                 </div>
               </div>
             ))}
           </div>
           <div className="card">
-            <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 20, color: "#64B5F6" }}>Send us a Message</h3>
+            <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 20, color: "#1565C0" }}>Send us a Message</h3>
             {sent && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46" }}>✅ Message sent! We&#39;ll get back to you within 2 hours.</div>}
             {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
             <label>Full Name</label><input name="name" placeholder="Your full name" value={form.name} onChange={handleChange} />
@@ -972,7 +972,7 @@ function ContactForm() {
 
 function CTA({ setModal }) {
   return (
-    <section style={{ background: `linear-gradient(135deg, #64B5F6, #64B5F6)`, padding: "72px 0" }}>
+    <section style={{ background: `linear-gradient(135deg, #1565C0, #1565C0)`, padding: "72px 0" }}>
       <div className="container" style={{ textAlign: "center" }}>
         <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 700, color: "#FFFFFF", marginBottom: 14, letterSpacing: "-0.02em" }}>
           Ready to Secure Your Admission?
@@ -991,7 +991,7 @@ function CTA({ setModal }) {
 
 function Footer({ setPage }) {
   return (
-    <footer style={{ background: "#64B5F6", color: "rgba(255,255,255,0.6)", padding: "56px 0 24px" }}>
+    <footer style={{ background: "#1565C0", color: "rgba(255,255,255,0.6)", padding: "56px 0 24px" }}>
       <div className="container">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 32, marginBottom: 40 }}>
           <div>
@@ -1001,7 +1001,7 @@ function Footer({ setPage }) {
                 <polygon points="30,8 50,19 50,41 30,52 10,41 10,19" fill="none" stroke="white" strokeWidth="2"/>
                 <text x="30" y="38" textAnchor="middle" fontFamily="Sora,sans-serif" fontSize="22" fontWeight="700" fill="white">E</text>
               </svg>
-              <span className="font-display" style={{ fontSize: 18, fontWeight: 700, color: "#FFFFFF" }}>Edu<span style={{color:"#E0D4FC"}}>ceff</span></span>
+              <span className="font-display" style={{ fontSize: 18, fontWeight: 700, color: "#FFFFFF" }}>Edu<span style={{color:"#F5F3FF"}}>ceff</span></span>
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.7, maxWidth: 260 }}>Your trusted partner for exam forms, educational counseling, and college admissions across Maharashtra.</p>
           </div>
@@ -1011,7 +1011,7 @@ function Footer({ setPage }) {
             { heading: "Student", links: ["Register", "Student Login", "Track Application", "Upload Documents", "Support"] },
           ].map(col => (
             <div key={col.heading}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#6D28D9", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>{col.heading}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#7C3AED", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>{col.heading}</div>
               {col.links.map(l => (
                 <div key={l} style={{ fontSize: 13, marginBottom: 8, cursor: "pointer", transition: "color 0.2s" }}
                   onMouseEnter={e => e.target.style.color = "white"}
@@ -1087,12 +1087,12 @@ function LoginModal({ onClose, onLogin }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6D28D9" }}>×</button>
-        <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Welcome Back</h2>
-        <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Sign in to your Educeff account</p>
-        <div style={{ display: "flex", gap: 0, background: "#F5FAFF", borderRadius: 6, padding: 3, marginBottom: 20 }}>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#7C3AED" }}>×</button>
+        <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#1565C0", marginBottom: 6 }}>Welcome Back</h2>
+        <p style={{ color: "#7C3AED", fontSize: 14, marginBottom: 24 }}>Sign in to your Educeff account</p>
+        <div style={{ display: "flex", gap: 0, background: "#EFF6FF", borderRadius: 6, padding: 3, marginBottom: 20 }}>
           {["Student", "Admin"].map(t => (
-            <button key={t} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 4, background: (t === "Admin") === isAdmin ? "#FFFFFF" : "transparent", fontWeight: 500, fontSize: 13, cursor: "pointer", color: (t === "Admin") === isAdmin ? "#64B5F6" : "#6D28D9", transition: "all 0.2s" }} onClick={() => switchTab(t === "Admin")}>{t}</button>
+            <button key={t} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 4, background: (t === "Admin") === isAdmin ? "#FFFFFF" : "transparent", fontWeight: 500, fontSize: 13, cursor: "pointer", color: (t === "Admin") === isAdmin ? "#1565C0" : "#7C3AED", transition: "all 0.2s" }} onClick={() => switchTab(t === "Admin")}>{t}</button>
           ))}
         </div>
         {error && (
@@ -1120,7 +1120,7 @@ function LoginModal({ onClose, onLogin }) {
           name={isAdmin ? "admin-password" : "student-password"}
         />
         <div style={{ textAlign: "right", marginTop: -8, marginBottom: 16 }}>
-          <span style={{ fontSize: 12, color: "#64B5F6", cursor: "pointer" }} onClick={async () => {
+          <span style={{ fontSize: 12, color: "#1565C0", cursor: "pointer" }} onClick={async () => {
             if (!email) { alert("Enter your email first"); return; }
             try {
               await supabase.auth.resetPasswordForEmail(email, {
@@ -1133,8 +1133,8 @@ function LoginModal({ onClose, onLogin }) {
         <button className="btn-navy" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }} onClick={handleLogin} disabled={loading}>
           {loading ? "Signing in..." : "Sign In →"}
         </button>
-        <p style={{ textAlign: "center", marginTop: 16, fontSize: 13, color: "#6D28D9" }}>
-          New student? <span style={{ color: "#64B5F6", cursor: "pointer" }} onClick={onClose}>Register for free</span>
+        <p style={{ textAlign: "center", marginTop: 16, fontSize: 13, color: "#7C3AED" }}>
+          New student? <span style={{ color: "#1565C0", cursor: "pointer" }} onClick={onClose}>Register for free</span>
         </p>
       </div>
     </div>
@@ -1265,9 +1265,9 @@ function RegisterModal({ onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6D28D9" }}>×</button>
-        <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Create Your Account</h2>
-        <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Join Educeff — your academic journey starts here.</p>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#7C3AED" }}>×</button>
+        <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#1565C0", marginBottom: 6 }}>Create Your Account</h2>
+        <p style={{ color: "#7C3AED", fontSize: 14, marginBottom: 24 }}>Join Educeff — your academic journey starts here.</p>
         {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>⚠️ {error}</div>}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
           <div><label>First Name</label><input name="firstName" placeholder="Rahul" value={form.firstName} onChange={handleChange} /></div>
@@ -1275,7 +1275,7 @@ function RegisterModal({ onClose }) {
         </div>
         <label>Email Address</label><input name="email" placeholder="rahul@email.com" type="email" value={form.email} onChange={handleChange} />
         <label>Mobile Number</label><input name="mobile" placeholder="+91 98996 44633" value={form.mobile} onChange={handleChange} />
-        <label>Date of Birth <span style={{ color: "#90CAF9", fontSize: 11, fontWeight: 400 }}>(cannot be today or future)</span></label>
+        <label>Date of Birth <span style={{ color: "#6B7280", fontSize: 11, fontWeight: 400 }}>(cannot be today or future)</span></label>
         <input
           name="dob"
           type="date"
@@ -1296,8 +1296,8 @@ function RegisterModal({ onClose }) {
         <label>Password</label><input name="password" type="password" placeholder="Min 8 characters, mix letters &amp; numbers" value={form.password} onChange={handleChange} />
         <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 16 }}>
           <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width: "auto", marginTop: 3, marginBottom: 0 }} />
-          <span style={{ fontSize: 12, color: "#6D28D9" }}>
-            I agree to the <span style={{ color: "#64B5F6", cursor: "pointer" }}>Terms of Service</span> and <span style={{ color: "#64B5F6", cursor: "pointer" }}>Privacy Policy</span>. I consent to Educeff collecting and using my personal data for admission and counseling services as described in the Privacy Policy (DPDP Act 2023).
+          <span style={{ fontSize: 12, color: "#7C3AED" }}>
+            I agree to the <span style={{ color: "#1565C0", cursor: "pointer" }}>Terms of Service</span> and <span style={{ color: "#1565C0", cursor: "pointer" }}>Privacy Policy</span>. I consent to Educeff collecting and using my personal data for admission and counseling services as described in the Privacy Policy (DPDP Act 2023).
             {form.dob && new Date().getFullYear() - new Date(form.dob).getFullYear() < 18 && (
               <span style={{ display: "block", marginTop: 6, color: "#D97706", fontWeight: 600 }}>
                 ⚠️ You appear to be a minor. Please ensure a parent or guardian reviews and approves this registration.
@@ -1317,11 +1317,11 @@ function RegisterModal({ onClose }) {
 const portalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-  .portal-wrap { display: flex; min-height: 100vh; background: #F0F7FF; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .portal-wrap { display: flex; min-height: 100vh; background: #EFF6FF; font-family: 'Plus Jakarta Sans', sans-serif; }
 
   .portal-sidebar-premium {
     width: 260px;
-    background: linear-gradient(180deg, #1A237E 0%, #283593 60%, #1565C0 100%);
+    background: linear-gradient(180deg, #1565C0 0%, #1565C0 60%, #1565C0 100%);
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -1349,7 +1349,7 @@ const portalCSS = `
   .portal-avatar {
     width: 52px; height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #64B5F6, #7C3AED);
+    background: linear-gradient(135deg, #1565C0, #7C3AED);
     display: flex; align-items: center; justify-content: center;
     font-weight: 800; font-size: 18px; color: white;
     margin-bottom: 10px;
@@ -1372,7 +1372,7 @@ const portalCSS = `
   .portal-nav-item.active {
     background: rgba(255,255,255,0.15);
     color: white; font-weight: 600;
-    border-left: 3px solid #64B5F6;
+    border-left: 3px solid #1565C0;
   }
   .portal-nav-item .nav-icon {
     width: 32px; height: 32px;
@@ -1429,7 +1429,7 @@ const portalCSS = `
   .activity-item {
     display: flex; gap: 12px; align-items: flex-start;
     padding: 12px 0;
-    border-bottom: 1px solid #F0F7FF;
+    border-bottom: 1px solid #EFF6FF;
   }
   .activity-dot {
     width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
@@ -1444,7 +1444,7 @@ const portalCSS = `
     transition: all 0.2s;
     display: flex; align-items: center; gap: 12px;
   }
-  .quick-action-card:hover { border-color: #64B5F6; box-shadow: 0 4px 12px rgba(100,181,246,0.12); transform: translateY(-2px); }
+  .quick-action-card:hover { border-color: #1565C0; box-shadow: 0 4px 12px rgba(100,181,246,0.12); transform: translateY(-2px); }
 
   .exam-reminder-card {
     background: linear-gradient(135deg, #1565C0, #7C3AED);
@@ -1579,7 +1579,7 @@ function StudentPortal({ setPage, user }) {
               <polygon points="30,8 50,19 50,41 30,52 10,41 10,19" fill="none" stroke="white" strokeWidth="2"/>
               <text x="30" y="38" textAnchor="middle" fontFamily="Sora" fontSize="20" fontWeight="700" fill="white">E</text>
             </svg>
-            <span style={{ fontSize: 17, fontWeight: 700, color: "white", fontFamily: "Sora" }}>Edu<span style={{ color: "#90CAF9" }}>ceff</span></span>
+            <span style={{ fontSize: 17, fontWeight: 700, color: "white", fontFamily: "Sora" }}>Edu<span style={{ color: "#6B7280" }}>ceff</span></span>
           </div>
         </div>
 
@@ -1592,7 +1592,7 @@ function StudentPortal({ setPage, user }) {
               <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>{profile?.course_interest || "Student"}</div>
               <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 5 }}>
                 <div style={{ flex: 1, background: "rgba(255,255,255,0.15)", borderRadius: 10, height: 4, overflow: "hidden" }}>
-                  <div style={{ width: `${profileComplete}%`, height: "100%", background: "linear-gradient(90deg, #64B5F6, #A78BFA)", borderRadius: 10 }} />
+                  <div style={{ width: `${profileComplete}%`, height: "100%", background: "linear-gradient(90deg, #1565C0, #C4B5FD)", borderRadius: 10 }} />
                 </div>
                 <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", whiteSpace: "nowrap" }}>{profileComplete}%</span>
               </div>
@@ -1631,13 +1631,13 @@ function StudentPortal({ setPage, user }) {
             <div style={{ fontSize: "clamp(14px, 2.5vw, 18px)", fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>
               {navGroups.flatMap(g => g.items).find(i => i.id === tab)?.label || "Dashboard"}
             </div>
-            <div style={{ fontSize: 12, color: "#90CAF9" }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
+            <div style={{ fontSize: 12, color: "#6B7280" }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "#F0F7FF", border: "1px solid #E3F2FD", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 600, color: "#64B5F6", cursor: "pointer" }} onClick={() => setTab("notifications")}>
+            <button style={{ background: "#EFF6FF", border: "1px solid #E3F2FD", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 600, color: "#1565C0", cursor: "pointer" }} onClick={() => setTab("notifications")}>
               🔔 {notifications > 0 ? <span style={{ background: "#DC2626", color: "white", borderRadius: 10, padding: "1px 5px", fontSize: 10, marginLeft: 4 }}>{notifications}</span> : ""}
             </button>
-            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "white", cursor: "pointer" }} onClick={() => setTab("profile")}>{initials}</div>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "white", cursor: "pointer" }} onClick={() => setTab("profile")}>{initials}</div>
           </div>
         </div>
 
@@ -1702,9 +1702,9 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
 
   const statCards = [
-    { label: "Active Applications", val: stats.applications, icon: "📋", color: "#1565C0", bg: "#EFF6FF", bar: "#64B5F6", pct: Math.min(100, stats.applications * 20) },
-    { label: "Documents Uploaded", val: `${stats.docs}/4`, icon: "📁", color: "#059669", bg: "#F0FDF4", bar: "#34D399", pct: (stats.docs / 4) * 100 },
-    { label: "Profile Completion", val: `${profileComplete}%`, icon: "👤", color: "#7C3AED", bg: "#F5F3FF", bar: "#A78BFA", pct: profileComplete },
+    { label: "Active Applications", val: stats.applications, icon: "📋", color: "#1565C0", bg: "#EFF6FF", bar: "#1565C0", pct: Math.min(100, stats.applications * 20) },
+    { label: "Documents Uploaded", val: `${stats.docs}/4`, icon: "📁", color: "#059669", bg: "#F0FDF4", bar: "#6EE7B7", pct: (stats.docs / 4) * 100 },
+    { label: "Profile Completion", val: `${profileComplete}%`, icon: "👤", color: "#7C3AED", bg: "#F5F3FF", bar: "#C4B5FD", pct: profileComplete },
     { label: "Services Purchased", val: stats.payments, icon: "💳", color: "#D97706", bg: "#FFFBEB", bar: "#FCD34D", pct: Math.min(100, stats.payments * 33) },
   ];
 
@@ -1763,7 +1763,7 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
         <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>Recent Applications</h3>
-            <button style={{ fontSize: 12, color: "#64B5F6", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }} onClick={() => setTab("applications")}>View All →</button>
+            <button style={{ fontSize: 12, color: "#1565C0", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }} onClick={() => setTab("applications")}>View All →</button>
           </div>
           {recentApps.length === 0 ? (
             <div style={{ textAlign: "center", padding: "32px 0" }}>
@@ -1772,11 +1772,11 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
               <button className="btn-primary" style={{ fontSize: 13, padding: "10px 20px" }} onClick={() => setTab("applications")}>Apply to a College</button>
             </div>
           ) : recentApps.map((a, i) => (
-            <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: i < recentApps.length - 1 ? "1px solid #F0F7FF" : "none" }}>
+            <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: i < recentApps.length - 1 ? "1px solid #EFF6FF" : "none" }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#1565C0", flexShrink: 0 }}>{a.college?.[0] || "C"}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.college}</div>
-                <div style={{ fontSize: 11, color: "#90CAF9" }}>{a.course}</div>
+                <div style={{ fontSize: 11, color: "#6B7280" }}>{a.course}</div>
               </div>
               <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`} style={{ flexShrink: 0 }}>{a.status?.replace("_", " ")}</span>
             </div>
@@ -1789,11 +1789,11 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
           <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 20 }}>
             <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 14 }}>⏰ Upcoming Exams</h3>
             {upcomingExams.map(e => (
-              <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, padding: "8px 10px", background: "#F8FFFE", borderRadius: 8, border: "1px solid #E3F2FD" }}>
+              <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, padding: "8px 10px", background: "#ECFDF5", borderRadius: 8, border: "1px solid #E3F2FD" }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: e.color, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 11, fontWeight: 700, flexShrink: 0, textAlign: "center", lineHeight: 1.2 }}>{e.daysLeft}d</div>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{e.name}</div>
-                  <div style={{ fontSize: 10, color: "#90CAF9" }}>{e.date}</div>
+                  <div style={{ fontSize: 10, color: "#6B7280" }}>{e.date}</div>
                 </div>
               </div>
             ))}
@@ -1816,10 +1816,10 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
             <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 18 }}>
               <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 12 }}>💳 Recent Payments</h3>
               {recentPayments.slice(0, 2).map(p => (
-                <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #F0F7FF" }}>
+                <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #EFF6FF" }}>
                   <div>
                     <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{p.service_title}</div>
-                    <div style={{ fontSize: 10, color: "#90CAF9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</div>
+                    <div style={{ fontSize: 10, color: "#6B7280" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: "#059669" }}>₹{p.amount}</div>
@@ -1841,7 +1841,7 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
               <div style={{ width: 40, height: 40, borderRadius: 10, background: a.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{a.icon}</div>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>{a.label}</div>
-                <div style={{ fontSize: 11, color: "#90CAF9" }}>{a.desc}</div>
+                <div style={{ fontSize: 11, color: "#6B7280" }}>{a.desc}</div>
               </div>
             </div>
           ))}
@@ -1947,13 +1947,13 @@ function PortalProfile({ user, profile, onSave }) {
   const pwStrength = pwForm.newPw.length === 0 ? null :
     pwForm.newPw.length < 6 ? { label: "Too short", color: "#DC2626", pct: 20 } :
     pwForm.newPw.length < 8 ? { label: "Weak", color: "#D97706", pct: 45 } :
-    pwForm.newPw.length < 10 ? { label: "Good", color: "#64B5F6", pct: 70 } :
+    pwForm.newPw.length < 10 ? { label: "Good", color: "#1565C0", pct: 70 } :
     { label: "Strong", color: "#059669", pct: 100 };
 
   return (
     <div>
-      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", marginBottom: 6, fontFamily: "Sora" }}>Profile Management</h1>
-      <p style={{ color: "#6D28D9", fontSize: 13, marginBottom: 24 }}>Update your personal details and keep your account secure.</p>
+      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#1565C0", marginBottom: 6, fontFamily: "Sora" }}>Profile Management</h1>
+      <p style={{ color: "#7C3AED", fontSize: 13, marginBottom: 24 }}>Update your personal details and keep your account secure.</p>
 
       {saved && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 16px", marginBottom: 20, fontSize: 13, color: "#065F46" }}>✅ Profile saved successfully!</div>}
 
@@ -1964,9 +1964,9 @@ function PortalProfile({ user, profile, onSave }) {
 
           {/* Avatar Card */}
           <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24, textAlign: "center" }}>
-            <div style={{ width: 68, height: 68, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 24, color: "white", margin: "0 auto 12px" }}>{initials}</div>
+            <div style={{ width: 68, height: 68, borderRadius: "50%", background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 24, color: "white", margin: "0 auto 12px" }}>{initials}</div>
             <div style={{ fontWeight: 700, fontSize: 16, color: "#1A1A2E" }}>{form.first_name} {form.last_name}</div>
-            <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 3, marginBottom: 12 }}>{user?.email}</div>
+            <div style={{ fontSize: 12, color: "#6B7280", marginTop: 3, marginBottom: 12 }}>{user?.email}</div>
             <span className="badge badge-success" style={{ fontSize: 11 }}>● Active Account</span>
           </div>
 
@@ -1978,11 +1978,11 @@ function PortalProfile({ user, profile, onSave }) {
                 <div style={{ width: 36, height: 36, borderRadius: 9, background: "#F5F3FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🔒</div>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>Change Password</div>
-                  <div style={{ fontSize: 11, color: "#90CAF9" }}>Update your login password</div>
+                  <div style={{ fontSize: 11, color: "#6B7280" }}>Update your login password</div>
                 </div>
               </div>
               <button onClick={() => { setShowPwSection(s => !s); setPwError(""); setPwSuccess(false); setPwForm({ current: "", newPw: "", confirm: "" }); }}
-                style={{ fontSize: 12, padding: "6px 14px", background: showPwSection ? "#FEF2F2" : "#F0F7FF", border: `1px solid ${showPwSection ? "#FECACA" : "#BFDBFE"}`, borderRadius: 8, cursor: "pointer", color: showPwSection ? "#DC2626" : "#1565C0", fontWeight: 600 }}>
+                style={{ fontSize: 12, padding: "6px 14px", background: showPwSection ? "#FEF2F2" : "#EFF6FF", border: `1px solid ${showPwSection ? "#FECACA" : "#BFDBFE"}`, borderRadius: 8, cursor: "pointer", color: showPwSection ? "#DC2626" : "#1565C0", fontWeight: 600 }}>
                 {showPwSection ? "✕ Cancel" : "Change"}
               </button>
             </div>
@@ -1992,7 +1992,7 @@ function PortalProfile({ user, profile, onSave }) {
               <div style={{ padding: "16px 20px" }}>
                 {pwSuccess && (
                   <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 16 }}>✅</span> Password changed! You'll be using the new password next time you log in.
+                    <span style={{ fontSize: 16 }}>✅</span> Password changed! You&#39;ll be using the new password next time you log in.
                   </div>
                 )}
 
@@ -2030,7 +2030,7 @@ function PortalProfile({ user, profile, onSave }) {
                 <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5, display: "block" }}>Confirm New Password</label>
                 <input type="password" placeholder="Re-enter new password" value={pwForm.confirm}
                   onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))}
-                  style={{ marginBottom: 6, borderColor: pwForm.confirm ? (pwForm.newPw === pwForm.confirm ? "#059669" : "#DC2626") : "#C8E4FA" }} />
+                  style={{ marginBottom: 6, borderColor: pwForm.confirm ? (pwForm.newPw === pwForm.confirm ? "#059669" : "#DC2626") : "#BFDBFE" }} />
 
                 {pwForm.confirm.length > 0 && (
                   <div style={{ fontSize: 11, marginBottom: 14, color: pwForm.newPw === pwForm.confirm ? "#059669" : "#DC2626", fontWeight: 600 }}>
@@ -2039,7 +2039,7 @@ function PortalProfile({ user, profile, onSave }) {
                 )}
 
                 <button onClick={handlePasswordChange} disabled={pwLoading || !pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm}
-                  style={{ width: "100%", padding: "11px 0", background: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#E3F2FD" : "#7C3AED", color: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#90CAF9" : "white", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "not-allowed" : "pointer", transition: "all 0.2s", opacity: pwLoading ? 0.7 : 1 }}>
+                  style={{ width: "100%", padding: "11px 0", background: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#E3F2FD" : "#7C3AED", color: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#6B7280" : "white", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "not-allowed" : "pointer", transition: "all 0.2s", opacity: pwLoading ? 0.7 : 1 }}>
                   {pwLoading ? "Updating..." : "🔒 Update Password"}
                 </button>
               </div>
@@ -2053,7 +2053,7 @@ function PortalProfile({ user, profile, onSave }) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0 16px" }}>
             <div><label>First Name</label><input name="first_name" value={form.first_name || ""} onChange={handleChange} /></div>
             <div><label>Last Name</label><input name="last_name" value={form.last_name || ""} onChange={handleChange} /></div>
-            <div><label>Email (cannot change)</label><input value={user?.email || ""} disabled style={{ background: "#F8FAFF", color: "#90CAF9" }} /></div>
+            <div><label>Email (cannot change)</label><input value={user?.email || ""} disabled style={{ background: "#F8FAFF", color: "#6B7280" }} /></div>
             <div><label>Mobile</label><input name="mobile" value={form.mobile || ""} onChange={handleChange} placeholder="+91 98996 44633" /></div>
             <div><label>Date of Birth</label><input name="date_of_birth" type="date" value={form.date_of_birth || ""} onChange={handleChange} max={new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split("T")[0]} min={new Date(new Date().setFullYear(new Date().getFullYear() - 60)).toISOString().split("T")[0]} /></div>
             <div><label>Gender</label><select name="gender" value={form.gender || ""} onChange={handleChange}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
@@ -2208,8 +2208,8 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
     <div>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <h1 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 4 }}>Document Upload Center</h1>
-        <p style={{ color: "#6D28D9", fontSize: 13 }}>Accepted formats: PDF, JPG, PNG · Max 5MB per file · All files encrypted</p>
+        <h1 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#1565C0", marginBottom: 4 }}>Document Upload Center</h1>
+        <p style={{ color: "#7C3AED", fontSize: 13 }}>Accepted formats: PDF, JPG, PNG · Max 5MB per file · All files encrypted</p>
       </div>
 
       {/* Alerts */}
@@ -2224,7 +2224,7 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
             <span style={{ fontSize: 13, fontWeight: 700, color: uploadedCount === 4 ? "#059669" : "#D97706" }}>{uploadedCount}/4 uploaded</span>
           </div>
           <div style={{ background: "#E3F2FD", borderRadius: 10, height: 8, overflow: "hidden" }}>
-            <div style={{ width: `${(uploadedCount / 4) * 100}%`, height: "100%", background: uploadedCount === 4 ? "#059669" : "#64B5F6", borderRadius: 10, transition: "width 0.5s" }} />
+            <div style={{ width: `${(uploadedCount / 4) * 100}%`, height: "100%", background: uploadedCount === 4 ? "#059669" : "#1565C0", borderRadius: 10, transition: "width 0.5s" }} />
           </div>
         </div>
         {uploadedCount === 4 && <span style={{ fontSize: 20 }}>🎉</span>}
@@ -2244,14 +2244,14 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
             const statusBadge = getStatusBadge(doc);
             const isRejected = docStatuses[doc] === "rejected";
             return (
-              <div key={doc} style={{ border: `1.5px solid ${isRejected ? "#FCA5A5" : uploaded ? "#6EE7B7" : "#E3F2FD"}`, borderRadius: 12, padding: 16, background: isRejected ? "#FFF5F5" : uploaded ? "#F0FDF4" : "#FAFCFF", transition: "all 0.2s" }}>
+              <div key={doc} style={{ border: `1.5px solid ${isRejected ? "#FECACA" : uploaded ? "#6EE7B7" : "#E3F2FD"}`, borderRadius: 12, padding: 16, background: isRejected ? "#FEF2F2" : uploaded ? "#F0FDF4" : "#F8FAFF", transition: "all 0.2s" }}>
                 {/* Doc header */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 22 }}>{uploaded ? "📄" : "📋"}</span>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>{doc}</div>
-                      <div style={{ fontSize: 10, color: "#90CAF9", marginTop: 1 }}>Required</div>
+                      <div style={{ fontSize: 10, color: "#6B7280", marginTop: 1 }}>Required</div>
                     </div>
                   </div>
                   {statusBadge && <span className={`badge ${statusBadge.cls}`} style={{ fontSize: 10 }}>{statusBadge.label}</span>}
@@ -2260,7 +2260,7 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
 
                 {/* Rejection message */}
                 {isRejected && (
-                  <div style={{ background: "#FEE2E2", borderRadius: 6, padding: "8px 10px", marginBottom: 10, fontSize: 11, color: "#991B1B" }}>
+                  <div style={{ background: "#FEF2F2", borderRadius: 6, padding: "8px 10px", marginBottom: 10, fontSize: 11, color: "#991B1B" }}>
                     ⚠️ Document rejected by admin. Please re-upload a clearer copy.
                   </div>
                 )}
@@ -2281,7 +2281,7 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
                   <label className="upload-zone" style={{ padding: "14px 12px", cursor: "pointer", display: "block", marginTop: 4 }}>
                     <div style={{ fontSize: 18, marginBottom: 4 }}>☁️</div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: "#1565C0" }}>{uploading[doc] ? "Uploading..." : "Click to Upload"}</div>
-                    <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>PDF, JPG or PNG · Max 5MB</div>
+                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>PDF, JPG or PNG · Max 5MB</div>
                     <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleUpload(doc, e.target.files[0])} disabled={uploading[doc]} />
                   </label>
                 )}
@@ -2295,14 +2295,14 @@ function DocumentCenter({ user, uploadedDocs, onUpload }) {
       <div style={{ background: "#FFFFFF", borderRadius: 12, border: "1px solid #E3F2FD", padding: 24 }}>
         <div style={{ marginBottom: 16 }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E" }}>Optional Documents</h3>
-          <p style={{ fontSize: 12, color: "#6D28D9", marginTop: 2 }}>Upload based on your category, scholarship, or college requirement</p>
+          <p style={{ fontSize: 12, color: "#7C3AED", marginTop: 2 }}>Upload based on your category, scholarship, or college requirement</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
           {OPTIONAL_DOCS.map(doc => {
             const uploaded = isUploaded(doc);
             const statusBadge = getStatusBadge(doc);
             return (
-              <div key={doc} style={{ border: `1px solid ${uploaded ? "#6EE7B7" : "#E3F2FD"}`, borderRadius: 10, padding: "12px 14px", background: uploaded ? "#F0FDF4" : "#FAFCFF", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+              <div key={doc} style={{ border: `1px solid ${uploaded ? "#6EE7B7" : "#E3F2FD"}`, borderRadius: 10, padding: "12px 14px", background: uploaded ? "#F0FDF4" : "#F8FAFF", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
                   <span style={{ fontSize: 16, flexShrink: 0 }}>{uploaded ? "📄" : "📎"}</span>
                   <div style={{ minWidth: 0 }}>
@@ -2495,10 +2495,10 @@ function ApplicationsTab({ user }) {
     Medical: { bg: "#F0FDF4", color: "#059669" },
     Law: { bg: "#FFF7ED", color: "#EA580C" },
     Management: { bg: "#F5F3FF", color: "#7C3AED" },
-    Architecture: { bg: "#ECFEFF", color: "#0891B2" },
+    Architecture: { bg: "#EFF6FF", color: "#0891B2" },
     Science: { bg: "#FFFBEB", color: "#D97706" },
-    Commerce: { bg: "#F0FDFA", color: "#0D9488" },
-    Pharmacy: { bg: "#FDF2F8", color: "#9D174D" },
+    Commerce: { bg: "#ECFDF5", color: "#059669" },
+    Pharmacy: { bg: "#F5F3FF", color: "#9D174D" },
   };
   const getStreamStyle = (stream) => streamColors[stream] || { bg: "#F8FAFF", color: "#6B7280" };
   const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
@@ -2508,8 +2508,8 @@ function ApplicationsTab({ user }) {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
-          <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", fontFamily: "Sora" }}>Applications</h1>
-          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} application{apps.length !== 1 ? "s" : ""} submitted</div>
+          <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#1565C0", fontFamily: "Sora" }}>Applications</h1>
+          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{apps.length} application{apps.length !== 1 ? "s" : ""} submitted</div>
         </div>
         <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => { setShowForm(s => !s); setApplyError(""); }}>+ Custom Apply</button>
       </div>
@@ -2522,14 +2522,14 @@ function ApplicationsTab({ user }) {
       )}
 
       {/* Tab Switch */}
-      <div style={{ display: "flex", gap: 0, background: "#F0F7FF", borderRadius: 10, padding: 4, marginBottom: 20, width: "fit-content", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 0, background: "#EFF6FF", borderRadius: 10, padding: 4, marginBottom: 20, width: "fit-content", flexWrap: "wrap" }}>
         {[
           { id: "suggestions", label: "🎯 Suggestions", count: filteredSuggestions.length },
           { id: "applications", label: "📋 My Applications", count: apps.length }
         ].map(t => (
           <button key={t.id} onClick={() => setActiveSection(t.id)}
-            style={{ padding: "8px 14px", border: "none", borderRadius: 8, background: activeSection === t.id ? "white" : "transparent", color: activeSection === t.id ? "#1565C0" : "#6D28D9", fontWeight: activeSection === t.id ? 700 : 500, fontSize: 13, cursor: "pointer", boxShadow: activeSection === t.id ? "0 2px 8px rgba(0,0,0,0.08)" : "none" }}>
-            {t.label} <span style={{ background: "#EFF6FF", color: "#64B5F6", borderRadius: 10, padding: "1px 6px", fontSize: 11, fontWeight: 700 }}>{t.count}</span>
+            style={{ padding: "8px 14px", border: "none", borderRadius: 8, background: activeSection === t.id ? "white" : "transparent", color: activeSection === t.id ? "#1565C0" : "#7C3AED", fontWeight: activeSection === t.id ? 700 : 500, fontSize: 13, cursor: "pointer", boxShadow: activeSection === t.id ? "0 2px 8px rgba(0,0,0,0.08)" : "none" }}>
+            {t.label} <span style={{ background: "#EFF6FF", color: "#1565C0", borderRadius: 10, padding: "1px 6px", fontSize: 11, fontWeight: 700 }}>{t.count}</span>
           </button>
         ))}
       </div>
@@ -2545,7 +2545,7 @@ function ApplicationsTab({ user }) {
           </div>
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <button className="btn-primary" style={{ fontSize: 13 }} onClick={handleAdd}>Submit Application</button>
-            <button style={{ fontSize: 13, padding: "10px 20px", background: "transparent", border: "1px solid #BFDBFE", borderRadius: 8, cursor: "pointer", color: "#64B5F6" }} onClick={() => { setShowForm(false); setApplyError(""); }}>Cancel</button>
+            <button style={{ fontSize: 13, padding: "10px 20px", background: "transparent", border: "1px solid #BFDBFE", borderRadius: 8, cursor: "pointer", color: "#1565C0" }} onClick={() => { setShowForm(false); setApplyError(""); }}>Cancel</button>
           </div>
         </div>
       )}
@@ -2565,7 +2565,7 @@ function ApplicationsTab({ user }) {
                   {profile.score ? ` · ${profile.score}` : ""}
                 </div>
               </div>
-              <div style={{ marginLeft: "auto", fontSize: 12, color: "#64B5F6", fontWeight: 600 }}>{filteredSuggestions.length} colleges</div>
+              <div style={{ marginLeft: "auto", fontSize: 12, color: "#1565C0", fontWeight: 600 }}>{filteredSuggestions.length} colleges</div>
             </div>
           )}
 
@@ -2581,7 +2581,7 @@ function ApplicationsTab({ user }) {
           {allColleges.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>⏳</div>
-              <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading colleges...</div>
+              <div style={{ color: "#6B7280", fontSize: 14 }}>Loading colleges...</div>
             </div>
           ) : filteredSuggestions.length === 0 ? (
             <div style={{ textAlign: "center", padding: "48px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
@@ -2606,7 +2606,7 @@ function ApplicationsTab({ user }) {
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E", lineHeight: 1.3 }}>{c.name}</div>
-                          <div style={{ fontSize: 11, color: "#90CAF9" }}>📍 {c.city}</div>
+                          <div style={{ fontSize: 11, color: "#6B7280" }}>📍 {c.city}</div>
                         </div>
                       </div>
 
@@ -2617,7 +2617,7 @@ function ApplicationsTab({ user }) {
                       </div>
 
                       {c.ranking && <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 6 }}>🏆 {c.ranking}</div>}
-                      {c.affiliation && <div style={{ fontSize: 10, color: "#90CAF9", marginBottom: 12 }}>Affiliated: {c.affiliation}</div>}
+                      {c.affiliation && <div style={{ fontSize: 10, color: "#6B7280", marginBottom: 12 }}>Affiliated: {c.affiliation}</div>}
 
                       {/* Apply button */}
                       <button className="btn-primary" style={{ width: "100%", fontSize: 12, padding: "9px 0", opacity: isApplying ? 0.7 : 1 }}
@@ -2639,13 +2639,13 @@ function ApplicationsTab({ user }) {
           {loading ? (
             <div style={{ textAlign: "center", padding: "48px 0" }}>
               <div style={{ fontSize: 32 }}>⏳</div>
-              <div style={{ color: "#90CAF9", fontSize: 14, marginTop: 8 }}>Loading...</div>
+              <div style={{ color: "#6B7280", fontSize: 14, marginTop: 8 }}>Loading...</div>
             </div>
           ) : apps.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 16, border: "1px solid #E3F2FD" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>📋</div>
               <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1A2E", marginBottom: 8 }}>No Applications Yet</div>
-              <div style={{ fontSize: 13, color: "#90CAF9", marginBottom: 20 }}>Browse college suggestions and apply with one click</div>
+              <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 20 }}>Browse college suggestions and apply with one click</div>
               <button className="btn-primary" style={{ fontSize: 13 }} onClick={() => setActiveSection("suggestions")}>🎯 Browse Suggestions →</button>
             </div>
           ) : (
@@ -2655,7 +2655,7 @@ function ApplicationsTab({ user }) {
                 return (
                   <div key={a.id} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", padding: 18 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-                      <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 15 }}>
+                      <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 15 }}>
                         {(a.college || "C")[0]}
                       </div>
                       <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`} style={{ fontSize: 10 }}>
@@ -2663,10 +2663,10 @@ function ApplicationsTab({ user }) {
                       </span>
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", marginBottom: 4 }}>{a.college}</div>
-                    <div style={{ fontSize: 12, color: "#90CAF9", marginBottom: 4 }}>{a.course}</div>
-                    {a.exam && <div style={{ fontSize: 11, color: "#64B5F6", marginBottom: 8 }}>📝 {a.exam}</div>}
-                    <div style={{ fontSize: 10, color: "#C8E4FA" }}>Applied: {new Date(a.created_at).toLocaleDateString("en-IN")}</div>
-                    <div style={{ fontSize: 10, color: "#C8E4FA", marginTop: 2 }}>ID: APP-{String(a.id || "").slice(-8).toUpperCase()}</div>
+                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>{a.course}</div>
+                    {a.exam && <div style={{ fontSize: 11, color: "#1565C0", marginBottom: 8 }}>📝 {a.exam}</div>}
+                    <div style={{ fontSize: 10, color: "#BFDBFE" }}>Applied: {new Date(a.created_at).toLocaleDateString("en-IN")}</div>
+                    <div style={{ fontSize: 10, color: "#BFDBFE", marginTop: 2 }}>ID: APP-{String(a.id || "").slice(-8).toUpperCase()}</div>
                   </div>
                 );
               })}
@@ -2683,7 +2683,7 @@ function ApplicationsTab({ user }) {
             <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
             <h3 style={{ fontSize: 20, fontWeight: 800, color: "#059669", marginBottom: 8, fontFamily: "Sora" }}>Application Submitted!</h3>
             <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 6 }}>Your application to <strong>{applyModal.name}</strong> has been submitted.</p>
-            <p style={{ fontSize: 13, color: "#90CAF9", marginBottom: 24 }}>Our counselors will guide you through the next steps.</p>
+            <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 24 }}>Our counselors will guide you through the next steps.</p>
             <button className="btn-primary" style={{ width: "100%", padding: 12 }} onClick={() => { setApplyModal(null); setActiveSection("applications"); }}>View My Applications →</button>
           </div>
         </div>
@@ -2733,7 +2733,7 @@ function PaymentsTab({ user, profile }) {
       price: 400,
       originalPrice: null,
       badge: "All Exams",
-      badgeColor: "#1D4ED8",
+      badgeColor: "#1565C0",
       includes: ["Complete form filling", "Photo & signature upload", "Fee payment assistance", "Confirmation PDF", "Error-check before submission"],
     },
     {
@@ -2744,7 +2744,7 @@ function PaymentsTab({ user, profile }) {
       price: 8000,
       originalPrice: null,
       badge: "End-to-End",
-      badgeColor: "#B45309",
+      badgeColor: "#D97706",
       includes: ["Counseling round strategy", "Choice filling guidance", "Document checklist", "Fee payment support", "Post-admission enrollment"],
     },
     {
@@ -2804,7 +2804,7 @@ function PaymentsTab({ user, profile }) {
       image: "https://i.imgur.com/n5tjHFD.png",
       prefill: { name: fullName, email, contact: mobile },
       notes: { user_id: user?.id, service_id: service.id },
-      theme: { color: "#64B5F6" },
+      theme: { color: "#1565C0" },
       handler: async (response) => {
         try {
           const { error } = await supabase.from("payments").insert({
@@ -2852,8 +2852,8 @@ function PaymentsTab({ user, profile }) {
     <div style={{ maxWidth: 480, margin: "40px auto", textAlign: "center" }}>
       <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
       <h2 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Payment Successful!</h2>
-      <p style={{ color: "#6D28D9", fontSize: 15, marginBottom: 8 }}>You&#39;ve successfully purchased <strong>{paySuccess.service.title}</strong></p>
-      <p style={{ fontSize: 13, color: "#90CAF9", marginBottom: 28 }}>Payment ID: {paySuccess.paymentId}</p>
+      <p style={{ color: "#7C3AED", fontSize: 15, marginBottom: 8 }}>You&#39;ve successfully purchased <strong>{paySuccess.service.title}</strong></p>
+      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 28 }}>Payment ID: {paySuccess.paymentId}</p>
       <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 12, padding: 20, marginBottom: 24, textAlign: "left" }}>
         <div style={{ fontWeight: 600, fontSize: 14, color: "#065F46", marginBottom: 10 }}>✅ What happens next:</div>
         {paySuccess.service.id.includes("counseling") ? (
@@ -2877,15 +2877,15 @@ function PaymentsTab({ user, profile }) {
 
   return (
     <div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Payments</h1>
-      <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 28 }}>Secure payments powered by Razorpay — UPI, Cards, NetBanking, Wallets accepted.</p>
+      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#1565C0", marginBottom: 6 }}>Payments</h1>
+      <p style={{ color: "#7C3AED", fontSize: 14, marginBottom: 28 }}>Secure payments powered by Razorpay — UPI, Cards, NetBanking, Wallets accepted.</p>
 
       {/* Payment Methods Banner */}
-      <div style={{ background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #C8E4FA", borderRadius: 12, padding: "14px 20px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+      <div style={{ background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE", borderRadius: 12, padding: "14px 20px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>🔒 100% Secure Payments</div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {["UPI", "Visa", "Mastercard", "RuPay", "NetBanking", "Wallets"].map(m => (
-            <span key={m} style={{ background: "white", border: "1px solid #C8E4FA", borderRadius: 6, padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#64B5F6" }}>{m}</span>
+            <span key={m} style={{ background: "white", border: "1px solid #BFDBFE", borderRadius: 6, padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#1565C0" }}>{m}</span>
           ))}
         </div>
       </div>
@@ -2893,13 +2893,13 @@ function PaymentsTab({ user, profile }) {
       {/* Service Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16, marginBottom: 32 }}>
         {SERVICES.map(service => (
-          <div key={service.id} className="card" style={{ position: "relative", border: selectedService?.id === service.id ? "2px solid #64B5F6" : "1px solid #C8E4FA" }}>
+          <div key={service.id} className="card" style={{ position: "relative", border: selectedService?.id === service.id ? "2px solid #1565C0" : "1px solid #BFDBFE" }}>
             {service.badge && (
               <div style={{ position: "absolute", top: -1, right: 16, background: service.badgeColor, color: "white", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }}>{service.badge}</div>
             )}
             <div style={{ fontSize: 32, marginBottom: 12 }}>{service.icon}</div>
             <h3 style={{ fontWeight: 700, fontSize: 16, color: "#1A1A2E", marginBottom: 6 }}>{service.title}</h3>
-            <p style={{ fontSize: 13, color: "#6D28D9", lineHeight: 1.6, marginBottom: 14 }}>{service.desc}</p>
+            <p style={{ fontSize: 13, color: "#7C3AED", lineHeight: 1.6, marginBottom: 14 }}>{service.desc}</p>
 
             {/* Includes */}
             <ul style={{ paddingLeft: 0, listStyle: "none", marginBottom: 16 }}>
@@ -2912,9 +2912,9 @@ function PaymentsTab({ user, profile }) {
 
             {/* Price */}
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#64B5F6" }}>₹{service.price}</span>
+              <span style={{ fontSize: 28, fontWeight: 800, color: "#1565C0" }}>₹{service.price}</span>
               {service.originalPrice && (
-                <span style={{ fontSize: 14, color: "#9CA3AF", textDecoration: "line-through" }}>₹{service.originalPrice}</span>
+                <span style={{ fontSize: 14, color: "#6B7280", textDecoration: "line-through" }}>₹{service.originalPrice}</span>
               )}
               {service.originalPrice && (
                 <span style={{ fontSize: 12, color: "#059669", fontWeight: 700 }}>Save ₹{service.originalPrice - service.price}</span>
@@ -2930,10 +2930,10 @@ function PaymentsTab({ user, profile }) {
       </div>
 
       {/* Payment History */}
-      <div style={{ background: "#FFFFFF", borderRadius: 12, border: "1px solid #C8E4FA", padding: 24 }}>
-        <h3 style={{ fontWeight: 700, fontSize: 16, color: "#64B5F6", marginBottom: 16 }}>💳 Payment History</h3>
+      <div style={{ background: "#FFFFFF", borderRadius: 12, border: "1px solid #BFDBFE", padding: 24 }}>
+        <h3 style={{ fontWeight: 700, fontSize: 16, color: "#1565C0", marginBottom: 16 }}>💳 Payment History</h3>
         {history.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 0", color: "#90CAF9" }}>
+          <div style={{ textAlign: "center", padding: "32px 0", color: "#6B7280" }}>
             <div style={{ fontSize: 36, marginBottom: 8 }}>📭</div>
             <div style={{ fontSize: 14 }}>No payments yet</div>
           </div>
@@ -2946,10 +2946,10 @@ function PaymentsTab({ user, profile }) {
               <tbody>
                 {history.map(p => (
                   <tr key={p.id}>
-                    <td style={{ color: "#6D28D9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
+                    <td style={{ color: "#7C3AED" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
                     <td style={{ fontWeight: 500, color: "#1A1A2E" }}>{p.service_title}</td>
-                    <td style={{ fontWeight: 700, color: "#64B5F6" }}>₹{p.amount}</td>
-                    <td style={{ fontSize: 11, color: "#90CAF9", fontFamily: "monospace" }}>{p.razorpay_payment_id || "—"}</td>
+                    <td style={{ fontWeight: 700, color: "#1565C0" }}>₹{p.amount}</td>
+                    <td style={{ fontSize: 11, color: "#6B7280", fontFamily: "monospace" }}>{p.razorpay_payment_id || "—"}</td>
                     <td><span className={`badge ${p.status === "success" ? "badge-success" : p.status === "failed" ? "badge-danger" : "badge-warning"}`}>{p.status}</span></td>
                   </tr>
                 ))}
@@ -2961,7 +2961,7 @@ function PaymentsTab({ user, profile }) {
 
       {/* Note */}
       <div style={{ marginTop: 16, padding: "12px 16px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, fontSize: 12, color: "#92400E" }}>
-        ⚠️ <strong>Test Mode:</strong> Replace <code>rzp_test_YOUR_KEY_ID</code> with your live Razorpay Key ID from <a href="https://razorpay.com" target="_blank" style={{ color: "#64B5F6" }}>razorpay.com</a> before going live.
+        ⚠️ <strong>Test Mode:</strong> Replace <code>rzp_test_YOUR_KEY_ID</code> with your live Razorpay Key ID from <a href="https://razorpay.com" target="_blank" style={{ color: "#1565C0" }}>razorpay.com</a> before going live.
       </div>
     </div>
   );
@@ -2993,16 +2993,16 @@ function TrackingTab({ user }) {
 
   return (
     <div>
-      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", marginBottom: 6, fontFamily: "Sora" }}>Application Tracking</h1>
-      <p style={{ color: "#6D28D9", fontSize: 13, marginBottom: 24 }}>Track the real-time status of all your college applications.</p>
+      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#1565C0", marginBottom: 6, fontFamily: "Sora" }}>Application Tracking</h1>
+      <p style={{ color: "#7C3AED", fontSize: 13, marginBottom: 24 }}>Track the real-time status of all your college applications.</p>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "60px 0" }}><div style={{ fontSize: 32 }}>⏳</div><div style={{ color: "#90CAF9", fontSize: 14, marginTop: 8 }}>Loading applications...</div></div>
+        <div style={{ textAlign: "center", padding: "60px 0" }}><div style={{ fontSize: 32 }}>⏳</div><div style={{ color: "#6B7280", fontSize: 14, marginTop: 8 }}>Loading applications...</div></div>
       ) : apps.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 16, border: "1px solid #E3F2FD" }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>📋</div>
           <div style={{ fontSize: 16, fontWeight: 600, color: "#1A1A2E", marginBottom: 8 }}>No Applications Yet</div>
-          <div style={{ fontSize: 13, color: "#90CAF9", marginBottom: 20 }}>Submit your first application to track its status here</div>
+          <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 20 }}>Submit your first application to track its status here</div>
           <button className="btn-primary" style={{ fontSize: 13 }}>+ New Application</button>
         </div>
       ) : (
@@ -3013,12 +3013,12 @@ function TrackingTab({ user }) {
               <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E" }}>Your Applications ({apps.length})</div>
             </div>
             {apps.map(a => (
-              <div key={a.id} onClick={() => setSelected(a)} style={{ padding: "14px 20px", borderBottom: "1px solid #F0F7FF", cursor: "pointer", background: selected?.id === a.id ? "#EFF6FF" : "white", transition: "background 0.15s" }}>
+              <div key={a.id} onClick={() => setSelected(a)} style={{ padding: "14px 20px", borderBottom: "1px solid #EFF6FF", cursor: "pointer", background: selected?.id === a.id ? "#EFF6FF" : "white", transition: "background 0.15s" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E", marginBottom: 3 }}>{a.college}</div>
-                    <div style={{ fontSize: 11, color: "#90CAF9" }}>{a.course} {a.exam ? `· ${a.exam}` : ""}</div>
-                    <div style={{ fontSize: 10, color: "#C8E4FA", marginTop: 2 }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</div>
+                    <div style={{ fontSize: 11, color: "#6B7280" }}>{a.course} {a.exam ? `· ${a.exam}` : ""}</div>
+                    <div style={{ fontSize: 10, color: "#BFDBFE", marginTop: 2 }}>{new Date(a.created_at).toLocaleDateString("en-IN")}</div>
                   </div>
                   <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : a.status === "under_review" ? "badge-info" : "badge-warning"}`} style={{ fontSize: 10 }}>
                     {a.status?.replace("_", " ")}
@@ -3033,7 +3033,7 @@ function TrackingTab({ user }) {
             <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 4 }}>{selected.college}</div>
-                <div style={{ fontSize: 12, color: "#90CAF9" }}>{selected.course} {selected.exam ? `· ${selected.exam}` : ""}</div>
+                <div style={{ fontSize: 12, color: "#6B7280" }}>{selected.course} {selected.exam ? `· ${selected.exam}` : ""}</div>
               </div>
 
               {selected.status === "rejected" && (
@@ -3053,17 +3053,17 @@ function TrackingTab({ user }) {
                   return (
                     <div key={step} style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: i < STEPS.length - 1 ? 0 : 0 }}>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: isDone ? "#059669" : isCurrent ? "#64B5F6" : "#E3F2FD", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: isDone || isCurrent ? "white" : "#90CAF9", flexShrink: 0, zIndex: 1, transition: "all 0.3s" }}>
+                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: isDone ? "#059669" : isCurrent ? "#1565C0" : "#E3F2FD", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: isDone || isCurrent ? "white" : "#6B7280", flexShrink: 0, zIndex: 1, transition: "all 0.3s" }}>
                           {isDone ? "✓" : i + 1}
                         </div>
                         {i < STEPS.length - 1 && <div style={{ width: 2, height: 28, background: isDone ? "#059669" : "#E3F2FD", margin: "2px 0", transition: "background 0.3s" }} />}
                       </div>
                       <div style={{ paddingBottom: i < STEPS.length - 1 ? 20 : 0, paddingTop: 4 }}>
-                        <div style={{ fontSize: 13, fontWeight: isCurrent ? 700 : 500, color: isDone ? "#059669" : isCurrent ? "#1565C0" : "#9CA3AF" }}>{step}</div>
+                        <div style={{ fontSize: 13, fontWeight: isCurrent ? 700 : 500, color: isDone ? "#059669" : isCurrent ? "#1565C0" : "#6B7280" }}>{step}</div>
                         {isCurrent && !selected.status === "rejected" && (
-                          <div style={{ fontSize: 11, color: "#64B5F6", marginTop: 2 }}>Current status</div>
+                          <div style={{ fontSize: 11, color: "#1565C0", marginTop: 2 }}>Current status</div>
                         )}
-                        {isDone && i === 0 && <div style={{ fontSize: 10, color: "#90CAF9", marginTop: 1 }}>{new Date(selected.created_at).toLocaleDateString("en-IN")}</div>}
+                        {isDone && i === 0 && <div style={{ fontSize: 10, color: "#6B7280", marginTop: 1 }}>{new Date(selected.created_at).toLocaleDateString("en-IN")}</div>}
                       </div>
                     </div>
                   );
@@ -3071,7 +3071,7 @@ function TrackingTab({ user }) {
               </div>
 
               <div style={{ marginTop: 20, padding: "12px 16px", background: "#F8FAFF", borderRadius: 10 }}>
-                <div style={{ fontSize: 11, color: "#90CAF9", marginBottom: 4 }}>Application ID</div>
+                <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>Application ID</div>
                 <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E", fontFamily: "monospace" }}>APP-{String(selected.id).slice(-8).toUpperCase()}</div>
               </div>
             </div>
@@ -3118,21 +3118,21 @@ function NotificationsTab({ user }) {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", fontFamily: "Sora" }}>Notifications</h1>
+          <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#1565C0", fontFamily: "Sora" }}>Notifications</h1>
           {unreadCount > 0 && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{unreadCount} unread notification{unreadCount > 1 ? "s" : ""}</div>}
         </div>
         {unreadCount > 0 && (
-          <button style={{ fontSize: 12, color: "#64B5F6", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "7px 14px", cursor: "pointer", fontWeight: 600 }} onClick={markAllRead}>Mark all read</button>
+          <button style={{ fontSize: 12, color: "#1565C0", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "7px 14px", cursor: "pointer", fontWeight: 600 }} onClick={markAllRead}>Mark all read</button>
         )}
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "60px 0" }}><div style={{ fontSize: 32 }}>⏳</div><div style={{ color: "#90CAF9", fontSize: 14, marginTop: 8 }}>Loading...</div></div>
+        <div style={{ textAlign: "center", padding: "60px 0" }}><div style={{ fontSize: 32 }}>⏳</div><div style={{ color: "#6B7280", fontSize: 14, marginTop: 8 }}>Loading...</div></div>
       ) : notifs.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 16, border: "1px solid #E3F2FD" }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔔</div>
           <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>No Notifications Yet</div>
-          <div style={{ fontSize: 13, color: "#90CAF9" }}>You&#39;ll receive updates about your applications and documents here</div>
+          <div style={{ fontSize: 13, color: "#6B7280" }}>You&#39;ll receive updates about your applications and documents here</div>
         </div>
       ) : notifs.map(n => (
         <div key={n.id} onClick={() => !n.is_read && markRead(n.id)} style={{ background: "white", borderRadius: 12, border: `1px solid ${!n.is_read ? "#BFDBFE" : "#E3F2FD"}`, padding: "16px 20px", marginBottom: 10, display: "flex", gap: 14, alignItems: "flex-start", cursor: !n.is_read ? "pointer" : "default", transition: "all 0.2s", boxShadow: !n.is_read ? "0 2px 8px rgba(100,181,246,0.1)" : "none" }}>
@@ -3140,11 +3140,11 @@ function NotificationsTab({ user }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: !n.is_read ? 700 : 500, fontSize: 14, color: "#1A1A2E", marginBottom: 4 }}>{n.title}</div>
             <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{n.message}</div>
-            <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 6 }}>{new Date(n.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+            <div style={{ fontSize: 11, color: "#6B7280", marginTop: 6 }}>{new Date(n.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
-            {!n.is_read && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#64B5F6" }} />}
-            {!n.is_read && <div style={{ fontSize: 10, color: "#64B5F6", fontWeight: 600 }}>tap to read</div>}
+            {!n.is_read && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1565C0" }} />}
+            {!n.is_read && <div style={{ fontSize: 10, color: "#1565C0", fontWeight: 600 }}>tap to read</div>}
           </div>
         </div>
       ))}
@@ -3186,7 +3186,7 @@ function SupportTab({ user }) {
 
   return (
     <div>
-      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#64B5F6", marginBottom: 20, fontFamily: "Sora" }}>Support Center</h1>
+      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#1565C0", marginBottom: 20, fontFamily: "Sora" }}>Support Center</h1>
 
       {/* Contact Options */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 24 }}>
@@ -3239,16 +3239,16 @@ function SupportTab({ user }) {
           {tickets.length === 0 ? (
             <div style={{ textAlign: "center", padding: "32px 0" }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>🎫</div>
-              <div style={{ fontSize: 13, color: "#90CAF9" }}>No tickets yet</div>
+              <div style={{ fontSize: 13, color: "#6B7280" }}>No tickets yet</div>
             </div>
           ) : tickets.map(t => (
-            <div key={t.id} style={{ padding: "12px 0", borderBottom: "1px solid #F0F7FF" }}>
+            <div key={t.id} style={{ padding: "12px 0", borderBottom: "1px solid #EFF6FF" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>{t.category}</div>
                 <span className={`badge ${t.status === "resolved" ? "badge-success" : t.status === "in_progress" ? "badge-info" : "badge-warning"}`} style={{ fontSize: 9 }}>{t.status?.replace("_", " ")}</span>
               </div>
               <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4, lineHeight: 1.4 }}>{t.description?.substring(0, 80)}{t.description?.length > 80 ? "..." : ""}</div>
-              <div style={{ fontSize: 10, color: "#90CAF9" }}>{new Date(t.created_at).toLocaleDateString("en-IN")}</div>
+              <div style={{ fontSize: 10, color: "#6B7280" }}>{new Date(t.created_at).toLocaleDateString("en-IN")}</div>
             </div>
           ))}
         </div>
@@ -3261,10 +3261,10 @@ function SupportTab({ user }) {
 
 // ─── ADMIN CSS ───────────────────────────────────────────────────────────────
 const adminCSS = `
-  .admin-wrap { display: flex; min-height: 100vh; background: #F0F7FF; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .admin-wrap { display: flex; min-height: 100vh; background: #EFF6FF; font-family: 'Plus Jakarta Sans', sans-serif; }
   .admin-sidebar {
     width: 220px;
-    background: linear-gradient(180deg, #0D1B4B 0%, #1A237E 50%, #283593 100%);
+    background: linear-gradient(180deg, #1A1A2E 0%, #1565C0 50%, #1565C0 100%);
     display: flex; flex-direction: column;
     padding: 0; flex-shrink: 0;
     position: sticky; top: 0; height: 100vh; overflow-y: auto;
@@ -3277,7 +3277,7 @@ const adminCSS = `
   .admin-nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 8px; margin: 8px 0 2px; }
   .admin-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.2s; margin-bottom: 1px; }
   .admin-nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
-  .admin-nav-item.active { background: rgba(100,181,246,0.2); color: white; font-weight: 600; border-left: 3px solid #64B5F6; }
+  .admin-nav-item.active { background: rgba(100,181,246,0.2); color: white; font-weight: 600; border-left: 3px solid #1565C0; }
   .admin-nav-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
   .admin-nav-item.active .admin-nav-icon { background: rgba(100,181,246,0.2); }
   .admin-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -3286,7 +3286,7 @@ const adminCSS = `
   .admin-stat-card { background: white; border-radius: 14px; padding: 20px; border: 1px solid #E3F2FD; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
   .admin-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(21,101,192,0.1); }
   .student-row { transition: background 0.15s; }
-  .student-row:hover { background: #F0F7FF !important; }
+  .student-row:hover { background: #EFF6FF !important; }
   .detail-modal-overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
   .detail-modal { background: white; border-radius: 16px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.2); }
   @media (max-width: 768px) {
@@ -3297,7 +3297,7 @@ const adminCSS = `
     .admin-nav-section { display: flex; flex-direction: row; padding: 4px 6px; flex-shrink: 0; }
     .admin-nav-label { display: none; }
     .admin-nav-item { flex-direction: column; font-size: 9px; gap: 2px; padding: 8px 10px; min-width: 50px; text-align: center; border-left: none !important; border-bottom: 3px solid transparent; border-radius: 0; white-space: nowrap; }
-    .admin-nav-item.active { border-bottom-color: #64B5F6; background: rgba(100,181,246,0.2); border-left: none !important; }
+    .admin-nav-item.active { border-bottom-color: #1565C0; background: rgba(100,181,246,0.2); border-left: none !important; }
     .admin-nav-icon { width: 24px; height: 24px; font-size: 13px; margin: 0 auto; }
     .admin-main { overflow: visible; }
     .admin-topbar { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
@@ -3388,14 +3388,14 @@ function AdminDashboard({ setPage }) {
         </div>
         <div className="admin-user-card">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "white" }}>AD</div>
+            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "white" }}>AD</div>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "white" }}>Admin</div>
               <div style={{ fontSize: 10, color: "rgba(255,255,255,0.45)" }}>Super Administrator</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-            {[{val: stats.students, label: "Students", color: "#64B5F6"}, {val: stats.applications, label: "Apps", color: "#34D399"}, {val: stats.pending_docs, label: "Pending", color: "#FCD34D"}].map(s => (
+            {[{val: stats.students, label: "Students", color: "#1565C0"}, {val: stats.applications, label: "Apps", color: "#6EE7B7"}, {val: stats.pending_docs, label: "Pending", color: "#FCD34D"}].map(s => (
               <div key={s.label} style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 6, padding: "5px 8px", textAlign: "center" }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: s.color }}>{s.val}</div>
                 <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{s.label}</div>
@@ -3429,11 +3429,11 @@ function AdminDashboard({ setPage }) {
             <div style={{ fontSize: "clamp(13px, 2.5vw, 17px)", fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora" }}>
               {navGroups.flatMap(g => g.items).find(i => i.id === tab)?.label || "Dashboard"}
             </div>
-            <div style={{ fontSize: 11, color: "#90CAF9" }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
+            <div style={{ fontSize: 11, color: "#6B7280" }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
           </div>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <button style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 600, color: "#1565C0", cursor: "pointer" }} onClick={loadAdminStats}>Refresh</button>
-            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12, color: "white" }}>AD</div>
+            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12, color: "white" }}>AD</div>
           </div>
         </div>
         <div className="admin-content">
@@ -3462,13 +3462,13 @@ function AdminOverview({ stats, setTab }) {
     { label: "Approved Applications", val: stats.approved, icon: "✅", color: "#059669", bg: "#F0FDF4" },
     { label: "Rejected Applications", val: stats.rejected, icon: "❌", color: "#DC2626", bg: "#FEF2F2" },
     { label: "Successful Payments", val: stats.payments, icon: "💳", color: "#7C3AED", bg: "#F5F3FF" },
-    { label: "Counseling Booked", val: stats.counseling, icon: "🎓", color: "#0891B2", bg: "#ECFEFF" },
+    { label: "Counseling Booked", val: stats.counseling, icon: "🎓", color: "#0891B2", bg: "#EFF6FF" },
     { label: "Success Rate", val: stats.applications > 0 ? `${Math.round((stats.approved / stats.applications) * 100)}%` : "—", icon: "📈", color: "#059669", bg: "#F0FDF4" },
   ];
 
   return (
     <div>
-      <div style={{ background: "linear-gradient(135deg, #0D1B4B, #1565C0)", borderRadius: 16, padding: "24px 28px", marginBottom: 24, position: "relative", overflow: "hidden" }}>
+      <div style={{ background: "linear-gradient(135deg, #1A1A2E, #1565C0)", borderRadius: 16, padding: "24px 28px", marginBottom: 24, position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -30, right: -30, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginBottom: 4, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>Admin Dashboard</div>
@@ -3569,9 +3569,9 @@ function AdminStudents() {
     "Medical": { bg: "#F0FDF4", color: "#059669" },
     "Law": { bg: "#FFF7ED", color: "#EA580C" },
     "Management": { bg: "#F5F3FF", color: "#7C3AED" },
-    "Architecture": { bg: "#ECFEFF", color: "#0891B2" },
+    "Architecture": { bg: "#EFF6FF", color: "#0891B2" },
     "Science / Commerce": { bg: "#FFFBEB", color: "#D97706" },
-    "Pharmacy": { bg: "#FDF2F8", color: "#9D174D" },
+    "Pharmacy": { bg: "#F5F3FF", color: "#9D174D" },
   };
   const getStreamStyle = (stream) => streamColors[stream] || { bg: "#F8FAFF", color: "#6B7280" };
 
@@ -3581,11 +3581,11 @@ function AdminStudents() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>All Students</h1>
-          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{students.length} enrolled · {filtered.length} shown</div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{students.length} enrolled · {filtered.length} shown</div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {/* View toggle */}
-          <div style={{ display: "flex", background: "#F0F7FF", borderRadius: 8, padding: 3 }}>
+          <div style={{ display: "flex", background: "#EFF6FF", borderRadius: 8, padding: 3 }}>
             {[["cards", "Cards"], ["table", "Table"]].map(([v, label]) => (
               <button key={v} onClick={() => setView(v)}
                 style={{ padding: "6px 14px", border: "none", borderRadius: 6, background: view === v ? "white" : "transparent", color: view === v ? "#1565C0" : "#6B7280", fontWeight: view === v ? 700 : 500, fontSize: 12, cursor: "pointer", boxShadow: view === v ? "0 1px 4px rgba(0,0,0,0.08)" : "none" }}>
@@ -3636,13 +3636,13 @@ function AdminStudents() {
       {loading ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
           <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
-          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading students...</div>
+          <div style={{ color: "#6B7280", fontSize: 14 }}>Loading students...</div>
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
           <div style={{ fontSize: 44, marginBottom: 10 }}>👥</div>
           <div style={{ color: "#6B7280", fontSize: 15, marginBottom: 6 }}>{students.length === 0 ? "No students registered yet" : "No results found"}</div>
-          <div style={{ fontSize: 13, color: "#90CAF9" }}>{students.length === 0 ? "Students appear here once they register" : "Try a different search or filter"}</div>
+          <div style={{ fontSize: 13, color: "#6B7280" }}>{students.length === 0 ? "Students appear here once they register" : "Try a different search or filter"}</div>
         </div>
 
       ) : view === "cards" ? (
@@ -3665,7 +3665,7 @@ function AdminStudents() {
                       <div style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {s.first_name || ""} {s.last_name || ""}
                       </div>
-                      <div style={{ fontSize: 11, color: "#90CAF9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.email}</div>
+                      <div style={{ fontSize: 11, color: "#6B7280", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.email}</div>
                     </div>
                   </div>
 
@@ -3686,14 +3686,14 @@ function AdminStudents() {
                       { label: "Score", val: s.score },
                     ].filter(f => f.val).map(f => (
                       <div key={f.label} style={{ background: "#F8FAFF", borderRadius: 7, padding: "6px 10px" }}>
-                        <div style={{ fontSize: 9, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase" }}>{f.label}</div>
+                        <div style={{ fontSize: 9, color: "#6B7280", fontWeight: 700, textTransform: "uppercase" }}>{f.label}</div>
                         <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E", marginTop: 1 }}>{f.val}</div>
                       </div>
                     ))}
                   </div>
 
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontSize: 10, color: "#90CAF9" }}>
+                    <div style={{ fontSize: 10, color: "#6B7280" }}>
                       {s.created_at ? new Date(s.created_at).toLocaleDateString("en-IN") : ""}
                     </div>
                     <button style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", color: "white", border: "none", borderRadius: 7, padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
@@ -3719,7 +3719,7 @@ function AdminStudents() {
                   const st = getStreamStyle(s.course_interest);
                   return (
                     <tr key={s.id} className="student-row">
-                      <td style={{ color: "#90CAF9", fontSize: 12, textAlign: "center" }}>{i + 1}</td>
+                      <td style={{ color: "#6B7280", fontSize: 12, textAlign: "center" }}>{i + 1}</td>
                       <td>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <div style={{ width: 34, height: 34, borderRadius: "50%", background: `linear-gradient(135deg, ${st.color}, #7C3AED)`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 11, color: "white", flexShrink: 0 }}>
@@ -3727,23 +3727,23 @@ function AdminStudents() {
                           </div>
                           <div>
                             <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{s.first_name} {s.last_name}</div>
-                            <div style={{ fontSize: 10, color: "#90CAF9" }}>{s.gender || ""}</div>
+                            <div style={{ fontSize: 10, color: "#6B7280" }}>{s.gender || ""}</div>
                           </div>
                         </div>
                       </td>
                       <td>
                         <div style={{ fontSize: 12, color: "#374151" }}>{s.email}</div>
-                        <div style={{ fontSize: 11, color: "#90CAF9" }}>{s.mobile || "—"}</div>
+                        <div style={{ fontSize: 11, color: "#6B7280" }}>{s.mobile || "—"}</div>
                       </td>
                       <td>
                         {s.course_interest
                           ? <span style={{ background: st.bg, color: st.color, fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 10 }}>{s.course_interest}</span>
-                          : <span style={{ color: "#90CAF9", fontSize: 12 }}>—</span>}
+                          : <span style={{ color: "#6B7280", fontSize: 12 }}>—</span>}
                       </td>
                       <td style={{ fontSize: 12, color: "#374151" }}>{s.tenth_percent || "—"}</td>
                       <td style={{ fontSize: 12, color: "#374151" }}>{s.twelfth_percent || "—"}</td>
                       <td style={{ fontSize: 12, color: "#374151" }}>{s.entrance_exam || "—"}{s.score ? ` (${s.score})` : ""}</td>
-                      <td style={{ fontSize: 11, color: "#90CAF9", whiteSpace: "nowrap" }}>
+                      <td style={{ fontSize: 11, color: "#6B7280", whiteSpace: "nowrap" }}>
                         {s.created_at ? new Date(s.created_at).toLocaleDateString("en-IN") : "—"}
                       </td>
                       <td>
@@ -3787,7 +3787,7 @@ function AdminStudents() {
               </div>
             </div>
             <div style={{ padding: 24 }}>
-              <h4 style={{ fontSize: 12, fontWeight: 700, color: "#90CAF9", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Student Profile</h4>
+              <h4 style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Student Profile</h4>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
                 {[
                   ["Date of Birth", selected.date_of_birth ? new Date(selected.date_of_birth).toLocaleDateString("en-IN") : null],
@@ -3800,8 +3800,8 @@ function AdminStudents() {
                   ["Score / Percentile", selected.score],
                 ].map(([k, v]) => (
                   <div key={k} style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 14px" }}>
-                    <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3 }}>{k}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: v ? "#1A1A2E" : "#C8E4FA" }}>{v || "Not provided"}</div>
+                    <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3 }}>{k}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: v ? "#1A1A2E" : "#BFDBFE" }}>{v || "Not provided"}</div>
                   </div>
                 ))}
               </div>
@@ -3821,7 +3821,7 @@ function StudentApplicationsAdmin({ userId }) {
   useEffect(() => {
     supabase.from("applications").select("*").eq("user_id", userId).then(({ data }) => setApps(data || [])).catch(() => {});
   }, [userId]);
-  if (apps.length === 0) return <div style={{ fontSize: 13, color: "#90CAF9", marginBottom: 12 }}>No applications submitted.</div>;
+  if (apps.length === 0) return <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>No applications submitted.</div>;
   return (
     <div style={{ marginBottom: 16 }}>
       <h4 style={{ fontSize: 13, fontWeight: 700, color: "#1565C0", marginBottom: 8 }}>📋 Applications ({apps.length})</h4>
@@ -3829,7 +3829,7 @@ function StudentApplicationsAdmin({ userId }) {
         <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#F8FAFF", borderRadius: 8, marginBottom: 6 }}>
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{a.college} — {a.course}</div>
-            <div style={{ fontSize: 10, color: "#90CAF9" }}>{a.exam} · {new Date(a.created_at).toLocaleDateString("en-IN")}</div>
+            <div style={{ fontSize: 10, color: "#6B7280" }}>{a.exam} · {new Date(a.created_at).toLocaleDateString("en-IN")}</div>
           </div>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <span className={`badge ${a.status === "approved" ? "badge-success" : a.status === "rejected" ? "badge-danger" : "badge-warning"}`}>{a.status}</span>
@@ -3849,7 +3849,7 @@ function StudentDocsAdmin({ userId }) {
   useEffect(() => {
     supabase.from("student_documents").select("*").eq("user_id", userId).then(({ data }) => setDocs(data || [])).catch(() => {});
   }, [userId]);
-  if (docs.length === 0) return <div style={{ fontSize: 13, color: "#90CAF9", marginBottom: 12 }}>No documents uploaded.</div>;
+  if (docs.length === 0) return <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>No documents uploaded.</div>;
   return (
     <div style={{ marginBottom: 16 }}>
       <h4 style={{ fontSize: 13, fontWeight: 700, color: "#059669", marginBottom: 8 }}>📁 Documents ({docs.length})</h4>
@@ -3858,7 +3858,7 @@ function StudentDocsAdmin({ userId }) {
           <div key={d.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#F8FAFF", borderRadius: 8 }}>
             <div>
               <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{d.doc_name}</div>
-              <div style={{ fontSize: 10, color: "#90CAF9" }}>{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "—"}</div>
+              <div style={{ fontSize: 10, color: "#6B7280" }}>{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "—"}</div>
             </div>
             <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
               <span className={`badge ${d.status === "verified" ? "badge-success" : d.status === "rejected" ? "badge-danger" : "badge-warning"}`} style={{ fontSize: 9 }}>{d.status?.replace("_", " ")}</span>
@@ -3887,7 +3887,7 @@ function StudentPaymentsAdmin({ userId }) {
         <div key={p.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: "#F8FAFF", borderRadius: 8, marginBottom: 6 }}>
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{p.service_title}</div>
-            <div style={{ fontSize: 10, color: "#90CAF9" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</div>
+            <div style={{ fontSize: 10, color: "#6B7280" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</div>
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: "#059669" }}>₹{p.amount}</div>
@@ -3984,7 +3984,7 @@ function AdminDocVerification() {
       {loading ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
           <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
-          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading documents...</div>
+          <div style={{ color: "#6B7280", fontSize: 14 }}>Loading documents...</div>
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
@@ -4010,7 +4010,7 @@ function AdminDocVerification() {
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E" }}>{d.doc_name}</div>
-                      <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>
+                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
                         Uploaded {d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("en-IN") : "—"}
                       </div>
                     </div>
@@ -4021,9 +4021,9 @@ function AdminDocVerification() {
 
                   {/* Student info */}
                   <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 12px", marginBottom: 14 }}>
-                    <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Student</div>
+                    <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Student</div>
                     <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{studentName}</div>
-                    <div style={{ fontSize: 11, color: "#90CAF9" }}>{d.student?.email || d.user_id?.substring(0, 12) + "..."}</div>
+                    <div style={{ fontSize: 11, color: "#6B7280" }}>{d.student?.email || d.user_id?.substring(0, 12) + "..."}</div>
                   </div>
 
                   {/* Actions */}
@@ -4120,7 +4120,7 @@ function AdminApplications() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Applications</h1>
-          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{apps.length} total · {filtered.length} shown</div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{apps.length} total · {filtered.length} shown</div>
         </div>
         <button style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "7px 16px", fontSize: 12, fontWeight: 600, color: "#1565C0", cursor: "pointer" }} onClick={loadApps}>↻ Refresh</button>
       </div>
@@ -4143,7 +4143,7 @@ function AdminApplications() {
       {loading ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
           <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
-          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading applications...</div>
+          <div style={{ color: "#6B7280", fontSize: 14 }}>Loading applications...</div>
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
@@ -4165,7 +4165,7 @@ function AdminApplications() {
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E", marginBottom: 3 }}>{a.college}</div>
                       <div style={{ fontSize: 12, color: "#6B7280" }}>{a.course}</div>
-                      {a.exam && <div style={{ fontSize: 11, color: "#90CAF9", marginTop: 2 }}>📝 {a.exam}</div>}
+                      {a.exam && <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>📝 {a.exam}</div>}
                     </div>
                     <span className={`badge ${cfg.badge}`} style={{ fontSize: 10, flexShrink: 0, marginLeft: 8 }}>
                       {a.status?.replace("_", " ")}
@@ -4174,18 +4174,18 @@ function AdminApplications() {
 
                   {/* Student info */}
                   <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 12px", marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #64B5F6, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 11, color: "white", flexShrink: 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 11, color: "white", flexShrink: 0 }}>
                       {(s?.first_name?.[0] || "?").toUpperCase()}
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{studentName}</div>
-                      <div style={{ fontSize: 11, color: "#90CAF9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s?.email || "—"}</div>
+                      <div style={{ fontSize: 11, color: "#6B7280", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s?.email || "—"}</div>
                     </div>
                   </div>
 
                   {/* Date + actions */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontSize: 10, color: "#90CAF9" }}>
+                    <div style={{ fontSize: 10, color: "#6B7280" }}>
                       Applied {new Date(a.created_at).toLocaleDateString("en-IN")}
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
@@ -4296,7 +4296,7 @@ function AdminPayments() {
       {loading ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
           <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
-          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading payments...</div>
+          <div style={{ color: "#6B7280", fontSize: 14 }}>Loading payments...</div>
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
@@ -4333,18 +4333,18 @@ function AdminPayments() {
 
                   {/* Student */}
                   <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "8px 12px", marginBottom: 12 }}>
-                    <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Student</div>
+                    <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Student</div>
                     <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{studentName}</div>
-                    <div style={{ fontSize: 11, color: "#90CAF9" }}>{s?.email || "—"}</div>
+                    <div style={{ fontSize: 11, color: "#6B7280" }}>{s?.email || "—"}</div>
                   </div>
 
                   {/* Date + payment ID */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontSize: 11, color: "#90CAF9" }}>
+                    <div style={{ fontSize: 11, color: "#6B7280" }}>
                       {new Date(p.created_at).toLocaleDateString("en-IN")}
                     </div>
                     {p.razorpay_payment_id && (
-                      <div style={{ fontSize: 10, color: "#90CAF9", fontFamily: "monospace", background: "#F8FAFF", padding: "2px 8px", borderRadius: 6 }}>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "monospace", background: "#F8FAFF", padding: "2px 8px", borderRadius: 6 }}>
                         {p.razorpay_payment_id.substring(0, 14)}...
                       </div>
                     )}
@@ -4388,7 +4388,7 @@ function AdminCounseling() {
     "Medical": { bg: "#F0FDF4", color: "#059669" },
     "Law": { bg: "#FFF7ED", color: "#EA580C" },
     "Management": { bg: "#F5F3FF", color: "#7C3AED" },
-    "Architecture": { bg: "#ECFEFF", color: "#0891B2" },
+    "Architecture": { bg: "#EFF6FF", color: "#0891B2" },
   };
   const getStream = (s) => streamColors[s] || { bg: "#F8FAFF", color: "#6B7280" };
 
@@ -4427,7 +4427,7 @@ function AdminCounseling() {
       {loading ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
           <div style={{ fontSize: 36, marginBottom: 10 }}>⏳</div>
-          <div style={{ color: "#90CAF9", fontSize: 14 }}>Loading sessions...</div>
+          <div style={{ color: "#6B7280", fontSize: 14 }}>Loading sessions...</div>
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
@@ -4458,7 +4458,7 @@ function AdminCounseling() {
                       </div>
                       <div>
                         <div style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E" }}>{b.full_name}</div>
-                        <div style={{ fontSize: 11, color: "#90CAF9" }}>{b.mobile}</div>
+                        <div style={{ fontSize: 11, color: "#6B7280" }}>{b.mobile}</div>
                       </div>
                     </div>
                     <span className={`badge ${isPending ? "badge-warning" : isConfirmed ? "badge-success" : "badge-gray"}`} style={{ fontSize: 9, flexShrink: 0 }}>
@@ -4476,7 +4476,7 @@ function AdminCounseling() {
                   {/* Preferred date */}
                   <div style={{ background: upcoming && b.preferred_date ? "#F0FDF4" : "#F8FAFF", borderRadius: 8, padding: "10px 12px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
-                      <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Preferred Date</div>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Preferred Date</div>
                       <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>
                         {b.preferred_date ? new Date(b.preferred_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Not specified"}
                       </div>
@@ -4490,7 +4490,7 @@ function AdminCounseling() {
 
                   {/* Booked + actions */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontSize: 10, color: "#90CAF9" }}>
+                    <div style={{ fontSize: 10, color: "#6B7280" }}>
                       Booked {new Date(b.created_at).toLocaleDateString("en-IN")}
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
@@ -4577,7 +4577,7 @@ function AdminReports({ stats }) {
             {label:"Successful Payments",val:stats.payments,color:"#059669"},
             {label:"Application Approval Rate",val:stats.applications>0?`${Math.round((stats.approved/stats.applications)*100)}%`:"—",color:"#059669"},
           ].map(m => (
-            <div key={m.label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #F0F7FF" }}>
+            <div key={m.label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #EFF6FF" }}>
               <span style={{ fontSize: 12, color: "#374151" }}>{m.label}</span>
               <span style={{ fontSize: 14, fontWeight: 700, color: m.color }}>{m.val}</span>
             </div>
@@ -4654,7 +4654,7 @@ function AdminManageColleges() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Manage Colleges</h1>
-          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{colleges.length} colleges · {filtered.length} shown</div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{colleges.length} colleges · {filtered.length} shown</div>
         </div>
         <button className="btn-primary" style={{ fontSize: 13 }} onClick={openAdd}>+ Add College</button>
       </div>
@@ -4712,7 +4712,7 @@ function AdminManageColleges() {
                     <td style={{ fontSize: 12, color: "#6B7280" }}>{c.city || "—"}</td>
                     <td><span style={{ background: `${streamColors[c.stream] || "#6B7280"}15`, color: streamColors[c.stream] || "#6B7280", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 10 }}>{c.stream}</span></td>
                     <td style={{ fontSize: 12, color: "#6B7280" }}>{c.type}</td>
-                    <td style={{ fontSize: 11, color: "#90CAF9", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.ranking || "—"}</td>
+                    <td style={{ fontSize: 11, color: "#6B7280", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.ranking || "—"}</td>
                     <td>
                       <span style={{ background: c.is_active ? "#ECFDF5" : "#FEF2F2", color: c.is_active ? "#059669" : "#DC2626", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 10 }}>
                         {c.is_active ? "Active" : "Hidden"}
@@ -4821,7 +4821,7 @@ function AdminManageExams() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora" }}>Manage Entrance Exams</h1>
-          <div style={{ fontSize: 12, color: "#90CAF9", marginTop: 2 }}>{exams.length} exams · {exams.filter(e => isStale(e.last_verified)).length} need verification</div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{exams.length} exams · {exams.filter(e => isStale(e.last_verified)).length} need verification</div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button style={{ background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 600, color: "#D97706", cursor: "pointer" }} onClick={() => { setFilterStream("All"); setSearch(""); }}>
@@ -4894,7 +4894,7 @@ function AdminManageExams() {
                   <tr key={e.id} className="student-row" style={{ background: isStale(e.last_verified) ? "#FFFBEB" : "white" }}>
                     <td>
                       <div style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>{e.name}</div>
-                      <div style={{ fontSize: 10, color: "#90CAF9" }}>{e.conducted_by}</div>
+                      <div style={{ fontSize: 10, color: "#6B7280" }}>{e.conducted_by}</div>
                     </td>
                     <td style={{ fontSize: 11, color: "#6B7280" }}>{e.stream}</td>
                     <td style={{ fontSize: 12, color: "#DC2626", fontWeight: 600 }}>{e.last_date_display || "—"}</td>
@@ -5042,19 +5042,19 @@ function AboutPage() {
                 <div style={{ background: "#EFF6FF", borderRadius: 10, padding: "12px 18px", flex: 1, minWidth: 130 }}>
                   <div style={{ fontSize: 11, color: "#1565C0", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>📍 Based In</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>Baner, Pune</div>
-                  <div style={{ fontSize: 11, color: "#90CAF9" }}>Maharashtra, India</div>
+                  <div style={{ fontSize: 11, color: "#6B7280" }}>Maharashtra, India</div>
                 </div>
                 <div style={{ background: "#F5F3FF", borderRadius: 10, padding: "12px 18px", flex: 1, minWidth: 130 }}>
                   <div style={{ fontSize: 11, color: "#7C3AED", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>📞 Reach Us</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>+91 98996 44633</div>
-                  <div style={{ fontSize: 11, color: "#90CAF9" }}>Mon–Sat, 9AM–7PM</div>
+                  <div style={{ fontSize: 11, color: "#6B7280" }}>Mon–Sat, 9AM–7PM</div>
                 </div>
               </div>
             </div>
 
             {/* Timeline */}
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#90CAF9", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Our Journey</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Our Journey</div>
               <div style={{ position: "relative" }}>
                 <div style={{ position: "absolute", left: 20, top: 8, bottom: 8, width: 2, background: "linear-gradient(180deg, #1565C0, #7C3AED)", borderRadius: 2 }} />
                 {milestones.map((m, i) => (
@@ -5091,7 +5091,7 @@ function AboutPage() {
               { icon: "🎓", title: "Educational Counseling", desc: "Stream selection, college shortlisting, entrance exam planning — first session is always FREE.", price: "First FREE", color: "#ECFDF5", accent: "#059669" },
               { icon: "🏛️", title: "College Admission", desc: "Choice filling, counseling round strategy, document submission and enrollment support.", price: "From ₹8,000", color: "#F5F3FF", accent: "#7C3AED" },
               { icon: "💰", title: "Scholarship Assistance", desc: "Central, state, minority and merit scholarships — we identify, apply and track disbursements.", price: "From ₹5,000", color: "#FFF7ED", accent: "#EA580C" },
-              { icon: "🧭", title: "Career Counseling", desc: "Psychometric assessment, market demand analysis and a personalised 12-month action plan.", price: "From ₹4,500", color: "#FDF2F8", accent: "#9D174D" },
+              { icon: "🧭", title: "Career Counseling", desc: "Psychometric assessment, market demand analysis and a personalised 12-month action plan.", price: "From ₹4,500", color: "#F5F3FF", accent: "#9D174D" },
               { icon: "📄", title: "Document Verification", desc: "Gap analysis, checklist of missing documents, correction guidance before admission deadlines.", price: "Bundled Free", color: "#F0FDF4", accent: "#059669" },
             ].map(s => (
               <div key={s.title} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", overflow: "hidden" }}>
@@ -5146,7 +5146,7 @@ function AboutPage() {
                   <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>{m.qual} · {m.exp}</div>
                   <div style={{ display: "flex", gap: 4, justifyContent: "center", flexWrap: "wrap" }}>
                     {m.streams.map(s => (
-                      <span key={s} style={{ background: "#F0F7FF", color: "#1565C0", fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{s}</span>
+                      <span key={s} style={{ background: "#EFF6FF", color: "#1565C0", fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{s}</span>
                     ))}
                   </div>
                 </div>
@@ -5268,7 +5268,7 @@ function AboutPage() {
                 ✉️ Email Us
               </a>
             </div>
-            <div style={{ marginTop: 16, fontSize: 12, color: "#90CAF9" }}>
+            <div style={{ marginTop: 16, fontSize: 12, color: "#6B7280" }}>
               📍 Baner, Pune 411045 &nbsp;·&nbsp; 📞 +91 98996 44633 &nbsp;·&nbsp; Mon–Sat 9AM–7PM
             </div>
           </div>
@@ -5344,7 +5344,7 @@ function ServicesPage() {
     {
       icon: "📄",
       title: "Document Verification Support",
-      color: "#FFF5F5",
+      color: "#FEF2F2",
       accent: "#DC2626",
       who: "Students preparing documents for university admission, government exams, or visa applications.",
       what: "We verify that your academic, category, domicile, and identity documents meet the requirements of your target institution or exam authority — catching errors before they cost you an opportunity.",
@@ -5358,7 +5358,7 @@ function ServicesPage() {
   return (
     <div>
       {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg, #64B5F6, #7C3AED)", padding: "64px 0" }}>
+      <div style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", padding: "64px 0" }}>
         <div className="container">
           <div className="tag" style={{ color: "white", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>What We Offer</div>
           <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Our Services</h1>
@@ -5406,7 +5406,7 @@ function ServicesPage() {
                   {/* Turnaround + Price */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14, marginTop: "auto" }}>
                     <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 12px" }}>
-                      <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 600, marginBottom: 3 }}>⏱ TURNAROUND</div>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 600, marginBottom: 3 }}>⏱ TURNAROUND</div>
                       <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{s.turnaround}</div>
                     </div>
                     <div style={{ background: s.color, borderRadius: 8, padding: "10px 12px" }}>
@@ -5489,19 +5489,19 @@ function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
   const isExpired = countdown.expired === true;
 
   const streamColors = {
-    Engineering: { bg: "#EFF6FF", border: "#BFDBFE", text: "#1D4ED8" },
-    Medical: { bg: "#F0FDF4", border: "#BBF7D0", text: "#15803D" },
-    Law: { bg: "#FFF7ED", border: "#FED7AA", text: "#C2410C" },
-    Management: { bg: "#FDF4FF", border: "#E9D5FF", text: "#7E22CE" },
-    Architecture: { bg: "#FFFBEB", border: "#FDE68A", text: "#B45309" },
-    Science: { bg: "#F0FDFA", border: "#99F6E4", text: "#0F766E" },
-    Commerce: { bg: "#FFF1F2", border: "#FECDD3", text: "#BE123C" },
-    Pharmacy: { bg: "#F5F3FF", border: "#DDD6FE", text: "#6D28D9" },
+    Engineering: { bg: "#EFF6FF", border: "#BFDBFE", text: "#1565C0" },
+    Medical: { bg: "#F0FDF4", border: "#A7F3D0", text: "#059669" },
+    Law: { bg: "#FFF7ED", border: "#FEF3C7", text: "#EA580C" },
+    Management: { bg: "#F5F3FF", border: "#F5F3FF", text: "#7C3AED" },
+    Architecture: { bg: "#FFFBEB", border: "#FDE68A", text: "#D97706" },
+    Science: { bg: "#ECFDF5", border: "#A7F3D0", text: "#059669" },
+    Commerce: { bg: "#FEF2F2", border: "#FECACA", text: "#DC2626" },
+    Pharmacy: { bg: "#F5F3FF", border: "#DDD6FE", text: "#7C3AED" },
   };
-  const sc = streamColors[exam.stream] || { bg: "#F0F7FF", border: "#C8E4FA", text: "#1565C0" };
+  const sc = streamColors[exam.stream] || { bg: "#EFF6FF", border: "#BFDBFE", text: "#1565C0" };
 
   return (
-    <div className="card" style={{ border: `1px solid ${isUrgent ? "#FCA5A5" : isExpired ? "#E5E7EB" : "#C8E4FA"}`, background: isExpired ? "#FAFAFA" : "#FFFFFF", opacity: isExpired ? 0.7 : 1, position: "relative", overflow: "hidden" }}>
+    <div className="card" style={{ border: `1px solid ${isUrgent ? "#FECACA" : isExpired ? "#E3F2FD" : "#BFDBFE"}`, background: isExpired ? "#F8FAFF" : "#FFFFFF", opacity: isExpired ? 0.7 : 1, position: "relative", overflow: "hidden" }}>
       {isUrgent && !isExpired && (
         <div style={{ position: "absolute", top: 0, right: 0, background: "#DC2626", color: "white", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderBottomLeftRadius: 8 }}>CLOSING SOON</div>
       )}
@@ -5519,22 +5519,22 @@ function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
 
       {/* Exam Name */}
       <h3 style={{ fontWeight: 700, fontSize: 16, color: "#1A1A2E", marginBottom: 4 }}>{exam.name}</h3>
-      <p style={{ fontSize: 12, color: "#6D28D9", marginBottom: 14 }}>{exam.fullName}</p>
+      <p style={{ fontSize: 12, color: "#7C3AED", marginBottom: 14 }}>{exam.fullName}</p>
 
       {/* Dates */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
-        <div style={{ background: "#F0F7FF", borderRadius: 6, padding: "8px 10px" }}>
-          <div style={{ fontSize: 10, color: "#90CAF9", fontWeight: 600, marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>Form Start</div>
+        <div style={{ background: "#EFF6FF", borderRadius: 6, padding: "8px 10px" }}>
+          <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 600, marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>Form Start</div>
           <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{exam.formStart}</div>
         </div>
-        <div style={{ background: isUrgent ? "#FEF2F2" : "#F0F7FF", borderRadius: 6, padding: "8px 10px" }}>
-          <div style={{ fontSize: 10, color: isUrgent ? "#FCA5A5" : "#90CAF9", fontWeight: 600, marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>Last Date</div>
+        <div style={{ background: isUrgent ? "#FEF2F2" : "#EFF6FF", borderRadius: 6, padding: "8px 10px" }}>
+          <div style={{ fontSize: 10, color: isUrgent ? "#FECACA" : "#6B7280", fontWeight: 600, marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>Last Date</div>
           <div style={{ fontSize: 12, fontWeight: 700, color: isUrgent ? "#DC2626" : "#1A1A2E" }}>{exam.lastDateDisplay}</div>
         </div>
       </div>
 
       {/* Exam Date */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "8px 10px", background: "#F8F4FF", borderRadius: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "8px 10px", background: "#F5F3FF", borderRadius: 6 }}>
         <span style={{ fontSize: 11, color: "#7C3AED", fontWeight: 600 }}>📅 Exam Date</span>
         <span style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{exam.examDate}</span>
       </div>
@@ -5542,7 +5542,7 @@ function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
       {/* Countdown Timer */}
       {!isExpired ? (
         <div style={{ background: isUrgent ? "#FEF2F2" : "#EFF6FF", borderRadius: 8, padding: "10px 12px", marginBottom: 14 }}>
-          <div style={{ fontSize: 10, color: isUrgent ? "#DC2626" : "#64B5F6", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>⏱ Time Left to Apply</div>
+          <div style={{ fontSize: 10, color: isUrgent ? "#DC2626" : "#1565C0", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>⏱ Time Left to Apply</div>
           <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
             {[
               { val: countdown.days, label: "Days" },
@@ -5551,29 +5551,29 @@ function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
               { val: countdown.secs, label: "Sec" },
             ].map(t => (
               <div key={t.label} style={{ textAlign: "center", background: "white", borderRadius: 6, padding: "4px 8px", minWidth: 42, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: isUrgent ? "#DC2626" : "#64B5F6", lineHeight: 1.2 }}>{String(t.val ?? 0).padStart(2, "0")}</div>
-                <div style={{ fontSize: 9, color: "#90CAF9", fontWeight: 600, textTransform: "uppercase" }}>{t.label}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: isUrgent ? "#DC2626" : "#1565C0", lineHeight: 1.2 }}>{String(t.val ?? 0).padStart(2, "0")}</div>
+                <div style={{ fontSize: 9, color: "#6B7280", fontWeight: 600, textTransform: "uppercase" }}>{t.label}</div>
               </div>
             ))}
           </div>
         </div>
       ) : (
-        <div style={{ background: "#F3F4F6", borderRadius: 8, padding: "10px 12px", marginBottom: 14, textAlign: "center" }}>
+        <div style={{ background: "#F8FAFF", borderRadius: 8, padding: "10px 12px", marginBottom: 14, textAlign: "center" }}>
           <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>Applications Closed</div>
-          <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>Next cycle expected {exam.nextCycle}</div>
+          <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>Next cycle expected {exam.nextCycle}</div>
         </div>
       )}
 
       {/* Fee & Mode */}
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6D28D9", marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#7C3AED", marginBottom: 14 }}>
         <span>💰 Fee: <strong style={{ color: "#1A1A2E" }}>{exam.fee}</strong></span>
         <span>🖥️ Mode: <strong style={{ color: "#1A1A2E" }}>{exam.mode}</strong></span>
       </div>
 
       {/* Conducting Body + lastVerified */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ fontSize: 11, color: "#90CAF9" }}>
-          By: <span style={{ color: "#64B5F6", fontWeight: 600 }}>{exam.conductedBy}</span>
+        <div style={{ fontSize: 11, color: "#6B7280" }}>
+          By: <span style={{ color: "#1565C0", fontWeight: 600 }}>{exam.conductedBy}</span>
         </div>
         {exam.lastVerified ? (
           <span style={{ background: "#ECFDF5", color: "#059669", fontSize: 9, padding: "2px 7px", borderRadius: 8, fontWeight: 700 }}>
@@ -5595,7 +5595,7 @@ function ExamCard({ exam, isLoggedIn, onRemind, setModal }) {
           </button>
         )}
         <div style={{ display: "flex", gap: 6 }}>
-          <button style={{ flex: 1, fontSize: 11, padding: "7px 0", background: isExpired ? "#F0F7FF" : "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 7, cursor: isExpired ? "default" : "pointer", color: isExpired ? "#90CAF9" : "#1565C0", fontWeight: 600 }}
+          <button style={{ flex: 1, fontSize: 11, padding: "7px 0", background: isExpired ? "#EFF6FF" : "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 7, cursor: isExpired ? "default" : "pointer", color: isExpired ? "#6B7280" : "#1565C0", fontWeight: 600 }}
             onClick={() => !isExpired && window.open(exam.officialLink, "_blank")}>
             {isExpired ? "Closed" : "Official Site →"}
           </button>
@@ -5673,7 +5673,7 @@ function CollegesPage({ setModal }) {
   if (dataLoading) return (
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
       <div style={{ fontSize: 40 }}>⏳</div>
-      <div style={{ fontSize: 16, color: "#90CAF9" }}>Loading colleges and exams...</div>
+      <div style={{ fontSize: 16, color: "#6B7280" }}>Loading colleges and exams...</div>
     </div>
   );
 
@@ -5697,7 +5697,7 @@ function CollegesPage({ setModal }) {
   return (
     <div>
       {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg, #64B5F6 0%, #7C3AED 100%)", padding: "64px 0" }}>
+      <div style={{ background: "linear-gradient(135deg, #1565C0 0%, #7C3AED 100%)", padding: "64px 0" }}>
         <div className="container">
           <div className="tag" style={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>Colleges &amp; Entrance Exams</div>
           <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Colleges &amp; Exam Calendar</h1>
@@ -5706,27 +5706,27 @@ function CollegesPage({ setModal }) {
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "white", fontWeight: 600 }}>📋 {exams.length} Exams Listed</div>
             <div style={{ background: "rgba(5,150,105,0.3)", border: "1px solid rgba(5,150,105,0.5)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "#6EE7B7", fontWeight: 600 }}>✅ {exams.filter(e => e.lastDate && new Date(e.lastDate) > new Date()).length} Open Now</div>
-            {urgentCount > 0 && <div style={{ background: "rgba(220,38,38,0.3)", border: "1px solid rgba(220,38,38,0.5)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "#FCA5A5", fontWeight: 600 }}>⚠️ {urgentCount} Closing This Week</div>}
+            {urgentCount > 0 && <div style={{ background: "rgba(220,38,38,0.3)", border: "1px solid rgba(220,38,38,0.5)", borderRadius: 20, padding: "6px 16px", fontSize: 13, color: "#FECACA", fontWeight: 600 }}>⚠️ {urgentCount} Closing This Week</div>}
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{ background: "#FFFFFF", borderBottom: "1px solid #C8E4FA", position: "sticky", top: 64, zIndex: 90 }}>
+      <div style={{ background: "#FFFFFF", borderBottom: "1px solid #BFDBFE", position: "sticky", top: 64, zIndex: 90 }}>
         <div className="container" style={{ display: "flex", gap: 0 }}>
           {[{ id: "exams", label: "📋 Entrance Exams" }, { id: "colleges", label: "🏛️ Partner Colleges" }].map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ padding: "14px 28px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: activeTab === t.id ? "#64B5F6" : "#6D28D9", borderBottom: activeTab === t.id ? "2px solid #64B5F6" : "2px solid transparent", transition: "all 0.2s" }}>{t.label}</button>
+            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ padding: "14px 28px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: activeTab === t.id ? "#1565C0" : "#7C3AED", borderBottom: activeTab === t.id ? "2px solid #1565C0" : "2px solid transparent", transition: "all 0.2s" }}>{t.label}</button>
           ))}
         </div>
       </div>
 
-      <section className="section" style={{ background: "#F4F9FF" }}>
+      <section className="section" style={{ background: "#EFF6FF" }}>
         <div className="container">
           {/* Filters */}
           <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {streams.map(s => (
-                <button key={s} onClick={() => setActiveStream(s)} style={{ padding: "6px 14px", border: `1px solid ${activeStream === s ? "#64B5F6" : "#C8E4FA"}`, borderRadius: 20, background: activeStream === s ? "#64B5F6" : "white", color: activeStream === s ? "white" : "#6D28D9", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>{s}</button>
+                <button key={s} onClick={() => setActiveStream(s)} style={{ padding: "6px 14px", border: `1px solid ${activeStream === s ? "#1565C0" : "#BFDBFE"}`, borderRadius: 20, background: activeStream === s ? "#1565C0" : "white", color: activeStream === s ? "white" : "#7C3AED", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>{s}</button>
               ))}
             </div>
             {activeTab === "exams" && (
@@ -5737,19 +5737,19 @@ function CollegesPage({ setModal }) {
           {/* EXAMS TAB */}
           {activeTab === "exams" && (
             <>
-              <div style={{ fontSize: 13, color: "#6D28D9", marginBottom: 20, fontWeight: 500 }}>
+              <div style={{ fontSize: 13, color: "#7C3AED", marginBottom: 20, fontWeight: 500 }}>
                 Showing <strong>{filteredExams.length}</strong> exams {activeStream !== "All" ? `for ${activeStream}` : ""} — Countdown timers update live every second
               </div>
               {filteredExams.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#6D28D9" }}>No exams found for "{search}"</div>
+                <div style={{ textAlign: "center", padding: "60px 0", color: "#7C3AED" }}>No exams found for "{search}"</div>
               ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
                   {filteredExams.map(exam => <ExamCard key={exam.name} exam={exam} isLoggedIn={false} onRemind={(e) => { setRemindExam(e); setRemindDone(false); setRemindForm({ name: "", email: "", mobile: "" }); }} setModal={setModal} />)}
                 </div>
               )}
-              <div style={{ marginTop: 32, background: "#FFFFFF", borderRadius: 12, border: "1px solid #C8E4FA", padding: 20 }}>
-                <p style={{ fontSize: 12, color: "#90CAF9", textAlign: "center" }}>
-                  ⚠️ Exam dates are indicative based on previous year cycles. Always verify official dates at the respective exam authority websites before applying. Educeff helps with form filling — <span style={{ color: "#64B5F6", cursor: "pointer", fontWeight: 600 }}>contact us for assistance</span>.
+              <div style={{ marginTop: 32, background: "#FFFFFF", borderRadius: 12, border: "1px solid #BFDBFE", padding: 20 }}>
+                <p style={{ fontSize: 12, color: "#6B7280", textAlign: "center" }}>
+                  ⚠️ Exam dates are indicative based on previous year cycles. Always verify official dates at the respective exam authority websites before applying. Educeff helps with form filling — <span style={{ color: "#1565C0", cursor: "pointer", fontWeight: 600 }}>contact us for assistance</span>.
                 </p>
               </div>
             </>
@@ -5757,23 +5757,23 @@ function CollegesPage({ setModal }) {
 
           {activeTab === "colleges" && (
             <>
-              <div style={{ fontSize: 13, color: "#6D28D9", marginBottom: 20, fontWeight: 500 }}>
+              <div style={{ fontSize: 13, color: "#7C3AED", marginBottom: 20, fontWeight: 500 }}>
                 Showing <strong>{filteredColleges.length}</strong> colleges {activeStream !== "All" ? `for ${activeStream}` : "across all streams"}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
                 {filteredColleges.map(c => (
-                  <div key={c.name} className="card" style={{ borderTop: `3px solid ${c.type === "Government" ? "#059669" : c.type === "Autonomous" ? "#7C3AED" : "#64B5F6"}` }}>
+                  <div key={c.name} className="card" style={{ borderTop: `3px solid ${c.type === "Government" ? "#059669" : c.type === "Autonomous" ? "#7C3AED" : "#1565C0"}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                      <div style={{ width: 42, height: 42, background: "#64B5F6", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 16 }}>{c.name[0]}</div>
+                      <div style={{ width: 42, height: 42, background: "#1565C0", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 16 }}>{c.name[0]}</div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
                         <span className="badge badge-info">{c.stream}</span>
-                        <span style={{ fontSize: 10, fontWeight: 600, color: c.type === "Government" ? "#059669" : c.type === "Autonomous" ? "#7C3AED" : "#64B5F6", background: c.type === "Government" ? "#ECFDF5" : c.type === "Autonomous" ? "#F5F3FF" : "#EFF6FF", padding: "2px 8px", borderRadius: 8 }}>{c.type}</span>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: c.type === "Government" ? "#059669" : c.type === "Autonomous" ? "#7C3AED" : "#1565C0", background: c.type === "Government" ? "#ECFDF5" : c.type === "Autonomous" ? "#F5F3FF" : "#EFF6FF", padding: "2px 8px", borderRadius: 8 }}>{c.type}</span>
                       </div>
                     </div>
                     <h3 style={{ fontWeight: 600, fontSize: 15, color: "#1A1A2E", marginBottom: 4 }}>{c.name}</h3>
-                    <div style={{ fontSize: 13, color: "#64B5F6", marginBottom: 4 }}>📍 {c.city}</div>
-                    <div style={{ fontSize: 12, color: "#6D28D9", marginBottom: 4 }}>🏆 {c.ranking}</div>
-                    <div style={{ fontSize: 12, color: "#90CAF9", marginBottom: 16 }}>Affiliated: {c.affiliation}</div>
+                    <div style={{ fontSize: 13, color: "#1565C0", marginBottom: 4 }}>📍 {c.city}</div>
+                    <div style={{ fontSize: 12, color: "#7C3AED", marginBottom: 4 }}>🏆 {c.ranking}</div>
+                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 16 }}>Affiliated: {c.affiliation}</div>
                     <button className="btn-primary" style={{ fontSize: 12, width: "100%" }}
                       onClick={() => { setApplyCollege(c); setApplyDone(false); setApplyError(""); setApplyForm({ name: "", email: "", mobile: "", course: c.stream, exam: "", message: "" }); }}>
                       Apply Through Educeff →
@@ -5794,7 +5794,7 @@ function CollegesPage({ setModal }) {
             onClick={e => e.stopPropagation()}>
 
             {/* Header */}
-            <div style={{ background: "linear-gradient(135deg, #64B5F6, #7C3AED)", padding: "20px 24px", borderRadius: "16px 16px 0 0" }}>
+            <div style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", padding: "20px 24px", borderRadius: "16px 16px 0 0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Apply Through Educeff</div>
@@ -5876,7 +5876,7 @@ function CollegesPage({ setModal }) {
                     {applyLoading ? "Submitting..." : "Submit Application Request →"}
                   </button>
 
-                  <p style={{ fontSize: 11, color: "#90CAF9", textAlign: "center", marginTop: 12 }}>
+                  <p style={{ fontSize: 11, color: "#6B7280", textAlign: "center", marginTop: 12 }}>
                     By submitting, you agree to be contacted by Educeff counselors regarding this application.
                   </p>
                 </>
@@ -5902,11 +5902,11 @@ function CollegesPage({ setModal }) {
               <>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
                   <div>
-                    <div style={{ fontSize: 11, color: "#90CAF9", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Set Deadline Reminder</div>
+                    <div style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Set Deadline Reminder</div>
                     <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1A1A2E", marginTop: 4 }}>{remindExam.name}</h3>
                     <div style={{ fontSize: 13, color: "#DC2626", fontWeight: 600, marginTop: 2 }}>Last Date: {remindExam.lastDateDisplay}</div>
                   </div>
-                  <button onClick={() => setRemindExam(null)} style={{ background: "#F0F7FF", border: "none", width: 30, height: 30, borderRadius: "50%", cursor: "pointer", fontSize: 16 }}>×</button>
+                  <button onClick={() => setRemindExam(null)} style={{ background: "#EFF6FF", border: "none", width: 30, height: 30, borderRadius: "50%", cursor: "pointer", fontSize: 16 }}>×</button>
                 </div>
                 <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20, lineHeight: 1.6 }}>
                   Get reminded 7 days and 1 day before this deadline via email and WhatsApp — completely free.
@@ -5934,7 +5934,7 @@ function CollegesPage({ setModal }) {
                   }}>
                   🔔 Set Free Reminder
                 </button>
-                <p style={{ fontSize: 11, color: "#90CAF9", textAlign: "center", marginTop: 10 }}>
+                <p style={{ fontSize: 11, color: "#6B7280", textAlign: "center", marginTop: 10 }}>
                   By registering, Educeff can also help you fill this exam form — <span style={{ color: "#7C3AED", fontWeight: 600 }}>save hours of hassle</span>.
                 </p>
               </>
@@ -5972,11 +5972,11 @@ function ResetPasswordPage({ onDone }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #64B5F6 0%, #7C3AED 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1565C0 0%, #7C3AED 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div style={{ background: "white", borderRadius: 16, padding: 40, width: "100%", maxWidth: 420, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{ width: 52, height: 52, background: "linear-gradient(135deg, #64B5F6, #7C3AED)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 22, fontWeight: 800, color: "white", fontFamily: "Sora" }}>E</div>
+          <div style={{ width: 52, height: 52, background: "linear-gradient(135deg, #1565C0, #7C3AED)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 22, fontWeight: 800, color: "white", fontFamily: "Sora" }}>E</div>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", margin: 0, fontFamily: "Sora" }}>Reset Your Password</h2>
           <p style={{ fontSize: 13, color: "#6B7280", marginTop: 6 }}>Enter your new password below</p>
         </div>
@@ -5999,10 +5999,10 @@ function ResetPasswordPage({ onDone }) {
               <div style={{ marginTop: -10, marginBottom: 14 }}>
                 <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
                   {[1,2,3,4].map(i => (
-                    <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: newPw.length >= i * 3 ? (i <= 1 ? "#DC2626" : i <= 2 ? "#D97706" : i <= 3 ? "#64B5F6" : "#059669") : "#E3F2FD" }} />
+                    <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: newPw.length >= i * 3 ? (i <= 1 ? "#DC2626" : i <= 2 ? "#D97706" : i <= 3 ? "#1565C0" : "#059669") : "#E3F2FD" }} />
                   ))}
                 </div>
-                <div style={{ fontSize: 11, color: newPw.length < 6 ? "#DC2626" : newPw.length < 8 ? "#D97706" : newPw.length < 10 ? "#64B5F6" : "#059669" }}>
+                <div style={{ fontSize: 11, color: newPw.length < 6 ? "#DC2626" : newPw.length < 8 ? "#D97706" : newPw.length < 10 ? "#1565C0" : "#059669" }}>
                   {newPw.length < 6 ? "Too short" : newPw.length < 8 ? "Weak" : newPw.length < 10 ? "Good" : "Strong"}
                 </div>
               </div>
@@ -6019,7 +6019,7 @@ function ResetPasswordPage({ onDone }) {
               {loading ? "Resetting..." : "Set New Password →"}
             </button>
 
-            <button onClick={onDone} style={{ width: "100%", padding: 10, marginTop: 10, background: "none", border: "none", color: "#90CAF9", fontSize: 13, cursor: "pointer" }}>
+            <button onClick={onDone} style={{ width: "100%", padding: 10, marginTop: 10, background: "none", border: "none", color: "#6B7280", fontSize: 13, cursor: "pointer" }}>
               Cancel — Back to Home
             </button>
           </>
@@ -6083,7 +6083,7 @@ export default function App() {
       {!supabaseConfigured && (
         <div style={{ background: "#FEF3C7", borderBottom: "1px solid #FCD34D", padding: "10px 24px", fontSize: 13, color: "#92400E", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <span style={{ fontSize: 16 }}>⚠️</span>
-          <strong>Supabase not configured:</strong> Add <code style={{ background: "#FEF9EE", padding: "1px 6px", borderRadius: 4 }}>VITE_SUPABASE_URL</code> and <code style={{ background: "#FEF9EE", padding: "1px 6px", borderRadius: 4 }}>VITE_SUPABASE_ANON_KEY</code> to your Vercel environment variables, then redeploy. Login and data features are disabled until then.
+          <strong>Supabase not configured:</strong> Add <code style={{ background: "#FFFBEB", padding: "1px 6px", borderRadius: 4 }}>VITE_SUPABASE_URL</code> and <code style={{ background: "#FFFBEB", padding: "1px 6px", borderRadius: 4 }}>VITE_SUPABASE_ANON_KEY</code> to your Vercel environment variables, then redeploy. Login and data features are disabled until then.
         </div>
       )}
       <Navbar page={page} setPage={setPage} isLoggedIn={isLoggedIn} isAdmin={isAdmin} setModal={(m) => { if (m === null) handleLogout(); else setModal(m); }} />
@@ -6141,8 +6141,8 @@ function CounselingModal({ onClose, user }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" style={{ textAlign: "center" }} onClick={e => e.stopPropagation()}>
         <div style={{ fontSize: 48, marginBottom: 12 }}>📅</div>
-        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#64B5F6", marginBottom: 8 }}>Session Booked!</h2>
-        <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>Our counselor will call you on <strong>{form.mobile}</strong> to confirm the appointment.</p>
+        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: "#1565C0", marginBottom: 8 }}>Session Booked!</h2>
+        <p style={{ color: "#7C3AED", fontSize: 14, marginBottom: 24 }}>Our counselor will call you on <strong>{form.mobile}</strong> to confirm the appointment.</p>
         <button className="btn-primary" style={{ width: "100%", padding: 13 }} onClick={onClose}>Done →</button>
       </div>
     </div>
@@ -6151,9 +6151,9 @@ function CounselingModal({ onClose, user }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#6D28D9" }}>×</button>
-        <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#64B5F6", marginBottom: 6 }}>Book Free Counseling</h2>
-        <p style={{ color: "#6D28D9", fontSize: 14, marginBottom: 24 }}>45-minute session with a certified academic counselor — completely free.</p>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#7C3AED" }}>×</button>
+        <h2 className="font-display" style={{ fontSize: 24, fontWeight: 700, color: "#1565C0", marginBottom: 6 }}>Book Free Counseling</h2>
+        <p style={{ color: "#7C3AED", fontSize: 14, marginBottom: 24 }}>45-minute session with a certified academic counselor — completely free.</p>
         <label>Full Name</label><input name="name" placeholder="Your name" value={form.name} onChange={handleChange} />
         <label>Mobile Number</label><input name="mobile" placeholder="+91 98996 44633" value={form.mobile} onChange={handleChange} />
         <label>Preferred Date</label><input name="date" type="date" value={form.date} onChange={handleChange} />
