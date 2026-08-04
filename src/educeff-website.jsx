@@ -720,7 +720,7 @@ function Hero({ setPage, setModal }) {
           <div style={{ display: "flex", gap: 24, marginTop: 48, flexWrap: "wrap" }}>
             {STATS.map(s => (
               <div key={s.label}>
-                <div className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#7C3AED" }}>{s.num}</div>
+                <div className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "white" }}>{s.num}</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", marginTop: 2 }}>{s.label}</div>
               </div>
             ))}
