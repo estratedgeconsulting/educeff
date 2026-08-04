@@ -705,7 +705,7 @@ function Hero({ setPage, setModal }) {
       <div style={{ position: "absolute", bottom: 0, left: "30%", width: 300, height: 300, background: "radial-gradient(circle, rgba(227,242,253,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
       <div className="container" style={{ padding: "80px 24px" }}>
         <div style={{ maxWidth: 640 }} className="fade-in">
-          <div className="tag" style={{ color: "#ffffff", borderColor: "rgba(255,255,255,0.7)", background: "rgba(255,255,255,0.15)" }}>India's Trusted Education Consultancy</div>
+          <div className="tag" style={{ color: "#ffffff", borderColor: "rgba(255,255,255,0.7)", background: "rgba(255,255,255,0.15)" }}>India&#39;s Trusted Education Consultancy</div>
           <h1 className="font-display hero-title" style={{ fontSize: "clamp(26px, 5vw, 52px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.12, marginBottom: 20, letterSpacing: "-0.02em" }}>
             Your One-Stop Solution for College Admissions & Counseling
           </h1>
@@ -929,7 +929,7 @@ function ContactForm() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40 }}>
           <div>
             <div className="tag">Get In Touch</div>
-            <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#64B5F6", marginBottom: 16, letterSpacing: "-0.02em" }}>Let's Start Your Journey Today</h2>
+            <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#64B5F6", marginBottom: 16, letterSpacing: "-0.02em" }}>Let&#39;s Start Your Journey Today</h2>
             <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>Reach out to our team for any queries about admissions, counseling, or services. We typically respond within 2 hours.</p>
             {[
               { icon: "📍", label: "Address", val: "123 Pimpri Road, Pimpri-Chinchwad, Pune 411045" },
@@ -948,7 +948,7 @@ function ContactForm() {
           </div>
           <div className="card">
             <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 20, color: "#64B5F6" }}>Send us a Message</h3>
-            {sent && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46" }}>✅ Message sent! We'll get back to you within 2 hours.</div>}
+            {sent && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46" }}>✅ Message sent! We&#39;ll get back to you within 2 hours.</div>}
             {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
             <label>Full Name</label><input name="name" placeholder="Your full name" value={form.name} onChange={handleChange} />
             <label>Email Address</label><input name="email" placeholder="your@email.com" type="email" value={form.email} onChange={handleChange} />
@@ -981,7 +981,7 @@ function CTA({ setModal }) {
           Join thousands of students who trusted Educeff for their academic journey. Register today and get a free counseling session.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", padding: "0 16px" }}>
-          <button className="btn-primary" style={{ padding: "14px 32px", fontSize: 15 }} onClick={() => setModal("register")}>Register Now — It's Free</button>
+          <button className="btn-primary" style={{ padding: "14px 32px", fontSize: 15 }} onClick={() => setModal("register")}>Register Now — It&#39;s Free</button>
           <button className="btn-outline" style={{ padding: "14px 32px", fontSize: 15 }} onClick={() => setModal("counseling")}>Book Free Counseling</button>
         </div>
       </div>
@@ -2852,7 +2852,7 @@ function PaymentsTab({ user, profile }) {
     <div style={{ maxWidth: 480, margin: "40px auto", textAlign: "center" }}>
       <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
       <h2 className="font-display" style={{ fontSize: 26, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Payment Successful!</h2>
-      <p style={{ color: "#6D28D9", fontSize: 15, marginBottom: 8 }}>You've successfully purchased <strong>{paySuccess.service.title}</strong></p>
+      <p style={{ color: "#6D28D9", fontSize: 15, marginBottom: 8 }}>You&#39;ve successfully purchased <strong>{paySuccess.service.title}</strong></p>
       <p style={{ fontSize: 13, color: "#90CAF9", marginBottom: 28 }}>Payment ID: {paySuccess.paymentId}</p>
       <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 12, padding: 20, marginBottom: 24, textAlign: "left" }}>
         <div style={{ fontWeight: 600, fontSize: 14, color: "#065F46", marginBottom: 10 }}>✅ What happens next:</div>
@@ -2860,7 +2860,7 @@ function PaymentsTab({ user, profile }) {
           <ul style={{ paddingLeft: 18, fontSize: 13, color: "#065F46", lineHeight: 2 }}>
             <li>Our team will contact you within 2 hours</li>
             <li>Session will be scheduled at your convenience</li>
-            <li>You'll receive a confirmation on your email</li>
+            <li>You&#39;ll receive a confirmation on your email</li>
           </ul>
         ) : (
           <ul style={{ paddingLeft: 18, fontSize: 13, color: "#065F46", lineHeight: 2 }}>
@@ -3132,7 +3132,7 @@ function NotificationsTab({ user }) {
         <div style={{ textAlign: "center", padding: "60px 0", background: "white", borderRadius: 16, border: "1px solid #E3F2FD" }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔔</div>
           <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>No Notifications Yet</div>
-          <div style={{ fontSize: 13, color: "#90CAF9" }}>You'll receive updates about your applications and documents here</div>
+          <div style={{ fontSize: 13, color: "#90CAF9" }}>You&#39;ll receive updates about your applications and documents here</div>
         </div>
       ) : notifs.map(n => (
         <div key={n.id} onClick={() => !n.is_read && markRead(n.id)} style={{ background: "white", borderRadius: 12, border: `1px solid ${!n.is_read ? "#BFDBFE" : "#E3F2FD"}`, padding: "16px 20px", marginBottom: 10, display: "flex", gap: 14, alignItems: "flex-start", cursor: !n.is_read ? "pointer" : "default", transition: "all 0.2s", boxShadow: !n.is_read ? "0 2px 8px rgba(100,181,246,0.1)" : "none" }}>
@@ -3213,7 +3213,7 @@ function SupportTab({ user }) {
         {/* Submit Ticket */}
         <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>🎫 Submit a Support Ticket</h3>
-          {sent && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46" }}>✅ Ticket submitted! We'll respond within 4 hours.</div>}
+          {sent && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46" }}>✅ Ticket submitted! We&#39;ll respond within 4 hours.</div>}
           {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>}
           <label>Issue Category</label>
           <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
@@ -4540,7 +4540,7 @@ function AdminNotifications() {
         <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>Send Bulk Notification</h3>
         <label>Title</label><input placeholder="e.g. JEE Main 2026 Registration Open" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
         <label>Message</label><textarea rows={4} placeholder="Type your message..." style={{ resize: "vertical" }} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
-        <button className="btn-primary" style={{ opacity: sending ? 0.7 : 1 }} onClick={handleSend} disabled={sending}>{sending ? "Sending..." : "\ud83d\udce2 Send to All Students"}</button>
+        <button className="btn-primary" style={{ opacity: sending ? 0.7 : 1 }} onClick={handleSend} disabled={sending}>{sending ? "Sending..." : "📢 Send to All Students"}</button>
       </div>
     </div>
   );
@@ -4960,61 +4960,265 @@ function AdminSettings() {
 // ─── PAGES ───────────────────────────────────────────────────────────────────
 
 function AboutPage() {
+  const milestones = [
+    { year: "2018", title: "Educeff Founded", desc: "Started in Pune with a small team of 3 counselors helping engineering aspirants navigate MHT-CET and JEE admissions." },
+    { year: "2019", title: "Expanded to Medical", desc: "Added NEET counseling after demand from students struggling with Maharashtra MBBS seat allotment." },
+    { year: "2021", title: "500+ Students Guided", desc: "Crossed the 500-student milestone. Added Law and Management streams to our portfolio." },
+    { year: "2022", title: "50+ Counselor Network", desc: "Built a team of 50+ certified counselors covering engineering, medical, law, management, architecture and science." },
+    { year: "2023", title: "Digital Platform Launch", desc: "Launched online student portal for real-time tracking, document upload, and counseling sessions." },
+    { year: "2025", title: "1,100+ Students & Growing", desc: "Helping students across Maharashtra and India get into their dream colleges with a proven process." },
+  ];
+
+  const values = [
+    { icon: "🎯", title: "Student First", desc: "Every decision we make starts with one question — is this the best outcome for the student? Not the easiest, not the fastest, but the best." },
+    { icon: "🔍", title: "Full Transparency", desc: "We show you every college option, every exam deadline, and every service price upfront. No hidden fees, no pressure selling." },
+    { icon: "📋", title: "Process-Driven", desc: "Admission in India is a bureaucratic maze. We have documented playbooks for every exam and counseling process so nothing falls through the cracks." },
+    { icon: "🤝", title: "Relationship First", desc: "We stay with you from Class 11 right through your first semester — not just for the exam form. Your success is our reputation." },
+    { icon: "⚡", title: "Responsive Always", desc: "Deadlines in education don't wait. Our team responds to queries within 4 hours on weekdays, 8 hours on weekends." },
+    { icon: "📊", title: "Data-Informed", desc: "We track cutoffs, seat matrices, and trends across every exam cycle to give you a realistic shortlist — not just aspirational ones." },
+  ];
+
+  const team = [
+    { name: "Dr. Priya Mehta", role: "Head Counselor — Engineering", exp: "12 years", qual: "M.Tech, IIT Bombay", streams: ["JEE", "MHT-CET", "GATE"], initials: "PM", color: "#1565C0" },
+    { name: "Mr. Arun Kumar", role: "Senior Counselor — Medical", exp: "9 years", qual: "MBBS, BJ Medical College", streams: ["NEET UG", "NEET PG"], initials: "AK", color: "#059669" },
+    { name: "Ms. Rekha Patil", role: "Counselor — Management & Law", exp: "7 years", qual: "MBA, Symbiosis Pune", streams: ["CAT", "CLAT", "SNAP"], initials: "RP", color: "#7C3AED" },
+    { name: "Dr. Sanjay Rao", role: "Counselor — Arts & Science", exp: "11 years", qual: "Ph.D, Savitribai Phule Univ.", streams: ["CUET", "JAM"], initials: "SR", color: "#EA580C" },
+  ];
+
+  const whyUs = [
+    { num: SITE_STATS.studentsGuided, label: "Students Guided", sub: "Since 2018", color: "#1565C0", bg: "#EFF6FF" },
+    { num: SITE_STATS.yearsExcellence + " yrs", label: "Years Active", sub: "Founded in Pune", color: "#7C3AED", bg: "#F5F3FF" },
+    { num: SITE_STATS.counselors, label: "Expert Counselors", sub: "Across all streams", color: "#059669", bg: "#ECFDF5" },
+    { num: "58+", label: "Partner Colleges", sub: "Pan India", color: "#EA580C", bg: "#FFF7ED" },
+  ];
+
   return (
-    <div>
-      <div style={{ background: "#64B5F6", padding: "64px 0" }}>
-        <div className="container">
-          <div className="tag">Our Story</div>
-          <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em" }}>About Educeff</h1>
-          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, maxWidth: 540, marginTop: 12, lineHeight: 1.7 }}>Founded in Pune, we've been transforming academic dreams into realities since 2015.</p>
+    <div style={{ background: "#F8FAFF" }}>
+
+      {/* ── HERO ── */}
+      <div style={{ background: "linear-gradient(135deg, #1565C0 0%, #7C3AED 100%)", padding: "72px 0 56px", position: "relative", overflow: "hidden" }}>
+        {/* Background pattern */}
+        <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+        <div className="container" style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "6px 16px", fontSize: 12, fontWeight: 600, color: "white", marginBottom: 20 }}>
+            🏢 About Educeff Aspire
+          </div>
+          <h1 className="font-display" style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 800, color: "white", letterSpacing: "-0.02em", marginBottom: 16, lineHeight: 1.1 }}>
+            Your Trusted Partner<br />in Education Since 2018
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 16, maxWidth: 580, lineHeight: 1.8, marginBottom: 36 }}>
+            We started with a simple belief: every student deserves honest, expert guidance through India&#39;s complex admission process — regardless of their background or budget.
+          </p>
+          {/* Stat bar */}
+          <div style={{ display: "flex", gap: 0, flexWrap: "wrap" }}>
+            {whyUs.map((s, i) => (
+              <div key={s.label} style={{ padding: "16px 24px", borderRight: i < whyUs.length - 1 ? "1px solid rgba(255,255,255,0.15)" : "none", minWidth: 120 }}>
+                <div style={{ fontSize: "clamp(22px,3vw,32px)", fontWeight: 800, color: "white", fontFamily: "Sora" }}>{s.num}</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>{s.label}</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginTop: 1 }}>{s.sub}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      <section className="section section-alt">
+
+      {/* ── OUR STORY ── */}
+      <section className="section" style={{ background: "white" }}>
         <div className="container">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 48, alignItems: "center" }}>
             <div>
-              <h2 className="font-display" style={{ fontSize: 34, fontWeight: 700, color: "#64B5F6", marginBottom: 16 }}>A Decade of Academic Excellence</h2>
-              <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.8, marginBottom: 16 }}>
-                Educeff was founded in 2015 by a group of education professionals who recognized the overwhelming confusion students and parents face during the admission process in Maharashtra.
+              <div className="tag">Our Story</div>
+              <h2 className="font-display" style={{ fontSize: "clamp(22px,3.5vw,34px)", fontWeight: 700, color: "#1A1A2E", marginBottom: 16 }}>Why Educeff Was Built</h2>
+              <p style={{ color: "#374151", fontSize: 15, lineHeight: 1.8, marginBottom: 16 }}>
+                In 2018, our founders watched bright students in Maharashtra miss out on their dream colleges — not because of marks, but because of missed deadlines, wrong form entries, and a lack of guidance during counseling rounds.
               </p>
-              <p style={{ color: "#6D28D9", fontSize: 15, lineHeight: 1.8 }}>
-                Today, we've guided thousands of students into their dream colleges — from premier IITs and NITs to top private institutions across the country. Our certified team of {SITE_STATS.counselors} counselors brings together expertise in engineering, medical, law, management, and arts streams.
+              <p style={{ color: "#374151", fontSize: 15, lineHeight: 1.8, marginBottom: 16 }}>
+                The JEE, NEET, MHT-CET, and CLAT admission processes are each a bureaucratic maze on their own. Most families navigate these once in a lifetime, often without knowing the unofficial rules that determine outcomes.
               </p>
+              <p style={{ color: "#374151", fontSize: 15, lineHeight: 1.8, marginBottom: 24 }}>
+                Educeff Aspire was built to be the expert on the other side of that maze — one that stays with students from stream selection in Class 11 all the way through their first semester of college.
+              </p>
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                <div style={{ background: "#EFF6FF", borderRadius: 10, padding: "12px 18px", flex: 1, minWidth: 130 }}>
+                  <div style={{ fontSize: 11, color: "#1565C0", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>📍 Based In</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>Baner, Pune</div>
+                  <div style={{ fontSize: 11, color: "#90CAF9" }}>Maharashtra, India</div>
+                </div>
+                <div style={{ background: "#F5F3FF", borderRadius: 10, padding: "12px 18px", flex: 1, minWidth: 130 }}>
+                  <div style={{ fontSize: 11, color: "#7C3AED", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>📞 Reach Us</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>+91 98996 44633</div>
+                  <div style={{ fontSize: 11, color: "#90CAF9" }}>Mon–Sat, 9AM–7PM</div>
+                </div>
+              </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-              {STATS.map(s => (
-                <div key={s.label} style={{ background: "#64B5F6", borderRadius: 10, padding: 28, textAlign: "center" }}>
-                  <div className="font-display" style={{ fontSize: 32, fontWeight: 700, color: "#64B5F6" }}>{s.num}</div>
-                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", marginTop: 6 }}>{s.label}</div>
+
+            {/* Timeline */}
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#90CAF9", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Our Journey</div>
+              <div style={{ position: "relative" }}>
+                <div style={{ position: "absolute", left: 20, top: 8, bottom: 8, width: 2, background: "linear-gradient(180deg, #1565C0, #7C3AED)", borderRadius: 2 }} />
+                {milestones.map((m, i) => (
+                  <div key={m.year} style={{ display: "flex", gap: 16, marginBottom: 24, position: "relative" }}>
+                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: i === milestones.length - 1 ? "linear-gradient(135deg, #1565C0, #7C3AED)" : "white", border: "2px solid #1565C0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, zIndex: 1, fontSize: 10, fontWeight: 800, color: i === milestones.length - 1 ? "white" : "#1565C0" }}>
+                      {m.year.slice(2)}
+                    </div>
+                    <div style={{ paddingTop: 6 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#1565C0", background: "#EFF6FF", padding: "2px 8px", borderRadius: 10 }}>{m.year}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>{m.title}</span>
+                      </div>
+                      <p style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6, margin: 0 }}>{m.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHAT WE DO ── */}
+      <section className="section" style={{ background: "#F8FAFF" }}>
+        <div className="container">
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <div className="tag">What We Do</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(22px,3.5vw,34px)", fontWeight: 700, color: "#1A1A2E" }}>End-to-End Admission Support</h2>
+            <p style={{ color: "#6B7280", fontSize: 15, maxWidth: 560, margin: "10px auto 0", lineHeight: 1.7 }}>From your first entrance exam to your final semester enrollment — we cover it all.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
+            {[
+              { icon: "📋", title: "Exam Form Filling", desc: "JEE, NEET, MHT-CET, CLAT, CAT and 70+ exams — we handle registration, photo uploads, fee payment and confirmation.", price: "From ₹400", color: "#EFF6FF", accent: "#1565C0" },
+              { icon: "🎓", title: "Educational Counseling", desc: "Stream selection, college shortlisting, entrance exam planning — first session is always FREE.", price: "First FREE", color: "#ECFDF5", accent: "#059669" },
+              { icon: "🏛️", title: "College Admission", desc: "Choice filling, counseling round strategy, document submission and enrollment support.", price: "From ₹8,000", color: "#F5F3FF", accent: "#7C3AED" },
+              { icon: "💰", title: "Scholarship Assistance", desc: "Central, state, minority and merit scholarships — we identify, apply and track disbursements.", price: "From ₹5,000", color: "#FFF7ED", accent: "#EA580C" },
+              { icon: "🧭", title: "Career Counseling", desc: "Psychometric assessment, market demand analysis and a personalised 12-month action plan.", price: "From ₹4,500", color: "#FDF2F8", accent: "#9D174D" },
+              { icon: "📄", title: "Document Verification", desc: "Gap analysis, checklist of missing documents, correction guidance before admission deadlines.", price: "Bundled Free", color: "#F0FDF4", accent: "#059669" },
+            ].map(s => (
+              <div key={s.title} style={{ background: "white", borderRadius: 14, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+                <div style={{ height: 4, background: s.accent }} />
+                <div style={{ padding: 20 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 10, background: s.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 }}>{s.icon}</div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: "#1A1A2E", marginBottom: 6 }}>{s.title}</div>
+                  <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.7, marginBottom: 12 }}>{s.desc}</p>
+                  <span style={{ background: s.color, color: s.accent, fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 20 }}>{s.price}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── OUR VALUES ── */}
+      <section className="section" style={{ background: "white" }}>
+        <div className="container">
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <div className="tag">Our Values</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(22px,3.5vw,34px)", fontWeight: 700, color: "#1A1A2E" }}>How We Work</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
+            {values.map(v => (
+              <div key={v.title} style={{ background: "#F8FAFF", borderRadius: 14, padding: 24, border: "1px solid #E3F2FD" }}>
+                <div style={{ fontSize: 30, marginBottom: 12 }}>{v.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#1A1A2E", marginBottom: 8 }}>{v.title}</div>
+                <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.7, margin: 0 }}>{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TEAM ── */}
+      <section className="section" style={{ background: "#F8FAFF" }}>
+        <div className="container">
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <div className="tag">Our Team</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(22px,3.5vw,34px)", fontWeight: 700, color: "#1A1A2E" }}>Meet Your Counselors</h2>
+            <p style={{ color: "#6B7280", fontSize: 15, maxWidth: 500, margin: "10px auto 0" }}>Each counselor has first-hand experience in their stream — they know these exams from the inside.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
+            {team.map(m => (
+              <div key={m.name} style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", overflow: "hidden", textAlign: "center" }}>
+                <div style={{ height: 6, background: `linear-gradient(90deg, ${m.color}, #7C3AED)` }} />
+                <div style={{ padding: 24 }}>
+                  <div style={{ width: 64, height: 64, borderRadius: "50%", background: `linear-gradient(135deg, ${m.color}, #7C3AED)`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 22, color: "white", margin: "0 auto 14px" }}>{m.initials}</div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: "#1A1A2E", marginBottom: 4 }}>{m.name}</div>
+                  <div style={{ fontSize: 12, color: m.color, fontWeight: 600, marginBottom: 6 }}>{m.role}</div>
+                  <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>{m.qual} · {m.exp}</div>
+                  <div style={{ display: "flex", gap: 4, justifyContent: "center", flexWrap: "wrap" }}>
+                    {m.streams.map(s => (
+                      <span key={s} style={{ background: "#F0F7FF", color: "#1565C0", fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 10 }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY PUNE STUDENTS TRUST US ── */}
+      <section className="section" style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", padding: "56px 0" }}>
+        <div className="container">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 32, alignItems: "center" }}>
+            <div>
+              <h2 className="font-display" style={{ fontSize: "clamp(22px,3.5vw,34px)", fontWeight: 700, color: "white", marginBottom: 16 }}>Why Pune Families Trust Educeff</h2>
+              <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, lineHeight: 1.8, marginBottom: 24 }}>
+                We are not a generic coaching class or an online platform. We are a Pune-based team with deep roots in Maharashtra&#39;s education system — we know the DTE counseling process, the MUHS seat matrix, and the Symbiosis admission calendar inside out.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {[
+                  "Real counselors — not bots or call centres",
+                  "Maharashtra-specific expertise: DTE, MUHS, MHCET Law",
+                  "Transparent pricing — see all costs before you pay",
+                  "Office in Baner, Pune — walk in anytime",
+                  "Serving students across 15+ districts in Maharashtra",
+                ].map(p => (
+                  <div key={p} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0, marginTop: 1 }}>✓</div>
+                    <span style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{p}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              {whyUs.map(s => (
+                <div key={s.label} style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 14, padding: 20, textAlign: "center" }}>
+                  <div style={{ fontSize: "clamp(22px,3vw,30px)", fontWeight: 800, color: "white", fontFamily: "Sora" }}>{s.num}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", marginTop: 4, fontWeight: 600 }}>{s.label}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{s.sub}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </section>
-      <section className="section">
+
+      {/* ── CTA ── */}
+      <section className="section" style={{ background: "white" }}>
         <div className="container">
-          <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <div className="tag">Our Team</div>
-            <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#64B5F6" }}>Meet Our Expert Counselors</h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
-            {[
-              { name: "Dr. Priya Mehta", role: "Head Counselor — Engineering", exp: "12 years", initials: "PM" },
-              { name: "Mr. Arun Kumar", role: "Senior Counselor — Medical", exp: "9 years", initials: "AK" },
-              { name: "Ms. Rekha Patil", role: "Counselor — Management & Law", exp: "7 years", initials: "RP" },
-              { name: "Dr. Sanjay Rao", role: "Counselor — Arts & Science", exp: "11 years", initials: "SR" },
-            ].map(m => (
-              <div key={m.name} className="card" style={{ textAlign: "center", padding: 24 }}>
-                <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#64B5F6", color: "#64B5F6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 18, margin: "0 auto 14px" }}>{m.initials}</div>
-                <div style={{ fontWeight: 600, fontSize: 15, color: "#64B5F6" }}>{m.name}</div>
-                <div style={{ fontSize: 12, color: "#64B5F6", margin: "4px 0" }}>{m.role}</div>
-                <div style={{ fontSize: 12, color: "#6D28D9" }}>{m.exp} experience</div>
-              </div>
-            ))}
+          <div style={{ background: "#F8FAFF", borderRadius: 20, padding: "40px 32px", textAlign: "center", border: "1px solid #E3F2FD" }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🎓</div>
+            <h3 className="font-display" style={{ fontSize: "clamp(20px,3vw,28px)", fontWeight: 700, color: "#1A1A2E", marginBottom: 10 }}>Ready to Start Your Journey?</h3>
+            <p style={{ color: "#6B7280", fontSize: 15, maxWidth: 480, margin: "0 auto 28px", lineHeight: 1.7 }}>
+              Book a free 45-minute counseling session with one of our experts. No obligation, no sales pitch — just honest guidance.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <a href={`https://wa.me/919899644633?text=Hi, I'd like to book a free counseling session`} target="_blank" rel="noreferrer"
+                style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", color: "white", padding: "13px 28px", borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: "none", display: "inline-block" }}>
+                📞 Book Free Counseling
+              </a>
+              <a href={`mailto:Educeff.india@gmail.com`}
+                style={{ background: "white", color: "#1565C0", padding: "13px 28px", borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: "none", border: "2px solid #BFDBFE", display: "inline-block" }}>
+                ✉️ Email Us
+              </a>
+            </div>
+            <div style={{ marginTop: 16, fontSize: 12, color: "#90CAF9" }}>
+              📍 Baner, Pune 411045 &nbsp;·&nbsp; 📞 +91 98996 44633 &nbsp;·&nbsp; Mon–Sat 9AM–7PM
+            </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }
@@ -5102,7 +5306,7 @@ function ServicesPage() {
         <div className="container">
           <div className="tag" style={{ color: "white", borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.15)" }}>What We Offer</div>
           <h1 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.02em", marginBottom: 12 }}>Our Services</h1>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, maxWidth: 540 }}>Clear deliverables, honest timelines, and transparent pricing — so you know exactly what you're getting before you pay.</p>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, maxWidth: 540 }}>Clear deliverables, honest timelines, and transparent pricing — so you know exactly what you&#39;re getting before you pay.</p>
         </div>
       </div>
 
@@ -5635,7 +5839,7 @@ function CollegesPage({ setModal }) {
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 52, marginBottom: 12 }}>🔔</div>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Reminder Set!</h3>
-                <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>We'll remind you before the <strong>{remindExam.name}</strong> deadline on <strong>{remindExam.lastDateDisplay}</strong>.</p>
+                <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>We&#39;ll remind you before the <strong>{remindExam.name}</strong> deadline on <strong>{remindExam.lastDateDisplay}</strong>.</p>
                 <button className="btn-primary" style={{ width: "100%" }} onClick={() => setRemindExam(null)}>Done ✓</button>
               </div>
             ) : (
