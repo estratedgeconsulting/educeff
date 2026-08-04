@@ -304,7 +304,7 @@ const css = `
       display: block;
       position: fixed;
       top: 60px; left: 0; right: 0;
-      background: #1565C0;
+      background: #64B5F6;
       padding: 16px 20px 20px;
       z-index: 99;
       border-top: 1px solid rgba(255,255,255,0.15);
@@ -631,7 +631,7 @@ function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
   const publicPages = ["Home", "About", "Services", "Colleges", "Contact"];
 
   return (
-    <nav style={{ background: "#1565C0", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+    <nav style={{ background: "#64B5F6", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
       <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px" }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => { setPage("Home"); setMenuOpen(false); }}>
