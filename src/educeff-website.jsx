@@ -932,10 +932,10 @@ function ContactForm() {
             <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#1565C0", marginBottom: 16, letterSpacing: "-0.02em" }}>Let&#39;s Start Your Journey Today</h2>
             <p style={{ color: "#7C3AED", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>Reach out to our team for any queries about admissions, counseling, or services. We typically respond within 2 hours.</p>
             {[
-              { icon: "📍", label: "Address", val: "IdeastoImpacts,Pollard farms road, Baner, Pune 411045" },
+              { icon: "📍", label: "Address", val: "123 Pimpri Road, Pimpri-Chinchwad, Pune 411045" },
               { icon: "📞", label: "Phone", val: "+91 98996 44633" },
-              { icon: "✉️", label: "Email", val: "info@educeff.com" },
-              { icon: "🕐", label: "Hours", val: "Mon–Sat, 9AM – 8PM" },
+              { icon: "✉️", label: "Email", val: "hello@educeff.com" },
+              { icon: "🕐", label: "Hours", val: "Mon–Sat, 9AM – 7PM" },
             ].map(c => (
               <div key={c.label} style={{ display: "flex", gap: 14, marginBottom: 18, alignItems: "flex-start" }}>
                 <span style={{ fontSize: 20, marginTop: 1 }}>{c.icon}</span>
@@ -1715,11 +1715,36 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
     { icon: "📍", label: "Track Status", desc: "View application status", color: "#FFFBEB", action: () => setTab("tracking") },
   ];
 
-  const upcomingExams = [
-    { name: "JEE Main Session 2", date: "Apr 4, 2026", daysLeft: 45, color: "#1565C0" },
-    { name: "MHT-CET 2026", date: "May 2, 2026", daysLeft: 73, color: "#059669" },
-    { name: "NEET UG 2026", date: "May 3, 2026", daysLeft: 74, color: "#DC2626" },
-  ];
+  const [upcomingExams, setUpcomingExams] = useState([]);
+
+  useEffect(() => {
+    // Load upcoming exams from Supabase — open exams ordered by deadline
+    const today = new Date().toISOString().split("T")[0];
+    supabase.from("entrance_exams")
+      .select("name, last_date, last_date_display, exam_date, stream")
+      .eq("is_active", true)
+      .gte("last_date", today)
+      .order("last_date", { ascending: true })
+      .limit(5)
+      .then(({ data }) => {
+        if (data) {
+          setUpcomingExams(data.map(e => {
+            const diff = new Date(e.last_date) - new Date();
+            const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            const streamColors = { Engineering: "#1565C0", Medical: "#DC2626", Law: "#EA580C", Management: "#7C3AED", Architecture: "#0891B2" };
+            return {
+              name: e.name,
+              date: e.last_date_display || e.last_date,
+              examDate: e.exam_date,
+              daysLeft,
+              stream: e.stream,
+              color: streamColors[e.stream] || "#1565C0",
+              urgent: daysLeft <= 7,
+            };
+          }));
+        }
+      }).catch(() => {});
+  }, []);
 
   return (
     <div>
@@ -1787,13 +1812,26 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {/* Upcoming Exams */}
           <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 20 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 14 }}>⏰ Upcoming Exams</h3>
-            {upcomingExams.map(e => (
-              <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, padding: "8px 10px", background: "#ECFDF5", borderRadius: 8, border: "1px solid #E3F2FD" }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: e.color, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 11, fontWeight: 700, flexShrink: 0, textAlign: "center", lineHeight: 1.2 }}>{e.daysLeft}d</div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{e.name}</div>
-                  <div style={{ fontSize: 10, color: "#6B7280" }}>{e.date}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", fontFamily: "Sora", margin: 0 }}>⏰ Upcoming Deadlines</h3>
+              <button style={{ fontSize: 11, color: "#1565C0", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }} onClick={() => setTab && window.scrollTo(0,0)}>View All →</button>
+            </div>
+            {upcomingExams.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <div style={{ fontSize: 28, marginBottom: 6 }}>📅</div>
+                <div style={{ fontSize: 12, color: "#6B7280" }}>Loading exam deadlines...</div>
+              </div>
+            ) : upcomingExams.map(e => (
+              <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, padding: "8px 10px", background: e.urgent ? "#FEF2F2" : "#F8FAFF", borderRadius: 8, border: `1px solid ${e.urgent ? "#FECACA" : "#E3F2FD"}` }}>
+                <div style={{ width: 38, height: 38, borderRadius: 8, background: e.urgent ? "#DC2626" : e.color, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 10, fontWeight: 800, flexShrink: 0, textAlign: "center", lineHeight: 1.2 }}>
+                  {e.daysLeft}d
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{e.name}</div>
+                  <div style={{ fontSize: 10, color: "#6B7280" }}>
+                    Last date: {e.date}
+                    {e.urgent && <span style={{ color: "#DC2626", fontWeight: 700 }}> ⚠️ Urgent!</span>}
+                  </div>
                 </div>
               </div>
             ))}
