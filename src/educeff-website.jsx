@@ -1554,6 +1554,7 @@ function StudentPortal({ setPage, user }) {
       { id: "profile", label: "My Profile", icon: "👤", badge: profileComplete < 100 ? "!" : null },
     ]},
     { label: "Admissions", items: [
+      { id: "exams", label: "Entrance Exams", icon: "📝" },
       { id: "applications", label: "Applications", icon: "📋", badge: applications > 0 ? applications : null },
       { id: "tracking", label: "Track Status", icon: "📍" },
       { id: "documents", label: "Documents", icon: "📁", badge: docCount < 4 ? `${docCount}/4` : null },
@@ -1647,6 +1648,7 @@ function StudentPortal({ setPage, user }) {
           {tab === "profile" && <PortalProfile user={user} profile={profile} onSave={loadProfile} />}
           {tab === "documents" && <DocumentCenter user={user} uploadedDocs={uploadedDocs} onUpload={loadProfile} />}
           {tab === "applications" && <ApplicationsTab user={user} />}
+          {tab === "exams" && <ExamsTab user={user} setTab={setTab} />}
           {tab === "payments" && <PaymentsTab user={user} profile={profile} />}
           {tab === "tracking" && <TrackingTab user={user} />}
           {tab === "notifications" && <NotificationsTab user={user} />}
@@ -2739,6 +2741,309 @@ function ApplicationsTab({ user }) {
   );
 }
 
+
+function ExamsTab({ user, setTab }) {
+  const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterStream, setFilterStream] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [formModal, setFormModal] = useState(null); // exam to fill form for
+  const [formSent, setFormSent] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [bookForm, setBookForm] = useState({ name: "", mobile: "", message: "" });
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    // Load all active exams
+    supabase.from("entrance_exams").select("*").eq("is_active", true).order("last_date", { ascending: true, nullsFirst: false })
+      .then(({ data }) => { setExams(data || []); setLoading(false); })
+      .catch(() => setLoading(false));
+    // Load student profile for pre-filling
+    if (user) {
+      supabase.from("students").select("first_name, last_name, mobile, entrance_exam, course_interest").eq("user_id", user.id).single()
+        .then(({ data }) => {
+          if (data) {
+            setProfile(data);
+            setBookForm(f => ({ ...f, name: `${data.first_name || ""} ${data.last_name || ""}`.trim(), mobile: data.mobile || "" }));
+          }
+        }).catch(() => {});
+    }
+  }, [user]);
+
+  const today = new Date();
+
+  const getStatus = (lastDate) => {
+    if (!lastDate) return "open";
+    const [y, m, d] = lastDate.split("-").map(Number);
+    const deadline = new Date(y, m - 1, d, 23, 59, 59);
+    const diff = deadline - today;
+    if (diff < 0) return "closed";
+    if (diff <= 7 * 24 * 60 * 60 * 1000) return "urgent";
+    return "open";
+  };
+
+  const getDaysLeft = (lastDate) => {
+    if (!lastDate) return null;
+    const [y, m, d] = lastDate.split("-").map(Number);
+    return Math.ceil((new Date(y, m - 1, d, 23, 59, 59) - today) / (1000 * 60 * 60 * 24));
+  };
+
+  const streams = ["All", "Engineering", "Medical", "Law", "Management", "Architecture", "Science", "Commerce", "Pharmacy"];
+
+  const filtered = exams.filter(e => {
+    const matchStream = filterStream === "All" || e.stream === filterStream;
+    const matchSearch = !search || (e.name || "").toLowerCase().includes(search.toLowerCase()) || (e.full_name || "").toLowerCase().includes(search.toLowerCase());
+    const status = getStatus(e.last_date);
+    const matchStatus = filterStatus === "All" || (filterStatus === "Open" && status !== "closed") || (filterStatus === "Closed" && status === "closed") || (filterStatus === "Urgent" && status === "urgent");
+    return matchStream && matchSearch && matchStatus;
+  });
+
+  const streamColors = { Engineering: "#1565C0", Medical: "#DC2626", Law: "#EA580C", Management: "#7C3AED", Architecture: "#0891B2", Science: "#059669", Commerce: "#D97706", Pharmacy: "#9D174D" };
+  const getStreamColor = (s) => streamColors[s] || "#6B7280";
+
+  const handleFormRequest = async () => {
+    if (!bookForm.name || !bookForm.mobile) return;
+    setFormLoading(true);
+    try {
+      await supabase.from("contact_messages").insert({
+        full_name: sanitize(bookForm.name),
+        email: user?.email || "",
+        phone: bookForm.mobile,
+        subject: `Form Filling Request: ${formModal.name}`,
+        message: sanitize(`Student requests Educeff to fill form for ${formModal.name} (${formModal.last_date_display || ""}). ${bookForm.message}`),
+        created_at: new Date().toISOString(),
+      });
+      setFormSent(true);
+    } catch (e) { console.warn(e); }
+    setFormLoading(false);
+  };
+
+  const openCount = exams.filter(e => getStatus(e.last_date) !== "closed").length;
+  const urgentCount = exams.filter(e => getStatus(e.last_date) === "urgent").length;
+
+  return (
+    <div>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#1565C0", fontFamily: "Sora", marginBottom: 4 }}>Entrance Exams</h1>
+          <div style={{ fontSize: 12, color: "#6B7280" }}>{openCount} open · {urgentCount > 0 && <span style={{ color: "#DC2626", fontWeight: 700 }}>{urgentCount} urgent · </span>}{exams.length} total</div>
+        </div>
+        {profile?.entrance_exam && (
+          <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10, padding: "8px 14px", fontSize: 12, color: "#1565C0", fontWeight: 600 }}>
+            Your exam: {profile.entrance_exam}
+          </div>
+        )}
+      </div>
+
+      {/* Urgent banner */}
+      {urgentCount > 0 && (
+        <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: "12px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 20 }}>⚠️</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#DC2626" }}>{urgentCount} exam deadline{urgentCount > 1 ? "s" : ""} closing within 7 days!</div>
+            <div style={{ fontSize: 12, color: "#374151" }}>Click <strong>Let Educeff Fill This Form</strong> to get help before it closes.</div>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search exams..." style={{ flex: 1, minWidth: 150, marginBottom: 0, fontSize: 13 }} />
+        <select value={filterStream} onChange={e => setFilterStream(e.target.value)} style={{ width: 160, marginBottom: 0, fontSize: 13 }}>
+          {streams.map(s => <option key={s}>{s}</option>)}
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ width: 130, marginBottom: 0, fontSize: 13 }}>
+          {["All", "Open", "Urgent", "Closed"].map(s => <option key={s}>{s}</option>)}
+        </select>
+      </div>
+
+      {/* Exam Cards */}
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "48px 0" }}>
+          <div style={{ fontSize: 36 }}>⏳</div>
+          <div style={{ color: "#6B7280", fontSize: 14, marginTop: 8 }}>Loading exams...</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "48px 0", background: "white", borderRadius: 14, border: "1px solid #E3F2FD" }}>
+          <div style={{ fontSize: 40 }}>📝</div>
+          <div style={{ color: "#6B7280", fontSize: 14, marginTop: 8 }}>No exams found</div>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 14 }}>
+          {filtered.map(e => {
+            const status = getStatus(e.last_date);
+            const daysLeft = getDaysLeft(e.last_date);
+            const sc = getStreamColor(e.stream);
+            const isOpen = status !== "closed";
+            const isUrgent = status === "urgent";
+            return (
+              <div key={e.id || e.name} style={{ background: "white", borderRadius: 14, border: `1.5px solid ${isUrgent ? "#FECACA" : isOpen ? "#E3F2FD" : "#F3F4F6"}`, overflow: "hidden", opacity: isOpen ? 1 : 0.75 }}>
+                <div style={{ height: 4, background: isUrgent ? "#DC2626" : isOpen ? `linear-gradient(90deg, ${sc}, #7C3AED)` : "#E3F2FD" }} />
+                <div style={{ padding: 16 }}>
+                  {/* Header */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E", marginBottom: 2 }}>{e.name}</div>
+                      {e.full_name && e.full_name !== e.name && (
+                        <div style={{ fontSize: 10, color: "#6B7280", lineHeight: 1.4 }}>{e.full_name}</div>
+                      )}
+                    </div>
+                    <span style={{
+                      background: isUrgent ? "#FEF2F2" : isOpen ? "#ECFDF5" : "#F3F4F6",
+                      color: isUrgent ? "#DC2626" : isOpen ? "#059669" : "#6B7280",
+                      fontSize: 9, fontWeight: 700, padding: "3px 8px", borderRadius: 10, flexShrink: 0, marginLeft: 8
+                    }}>
+                      {isUrgent ? `⚠️ ${daysLeft}d LEFT` : isOpen ? "✅ OPEN" : "❌ CLOSED"}
+                    </span>
+                  </div>
+
+                  {/* Stream badge */}
+                  <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+                    <span style={{ background: `${sc}15`, color: sc, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 10 }}>{e.stream}</span>
+                    {e.level && <span style={{ background: "#F8FAFF", color: "#6B7280", fontSize: 10, padding: "2px 8px", borderRadius: 10 }}>{e.level}</span>}
+                  </div>
+
+                  {/* Key dates */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 12 }}>
+                    <div style={{ background: "#F8FAFF", borderRadius: 7, padding: "7px 9px" }}>
+                      <div style={{ fontSize: 9, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Last Date</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: isUrgent ? "#DC2626" : "#1A1A2E" }}>{e.last_date_display || "TBA"}</div>
+                    </div>
+                    <div style={{ background: "#F8FAFF", borderRadius: 7, padding: "7px 9px" }}>
+                      <div style={{ fontSize: 9, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Exam Date</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>{e.exam_date || "TBA"}</div>
+                    </div>
+                    {e.fee && (
+                      <div style={{ background: "#F0FDF4", borderRadius: 7, padding: "7px 9px" }}>
+                        <div style={{ fontSize: 9, color: "#059669", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Exam Fee</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#059669" }}>{e.fee}</div>
+                      </div>
+                    )}
+                    {e.mode && (
+                      <div style={{ background: "#F5F3FF", borderRadius: 7, padding: "7px 9px" }}>
+                        <div style={{ fontSize: 9, color: "#7C3AED", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Mode</div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "#7C3AED" }}>{e.mode}</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {e.conducted_by && (
+                    <div style={{ fontSize: 10, color: "#6B7280", marginBottom: 12 }}>By: <strong>{e.conducted_by}</strong></div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {isOpen && (
+                      <button style={{ width: "100%", padding: "10px 0", background: "linear-gradient(135deg, #1565C0, #7C3AED)", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}
+                        onClick={() => { setFormModal(e); setFormSent(false); setBookForm(f => ({ ...f, message: "" })); }}>
+                        🎓 Let Educeff Fill This Form — ₹400
+                      </button>
+                    )}
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {e.official_link && (
+                        <button style={{ flex: 1, padding: "8px 0", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 7, cursor: "pointer", color: "#1565C0", fontSize: 11, fontWeight: 600 }}
+                          onClick={() => window.open(e.official_link, "_blank")}>
+                          {isOpen ? "Official Site →" : "View Info →"}
+                        </button>
+                      )}
+                      {e.last_verified && (
+                        <div style={{ flex: 1, background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 7, padding: "8px 0", textAlign: "center", fontSize: 9, color: "#059669", fontWeight: 700 }}>
+                          ✓ Verified {new Date(e.last_verified).toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Form Filling Request Modal */}
+      {formModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(13,27,75,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 16 }}
+          onClick={() => setFormModal(null)}>
+          <div style={{ background: "white", borderRadius: 18, width: "100%", maxWidth: 460, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 60px rgba(0,0,0,0.25)" }}
+            onClick={e => e.stopPropagation()}>
+
+            {/* Modal header */}
+            <div style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", padding: "24px 24px 20px", borderRadius: "18px 18px 0 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Educeff Form Filling</div>
+                  <h2 style={{ fontSize: 18, fontWeight: 800, color: "white", fontFamily: "Sora", margin: 0 }}>{formModal.name}</h2>
+                  {formModal.last_date_display && (
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>Last date: {formModal.last_date_display}</div>
+                  )}
+                </div>
+                <button onClick={() => setFormModal(null)} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "white", width: 32, height: 32, borderRadius: "50%", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
+              </div>
+            </div>
+
+            <div style={{ padding: 24 }}>
+              {formSent ? (
+                <div style={{ textAlign: "center", padding: "16px 0" }}>
+                  <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Request Sent!</h3>
+                  <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 8 }}>Our team will contact you on <strong>{bookForm.mobile}</strong> to collect your details and fill the form.</p>
+                  <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20 }}>Service charge: <strong>₹400</strong> payable after form submission.</p>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <a href={`https://wa.me/919899644633?text=Hi, I requested form filling for ${formModal.name}`} target="_blank" rel="noreferrer"
+                      style={{ flex: 1, padding: "11px 0", background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, textAlign: "center", fontSize: 13, fontWeight: 700, color: "#065F46", textDecoration: "none" }}>
+                      💬 WhatsApp Us
+                    </a>
+                    <button style={{ flex: 1, padding: "11px 0", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, fontSize: 13, fontWeight: 700, color: "#1565C0", cursor: "pointer" }}
+                      onClick={() => setFormModal(null)}>Done ✓</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Service info box */}
+                  <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10, padding: "14px 16px", marginBottom: 20 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1565C0", marginBottom: 8 }}>What Educeff Does for You</div>
+                    {["Complete online registration on your behalf", "Photo & signature upload to exact specifications", "Fee payment assistance & confirmation", "Error-free form — reviewed before submission", "Confirmation PDF sent to your email"].map(item => (
+                      <div key={item} style={{ fontSize: 12, color: "#374151", marginBottom: 5, display: "flex", gap: 7 }}>
+                        <span style={{ color: "#1565C0", fontWeight: 700 }}>✓</span> {item}
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 10, padding: "8px 12px", background: "white", borderRadius: 7, fontSize: 13, fontWeight: 700, color: "#1565C0", textAlign: "center" }}>
+                      Service Charge: ₹400 (GST incl.) — Pay after completion
+                    </div>
+                  </div>
+
+                  <label>Your Name</label>
+                  <input placeholder="Full name" value={bookForm.name} onChange={e => setBookForm(f => ({ ...f, name: e.target.value }))} />
+                  <label>Mobile Number</label>
+                  <input placeholder="+91 98765 43210" value={bookForm.mobile} onChange={e => setBookForm(f => ({ ...f, mobile: e.target.value }))} />
+                  <label>Any specific instructions? (optional)</label>
+                  <textarea rows={2} placeholder="e.g. General category, Maharashtra domicile..." style={{ resize: "none" }} value={bookForm.message} onChange={e => setBookForm(f => ({ ...f, message: e.target.value }))} />
+
+                  <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                    <button className="btn-primary" style={{ flex: 1, padding: 12, opacity: formLoading ? 0.7 : 1, fontSize: 13 }}
+                      onClick={handleFormRequest} disabled={formLoading || !bookForm.name || !bookForm.mobile}>
+                      {formLoading ? "Sending..." : "🎓 Request Form Filling →"}
+                    </button>
+                    <a href={`https://wa.me/919899644633?text=Hi, I want Educeff to fill ${formModal.name} form for me`} target="_blank" rel="noreferrer"
+                      style={{ padding: "12px 14px", background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, fontSize: 13, fontWeight: 700, color: "#065F46", textDecoration: "none", display: "flex", alignItems: "center" }}>
+                      💬
+                    </a>
+                  </div>
+                  <p style={{ fontSize: 11, color: "#6B7280", textAlign: "center", marginTop: 10 }}>
+                    Our counselor will call you within 4 hours · No advance payment needed
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function PaymentsTab({ user, profile }) {
   const [history, setHistory] = useState([]);
