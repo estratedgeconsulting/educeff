@@ -932,9 +932,9 @@ function ContactForm() {
             <h2 className="font-display" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, color: "#1565C0", marginBottom: 16, letterSpacing: "-0.02em" }}>Let&#39;s Start Your Journey Today</h2>
             <p style={{ color: "#7C3AED", fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>Reach out to our team for any queries about admissions, counseling, or services. We typically respond within 2 hours.</p>
             {[
-              { icon: "📍", label: "Address", val: "IdeastoImpacts,Pallord Farm, Baner, Pune 411045" },
+              { icon: "📍", label: "Address", val: "123 Pimpri Road, Pimpri-Chinchwad, Pune 411045" },
               { icon: "📞", label: "Phone", val: "+91 98996 44633" },
-              { icon: "✉️", label: "Email", val: "info@educeff.com" },
+              { icon: "✉️", label: "Email", val: "hello@educeff.com" },
               { icon: "🕐", label: "Hours", val: "Mon–Sat, 9AM – 7PM" },
             ].map(c => (
               <div key={c.label} style={{ display: "flex", gap: 14, marginBottom: 18, alignItems: "flex-start" }}>
@@ -6114,19 +6114,56 @@ export default function App() {
   // Restore session on page load
   useEffect(() => {
     if (!supabaseConfigured) return;
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) { setUser(session.user); setIsLoggedIn(true); }
+
+    const checkAdminStatus = async (userId, email) => {
+      try {
+        const { data: adminByUid } = await supabase.from("admins").select("id").eq("user_id", userId).maybeSingle();
+        if (adminByUid) return true;
+        const { data: adminByEmail } = await supabase.from("admins").select("id").eq("email", email).maybeSingle();
+        return !!adminByEmail;
+      } catch (e) { return false; }
+    };
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        setIsLoggedIn(true);
+        // Re-check admin status on every page load/refresh
+        const admin = await checkAdminStatus(session.user.id, session.user.email);
+        setIsAdmin(admin);
+        // Restore page based on verified admin status
+        const storedRole = localStorage.getItem("educeff_role");
+        if (admin) {
+          localStorage.setItem("educeff_role", "admin");
+          setPage("Admin");
+        } else if (storedRole === "student") {
+          setPage("Portal");
+        }
+      } else {
+        // No session — clear stored role
+        localStorage.removeItem("educeff_role");
+      }
     }).catch(e => console.warn("Session check failed:", e));
 
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      // Detect password recovery event from email link
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "PASSWORD_RECOVERY") {
         setIsRecovery(true);
         setUser(session?.user || null);
         return;
       }
-      if (session?.user) { setUser(session.user); setIsLoggedIn(true); }
-      else { setUser(null); setIsLoggedIn(false); setIsAdmin(false); }
+      if (event === "SIGNED_OUT") {
+        setUser(null); setIsLoggedIn(false); setIsAdmin(false);
+        return;
+      }
+      if (session?.user) {
+        setUser(session.user);
+        setIsLoggedIn(true);
+        // Re-check admin on any auth state change
+        const admin = await checkAdminStatus(session.user.id, session.user.email);
+        setIsAdmin(admin);
+      } else {
+        setUser(null); setIsLoggedIn(false); setIsAdmin(false);
+      }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -6134,7 +6171,14 @@ export default function App() {
   const handleLogin = (admin) => {
     setIsAdmin(admin);
     setModal(null);
-    setPage(admin ? "Admin" : "Portal");
+    // Persist role so refresh lands on correct page
+    if (admin) {
+      localStorage.setItem("educeff_role", "admin");
+      setPage("Admin");
+    } else {
+      localStorage.setItem("educeff_role", "student");
+      setPage("Portal");
+    }
   };
 
   const handleLogout = async () => {
@@ -6142,6 +6186,7 @@ export default function App() {
     setIsLoggedIn(false);
     setIsAdmin(false);
     setUser(null);
+    localStorage.removeItem("educeff_role");
     setPage("Home");
   };
 
