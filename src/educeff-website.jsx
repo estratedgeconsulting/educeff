@@ -1602,21 +1602,23 @@ function StudentPortal({ setPage, user }) {
         </div>
 
         {/* Nav Groups */}
-        {navGroups.map(group => (
-          <div key={group.label} className="portal-nav-section">
-            <div className="portal-nav-label">{group.label}</div>
-            {group.items.map(item => (
-              <div key={item.id} className={`portal-nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
-                <div className="nav-icon">{item.icon}</div>
-                {item.label}
-                {item.badge && <span className="portal-badge">{item.badge}</span>}
-              </div>
-            ))}
-          </div>
-        ))}
+        <div style={{ flex: 1, overflowY: "auto", paddingBottom: 8 }}>
+          {navGroups.map(group => (
+            <div key={group.label} className="portal-nav-section">
+              <div className="portal-nav-label">{group.label}</div>
+              {group.items.map(item => (
+                <div key={item.id} className={`portal-nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
+                  <div className="nav-icon">{item.icon}</div>
+                  {item.label}
+                  {item.badge && <span className="portal-badge">{item.badge}</span>}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
 
         {/* Logout */}
-        <div style={{ marginTop: "auto", padding: "12px 12px 20px" }}>
+        <div style={{ padding: "10px 12px 16px", borderTop: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
           <div className="portal-nav-item" onClick={handleLogout} style={{ color: "rgba(255,100,100,0.8)" }}>
             <div className="nav-icon" style={{ background: "rgba(220,38,38,0.15)" }}>🚪</div>
             Logout
