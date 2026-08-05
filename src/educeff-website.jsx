@@ -1011,11 +1011,11 @@ function Footer({ setPage }) {
             { heading: "Student", links: ["Register", "Student Login", "Track Application", "Upload Documents", "Support"] },
           ].map(col => (
             <div key={col.heading}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#7C3AED", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>{col.heading}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16, paddingBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.1)" }}>{col.heading}</div>
               {col.links.map(l => (
-                <div key={l} style={{ fontSize: 13, marginBottom: 8, cursor: "pointer", transition: "color 0.2s" }}
+                <div key={l} style={{ fontSize: 13, marginBottom: 8, cursor: "pointer", color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}
                   onMouseEnter={e => e.target.style.color = "white"}
-                  onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.55)"}
+                  onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.6)"}
                   onClick={() => setPage(l === "Home" || l === "About" || l === "Services" || l === "Colleges" || l === "Contact" ? l : "Home")}
                 >{l}</div>
               ))}
@@ -1936,10 +1936,34 @@ function PortalProfile({ user, profile, onSave }) {
   const handleSave = async () => {
     setLoading(true); setSaved(false);
     try {
-      const { error } = await supabase.from("students").update({ ...form, updated_at: new Date().toISOString() }).eq("user_id", user.id);
-      if (!error) { setSaved(true); onSave(); setTimeout(() => setSaved(false), 3000); }
-      else console.warn("Profile update error:", error.message);
-    } catch(e) { console.warn("Profile update failed:", e); }
+      // Only send valid student table columns — exclude any UI-only fields
+      const updateData = {
+        first_name: form.first_name || null,
+        last_name: form.last_name || null,
+        mobile: form.mobile || null,
+        date_of_birth: form.date_of_birth || null,
+        gender: form.gender || null,
+        address: form.address || null,
+        tenth_percent: form.tenth_percent || null,
+        twelfth_percent: form.twelfth_percent || null,
+        entrance_exam: form.entrance_exam || null,
+        score: form.score || null,
+        course_interest: form.course_interest || null,
+        updated_at: new Date().toISOString(),
+      };
+      const { error } = await supabase.from("students").update(updateData).eq("user_id", user.id);
+      if (!error) {
+        setSaved(true);
+        onSave();
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        console.warn("Profile update error:", error.message);
+        alert("Failed to save: " + error.message);
+      }
+    } catch(e) {
+      console.warn("Profile update failed:", e);
+      alert("Something went wrong. Please try again.");
+    }
     setLoading(false);
   };
 
