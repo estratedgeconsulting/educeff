@@ -2017,94 +2017,91 @@ function PortalProfile({ user, profile, onSave }) {
 
   return (
     <div>
-      <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 700, color: "#1565C0", marginBottom: 6, fontFamily: "Sora" }}>Profile Management</h1>
-      <p style={{ color: "#7C3AED", fontSize: 13, marginBottom: 24 }}>Update your personal details and keep your account secure.</p>
+      {/* Page Header */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 4 }}>My Profile</h1>
+        <p style={{ color: "#6B7280", fontSize: 13 }}>Keep your details accurate for faster applications and better college suggestions.</p>
+      </div>
 
-      {saved && <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 16px", marginBottom: 20, fontSize: 13, color: "#065F46" }}>✅ Profile saved successfully!</div>}
+      {saved && (
+        <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 10, padding: "12px 18px", marginBottom: 20, fontSize: 13, color: "#065F46", display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 18 }}>✅</span> Profile saved successfully!
+        </div>
+      )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, alignItems: "start" }}>
 
-        {/* Left Column */}
+        {/* ── LEFT COLUMN ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
           {/* Avatar Card */}
-          <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24, textAlign: "center" }}>
-            <div style={{ width: 68, height: 68, borderRadius: "50%", background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 24, color: "white", margin: "0 auto 12px" }}>{initials}</div>
-            <div style={{ fontWeight: 700, fontSize: 16, color: "#1A1A2E" }}>{form.first_name} {form.last_name}</div>
-            <div style={{ fontSize: 12, color: "#6B7280", marginTop: 3, marginBottom: 12 }}>{user?.email}</div>
-            <span className="badge badge-success" style={{ fontSize: 11 }}>● Active Account</span>
+          <div style={{ background: "white", borderRadius: 18, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+            <div style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", height: 72, position: "relative" }}>
+              <div style={{ position: "absolute", bottom: -32, left: "50%", transform: "translateX(-50%)", width: 64, height: 64, borderRadius: 16, background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 24, color: "white", border: "3px solid white", boxShadow: "0 4px 14px rgba(21,101,192,0.4)" }}>
+                {initials}
+              </div>
+            </div>
+            <div style={{ padding: "44px 20px 20px", textAlign: "center" }}>
+              <div style={{ fontWeight: 800, fontSize: 17, color: "#1A1A2E", fontFamily: "Sora" }}>{form.first_name || ""} {form.last_name || ""}</div>
+              <div style={{ fontSize: 12, color: "#6B7280", marginTop: 3, marginBottom: 12 }}>{user?.email}</div>
+              <span style={{ background: "linear-gradient(135deg, #ECFDF5, #F0FDF4)", border: "1px solid #A7F3D0", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 600, color: "#059669" }}>● Active Account</span>
+              {form.course_interest && (
+                <div style={{ marginTop: 10, background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10, padding: "6px 12px", fontSize: 12, fontWeight: 600, color: "#1565C0" }}>
+                  {form.course_interest}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Password Change Card */}
-          <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", overflow: "hidden" }}>
-            {/* Header */}
+          <div style={{ background: "white", borderRadius: 18, border: "1px solid #E3F2FD", overflow: "hidden" }}>
             <div style={{ padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: showPwSection ? "1px solid #E3F2FD" : "none" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 9, background: "#F5F3FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🔒</div>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #F5F3FF, #EFF6FF)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🔒</div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>Change Password</div>
-                  <div style={{ fontSize: 11, color: "#6B7280" }}>Update your login password</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>Password</div>
+                  <div style={{ fontSize: 11, color: "#6B7280" }}>Update login password</div>
                 </div>
               </div>
               <button onClick={() => { setShowPwSection(s => !s); setPwError(""); setPwSuccess(false); setPwForm({ current: "", newPw: "", confirm: "" }); }}
-                style={{ fontSize: 12, padding: "6px 14px", background: showPwSection ? "#FEF2F2" : "#EFF6FF", border: `1px solid ${showPwSection ? "#FECACA" : "#BFDBFE"}`, borderRadius: 8, cursor: "pointer", color: showPwSection ? "#DC2626" : "#1565C0", fontWeight: 600 }}>
+                style={{ fontSize: 12, padding: "6px 14px", background: showPwSection ? "#FEF2F2" : "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: `1px solid ${showPwSection ? "#FECACA" : "#BFDBFE"}`, borderRadius: 8, cursor: "pointer", color: showPwSection ? "#DC2626" : "#1565C0", fontWeight: 600 }}>
                 {showPwSection ? "✕ Cancel" : "Change"}
               </button>
             </div>
-
-            {/* Form */}
             {showPwSection && (
               <div style={{ padding: "16px 20px" }}>
                 {pwSuccess && (
                   <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#065F46", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 16 }}>✅</span> Password changed! You&#39;ll be using the new password next time you log in.
+                    ✅ Password changed! You&#39;ll be using the new password next time you log in.
                   </div>
                 )}
-
                 {pwError && (
                   <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span>⚠️</span> {pwError}
+                    ⚠️ {pwError}
                   </div>
                 )}
-
-                {/* Current Password */}
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5, display: "block" }}>Current Password</label>
-                <input type="password" placeholder="Enter your current password" value={pwForm.current}
-                  onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))}
-                  style={{ marginBottom: 14 }} />
-
-                {/* New Password */}
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5, display: "block" }}>New Password</label>
-                <div style={{ position: "relative", marginBottom: pwStrength ? 6 : 14 }}>
-                  <input type="password" placeholder="Enter new password (min 6 chars)" value={pwForm.newPw}
-                    onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))}
-                    style={{ marginBottom: 0, paddingRight: 40 }} />
-                </div>
-
-                {/* Strength bar */}
+                <label style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, display: "block" }}>Current Password</label>
+                <input type="password" placeholder="Enter current password" value={pwForm.current} onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))} style={{ marginBottom: 12 }} />
+                <label style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, display: "block" }}>New Password</label>
+                <input type="password" placeholder="Min 8 characters" value={pwForm.newPw} onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))} style={{ marginBottom: pwStrength ? 6 : 12, paddingRight: 40 }} />
                 {pwStrength && (
-                  <div style={{ marginBottom: 14 }}>
-                    <div style={{ background: "#E3F2FD", borderRadius: 4, height: 4, overflow: "hidden", marginBottom: 4 }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ background: "#F0F4FF", borderRadius: 4, height: 4, overflow: "hidden", marginBottom: 4 }}>
                       <div style={{ width: `${pwStrength.pct}%`, height: "100%", background: pwStrength.color, borderRadius: 4, transition: "all 0.3s" }} />
                     </div>
                     <div style={{ fontSize: 11, color: pwStrength.color, fontWeight: 600 }}>{pwStrength.label}</div>
                   </div>
                 )}
-
-                {/* Confirm Password */}
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5, display: "block" }}>Confirm New Password</label>
-                <input type="password" placeholder="Re-enter new password" value={pwForm.confirm}
-                  onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))}
+                <label style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, display: "block" }}>Confirm Password</label>
+                <input type="password" placeholder="Re-enter new password" value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))}
                   style={{ marginBottom: 6, borderColor: pwForm.confirm ? (pwForm.newPw === pwForm.confirm ? "#059669" : "#DC2626") : "#BFDBFE" }} />
-
                 {pwForm.confirm.length > 0 && (
-                  <div style={{ fontSize: 11, marginBottom: 14, color: pwForm.newPw === pwForm.confirm ? "#059669" : "#DC2626", fontWeight: 600 }}>
-                    {pwForm.newPw === pwForm.confirm ? "✅ Passwords match" : "⚠️ Passwords do not match"}
+                  <div style={{ fontSize: 11, marginBottom: 12, color: pwForm.newPw === pwForm.confirm ? "#059669" : "#DC2626", fontWeight: 600 }}>
+                    {pwForm.newPw === pwForm.confirm ? "✅ Passwords match" : "⚠️ Do not match"}
                   </div>
                 )}
-
                 <button onClick={handlePasswordChange} disabled={pwLoading || !pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm}
-                  style={{ width: "100%", padding: "11px 0", background: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#E3F2FD" : "#7C3AED", color: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#6B7280" : "white", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "not-allowed" : "pointer", transition: "all 0.2s", opacity: pwLoading ? 0.7 : 1 }}>
+                  style={{ width: "100%", padding: "11px 0", background: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#F0F4FF" : "linear-gradient(135deg, #1565C0, #7C3AED)", color: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "#94A3B8" : "white", border: "none", borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: (!pwForm.current || pwForm.newPw.length < 6 || pwForm.newPw !== pwForm.confirm) ? "not-allowed" : "pointer", opacity: pwLoading ? 0.7 : 1 }}>
                   {pwLoading ? "Updating..." : "🔒 Update Password"}
                 </button>
               </div>
@@ -2112,37 +2109,101 @@ function PortalProfile({ user, profile, onSave }) {
           </div>
         </div>
 
-        {/* Right Card - Profile Form */}
-        <div style={{ background: "white", borderRadius: 16, border: "1px solid #E3F2FD", padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 18, color: "#1A1A2E" }}>Personal Information</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0 16px" }}>
-            <div><label>First Name</label><input name="first_name" value={form.first_name || ""} onChange={handleChange} /></div>
-            <div><label>Last Name</label><input name="last_name" value={form.last_name || ""} onChange={handleChange} /></div>
-            <div><label>Email (cannot change)</label><input value={user?.email || ""} disabled style={{ background: "#F8FAFF", color: "#6B7280" }} /></div>
-            <div><label>Mobile</label><input name="mobile" value={form.mobile || ""} onChange={handleChange} placeholder="+91 98996 44633" /></div>
-            <div><label>Date of Birth</label><input name="date_of_birth" type="date" value={form.date_of_birth || ""} onChange={handleChange} max={new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split("T")[0]} min={new Date(new Date().setFullYear(new Date().getFullYear() - 60)).toISOString().split("T")[0]} /></div>
-            <div><label>Gender</label><select name="gender" value={form.gender || ""} onChange={handleChange}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-            <div style={{ gridColumn: "span 2" }}><label>Address</label><input name="address" value={form.address || ""} onChange={handleChange} placeholder="Your full address" /></div>
-          </div>
+        {/* ── RIGHT COLUMN ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-          <h3 style={{ fontSize: 15, fontWeight: 700, margin: "20px 0 16px", color: "#1A1A2E" }}>Academic Information</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0 16px" }}>
-            <div><label>10th Percentage</label><input name="tenth_percent" value={form.tenth_percent || ""} onChange={handleChange} placeholder="e.g. 92.4%" /></div>
-            <div><label>12th Percentage</label><input name="twelfth_percent" value={form.twelfth_percent || ""} onChange={handleChange} placeholder="e.g. 88.6%" /></div>
-            <div><label>Entrance Exam</label>
-              <select name="entrance_exam" value={form.entrance_exam || ""} onChange={handleChange}>
-                <option value="">Select</option>
-                <option>JEE Main</option><option>JEE Advanced</option><option>MHT-CET</option>
-                <option>NEET UG</option><option>NEET PG</option><option>CLAT</option>
-                <option>CAT</option><option>MAH-MBA-CET</option><option>CUET</option><option>Other</option>
-              </select>
+          {/* Personal Information */}
+          <div style={{ background: "white", borderRadius: 18, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+            <div style={{ padding: "18px 24px 14px", borderBottom: "1px solid #F0F4FF", display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>👤</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E" }}>Personal Information</div>
+                <div style={{ fontSize: 11, color: "#6B7280" }}>Your basic details</div>
+              </div>
             </div>
-            <div><label>Score / Percentile</label><input name="score" value={form.score || ""} onChange={handleChange} placeholder="e.g. 95.2 Percentile" /></div>
+            <div style={{ padding: "20px 24px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0 20px" }}>
+                {[
+                  { label: "First Name", name: "first_name", placeholder: "e.g. Rahul", type: "text" },
+                  { label: "Last Name", name: "last_name", placeholder: "e.g. Sharma", type: "text" },
+                  { label: "Mobile Number", name: "mobile", placeholder: "+91 98765 43210", type: "tel" },
+                  { label: "Gender", name: "gender", type: "select", options: ["", "Male", "Female", "Other"] },
+                  { label: "Date of Birth", name: "date_of_birth", type: "date" },
+                  { label: "Email Address", name: "_email", disabled: true },
+                ].map(f => (
+                  <div key={f.name} style={{ marginBottom: 16 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, display: "block" }}>{f.label}</label>
+                    {f.type === "select" ? (
+                      <select name={f.name} value={form[f.name] || ""} onChange={handleChange}
+                        style={{ width: "100%", marginBottom: 0 }}>
+                        {f.options.map(o => <option key={o} value={o}>{o || "Select"}</option>)}
+                      </select>
+                    ) : f.disabled ? (
+                      <input value={user?.email || ""} disabled style={{ background: "#F8FAFF", color: "#94A3B8", cursor: "not-allowed", marginBottom: 0 }} />
+                    ) : (
+                      <input type={f.type || "text"} name={f.name} value={form[f.name] || ""} onChange={handleChange} placeholder={f.placeholder || ""} style={{ marginBottom: 0 }}
+                        {...(f.name === "date_of_birth" ? { max: new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split("T")[0], min: new Date(new Date().setFullYear(new Date().getFullYear() - 60)).toISOString().split("T")[0] } : {})} />
+                    )}
+                  </div>
+                ))}
+                <div style={{ gridColumn: "1 / -1", marginBottom: 4 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, display: "block" }}>Full Address</label>
+                  <input name="address" value={form.address || ""} onChange={handleChange} placeholder="House No., Street, City, State, PIN" style={{ marginBottom: 0 }} />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <button className="btn-primary" style={{ marginTop: 20, padding: "12px 28px", opacity: loading ? 0.7 : 1, fontSize: 14 }} onClick={handleSave} disabled={loading}>
-            {loading ? "Saving..." : "Save Changes →"}
-          </button>
+          {/* Academic Information */}
+          <div style={{ background: "white", borderRadius: 18, border: "1px solid #E3F2FD", overflow: "hidden" }}>
+            <div style={{ padding: "18px 24px 14px", borderBottom: "1px solid #F0F4FF", display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #F0FDF4, #ECFDF5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🎓</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E" }}>Academic Information</div>
+                <div style={{ fontSize: 11, color: "#6B7280" }}>Used for college suggestions and counseling</div>
+              </div>
+            </div>
+            <div style={{ padding: "20px 24px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0 20px" }}>
+                {[
+                  { label: "10th Percentage / CGPA", name: "tenth_percent", placeholder: "e.g. 92.4%" },
+                  { label: "12th Percentage / CGPA", name: "twelfth_percent", placeholder: "e.g. 88.6%" },
+                  { label: "Score / Percentile", name: "score", placeholder: "e.g. 95.2 Percentile" },
+                ].map(f => (
+                  <div key={f.name} style={{ marginBottom: 16 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, display: "block" }}>{f.label}</label>
+                    <input name={f.name} value={form[f.name] || ""} onChange={handleChange} placeholder={f.placeholder} style={{ marginBottom: 0 }} />
+                  </div>
+                ))}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, display: "block" }}>Entrance Exam</label>
+                  <select name="entrance_exam" value={form.entrance_exam || ""} onChange={handleChange} style={{ width: "100%", marginBottom: 0 }}>
+                    <option value="">Select exam</option>
+                    {["JEE Main","JEE Advanced","MHT-CET","NEET UG","NEET PG","CLAT","CAT","MAH-MBA-CET","CUET","BITSAT","VITEEE","Other"].map(e => <option key={e}>{e}</option>)}
+                  </select>
+                </div>
+                <div style={{ gridColumn: "1 / -1", marginBottom: 4 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, display: "block" }}>Preferred Stream / Course</label>
+                  <select name="course_interest" value={form.course_interest || ""} onChange={handleChange} style={{ width: "100%", marginBottom: 0 }}>
+                    <option value="">Select stream</option>
+                    {["Engineering","Medical","Law","Management","Architecture","Science","Commerce","Pharmacy"].map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+            <button style={{ padding: "12px 24px", background: "#F0F4FF", border: "1px solid #E3F2FD", borderRadius: 10, fontSize: 13, fontWeight: 600, color: "#6B7280", cursor: "pointer" }}
+              onClick={() => window.location.reload()}>
+              Reset
+            </button>
+            <button onClick={handleSave} disabled={loading}
+              style={{ padding: "12px 32px", background: loading ? "#F0F4FF" : "linear-gradient(135deg, #1565C0, #7C3AED)", color: loading ? "#94A3B8" : "white", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, boxShadow: loading ? "none" : "0 4px 14px rgba(21,101,192,0.3)" }}>
+              {loading ? "Saving..." : "💾 Save Profile →"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
