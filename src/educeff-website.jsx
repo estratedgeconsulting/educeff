@@ -1718,32 +1718,41 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
   const [upcomingExams, setUpcomingExams] = useState([]);
 
   useEffect(() => {
-    // Load upcoming exams from Supabase — open exams ordered by deadline
-    const today = new Date().toISOString().split("T")[0];
+    // Load upcoming exams - fetch all active and filter client-side
     supabase.from("entrance_exams")
       .select("name, last_date, last_date_display, exam_date, stream")
       .eq("is_active", true)
-      .gte("last_date", today)
-      .order("last_date", { ascending: true })
-      .limit(5)
-      .then(({ data }) => {
+      .order("last_date", { ascending: true, nullsFirst: false })
+      .limit(10)
+      .then(({ data, error }) => {
+        if (error) { console.warn("Exams fetch error:", error.message); return; }
         if (data) {
-          setUpcomingExams(data.map(e => {
-            const diff = new Date(e.last_date) - new Date();
-            const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-            const streamColors = { Engineering: "#1565C0", Medical: "#DC2626", Law: "#EA580C", Management: "#7C3AED", Architecture: "#0891B2" };
-            return {
-              name: e.name,
-              date: e.last_date_display || e.last_date,
-              examDate: e.exam_date,
-              daysLeft,
-              stream: e.stream,
-              color: streamColors[e.stream] || "#1565C0",
-              urgent: daysLeft <= 7,
-            };
-          }));
+          const today = new Date();
+          const streamColors = { Engineering: "#1565C0", Medical: "#DC2626", Law: "#EA580C", Management: "#7C3AED", Architecture: "#0891B2", Science: "#059669", Commerce: "#D97706", Pharmacy: "#9D174D" };
+          const upcoming = data
+            .filter(e => {
+              if (!e.last_date) return true; // show if no date set
+              const [y, m, d] = e.last_date.split("-").map(Number);
+              return new Date(y, m - 1, d, 23, 59, 59) >= today;
+            })
+            .slice(0, 5)
+            .map(e => {
+              const daysLeft = e.last_date
+                ? Math.ceil((new Date(...e.last_date.split("-").map((n, i) => i === 1 ? Number(n) - 1 : Number(n))) - today) / (1000 * 60 * 60 * 24))
+                : null;
+              return {
+                name: e.name,
+                date: e.last_date_display || e.last_date || "TBA",
+                examDate: e.exam_date,
+                daysLeft,
+                stream: e.stream,
+                color: streamColors[e.stream] || "#1565C0",
+                urgent: daysLeft !== null && daysLeft <= 7,
+              };
+            });
+          setUpcomingExams(upcoming);
         }
-      }).catch(() => {});
+      });
   }, []);
 
   return (
@@ -1817,14 +1826,14 @@ function PortalDashboard({ user, profile, setTab, profileComplete, docCount }) {
               <button style={{ fontSize: 11, color: "#1565C0", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }} onClick={() => setTab && window.scrollTo(0,0)}>View All →</button>
             </div>
             {upcomingExams.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <div style={{ textAlign: "center", padding: "16px 0" }}>
                 <div style={{ fontSize: 28, marginBottom: 6 }}>📅</div>
-                <div style={{ fontSize: 12, color: "#6B7280" }}>Loading exam deadlines...</div>
+                <div style={{ fontSize: 12, color: "#6B7280" }}>No upcoming exam deadlines</div>
               </div>
             ) : upcomingExams.map(e => (
               <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, padding: "8px 10px", background: e.urgent ? "#FEF2F2" : "#F8FAFF", borderRadius: 8, border: `1px solid ${e.urgent ? "#FECACA" : "#E3F2FD"}` }}>
                 <div style={{ width: 38, height: 38, borderRadius: 8, background: e.urgent ? "#DC2626" : e.color, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 10, fontWeight: 800, flexShrink: 0, textAlign: "center", lineHeight: 1.2 }}>
-                  {e.daysLeft}d
+                  {e.daysLeft !== null ? `${e.daysLeft}d` : "📅"}
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{e.name}</div>
