@@ -2967,76 +2967,161 @@ function ExamsTab({ user, setTab }) {
 
       {/* Form Filling Request Modal */}
       {formModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(13,27,75,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 16 }}
+        <div style={{ position: "fixed", inset: 0, background: "rgba(10,20,60,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 16, backdropFilter: "blur(4px)" }}
           onClick={() => setFormModal(null)}>
-          <div style={{ background: "white", borderRadius: 18, width: "100%", maxWidth: 460, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 60px rgba(0,0,0,0.25)" }}
+          <div style={{ background: "white", borderRadius: 20, width: "100%", maxWidth: 480, maxHeight: "92vh", overflowY: "auto", boxShadow: "0 32px 80px rgba(21,101,192,0.25)" }}
             onClick={e => e.stopPropagation()}>
 
-            {/* Modal header */}
-            <div style={{ background: "linear-gradient(135deg, #1565C0, #7C3AED)", padding: "24px 24px 20px", borderRadius: "18px 18px 0 0" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Educeff Form Filling</div>
-                  <h2 style={{ fontSize: 18, fontWeight: 800, color: "white", fontFamily: "Sora", margin: 0 }}>{formModal.name}</h2>
+            {/* Gradient Header */}
+            <div style={{ background: "linear-gradient(135deg, #1565C0 0%, #7C3AED 100%)", padding: "28px 28px 24px", borderRadius: "20px 20px 0 0", position: "relative", overflow: "hidden" }}>
+              {/* Background pattern */}
+              <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>🎓</div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em" }}>Educeff Form Filling</div>
+                      <h2 style={{ fontSize: 20, fontWeight: 800, color: "white", fontFamily: "Sora", margin: "4px 0 0" }}>{formModal.name}</h2>
+                    </div>
+                  </div>
+                  <button onClick={() => setFormModal(null)}
+                    style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", color: "white", width: 34, height: 34, borderRadius: "50%", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>×</button>
+                </div>
+
+                {/* Exam info pills */}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {formModal.last_date_display && (
-                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>Last date: {formModal.last_date_display}</div>
+                    <div style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 20, padding: "5px 12px", fontSize: 12, color: "white", display: "flex", alignItems: "center", gap: 5 }}>
+                      📅 Last Date: <strong>{formModal.last_date_display}</strong>
+                    </div>
+                  )}
+                  {formModal.fee && (
+                    <div style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 20, padding: "5px 12px", fontSize: 12, color: "white" }}>
+                      Exam Fee: <strong>{formModal.fee}</strong>
+                    </div>
+                  )}
+                  {formModal.stream && (
+                    <div style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 20, padding: "5px 12px", fontSize: 12, color: "white" }}>
+                      {formModal.stream}
+                    </div>
                   )}
                 </div>
-                <button onClick={() => setFormModal(null)} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "white", width: 32, height: 32, borderRadius: "50%", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
               </div>
             </div>
 
-            <div style={{ padding: 24 }}>
+            <div style={{ padding: "24px 28px 28px" }}>
               {formSent ? (
-                <div style={{ textAlign: "center", padding: "16px 0" }}>
-                  <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, color: "#059669", marginBottom: 8 }}>Request Sent!</h3>
-                  <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 8 }}>Our team will contact you on <strong>{bookForm.mobile}</strong> to collect your details and fill the form.</p>
-                  <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20 }}>Service charge: <strong>₹400</strong> payable after form submission.</p>
+                /* ── SUCCESS STATE ── */
+                <div style={{ textAlign: "center", padding: "12px 0" }}>
+                  <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, margin: "0 auto 16px" }}>✓</div>
+                  <h3 style={{ fontSize: 20, fontWeight: 800, color: "#1A1A2E", fontFamily: "Sora", marginBottom: 8 }}>Request Submitted!</h3>
+                  <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.7, marginBottom: 6 }}>
+                    Our counselor will call <strong style={{ color: "#1565C0" }}>{bookForm.mobile}</strong> within 4 hours to collect your details and fill the form.
+                  </p>
+                  <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 24 }}>
+                    Service fee: <strong>₹400</strong> — payable only after form is successfully submitted.
+                  </p>
+                  <div style={{ background: "#F8FAFF", borderRadius: 12, padding: "14px 16px", marginBottom: 20, textAlign: "left" }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#1565C0", marginBottom: 8 }}>What happens next</div>
+                    {["Counselor calls you within 4 hours", "You share your documents over WhatsApp", "We fill & review the form with you", "Form submitted — confirmation sent to your email"].map((s, i) => (
+                      <div key={i} style={{ display: "flex", gap: 10, marginBottom: 6, alignItems: "flex-start" }}>
+                        <div style={{ width: 20, height: 20, borderRadius: "50%", background: "linear-gradient(135deg, #1565C0, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "white", flexShrink: 0, marginTop: 1 }}>{i + 1}</div>
+                        <span style={{ fontSize: 12, color: "#374151" }}>{s}</span>
+                      </div>
+                    ))}
+                  </div>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <a href={`https://wa.me/919899644633?text=Hi, I requested form filling for ${formModal.name}`} target="_blank" rel="noreferrer"
-                      style={{ flex: 1, padding: "11px 0", background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, textAlign: "center", fontSize: 13, fontWeight: 700, color: "#065F46", textDecoration: "none" }}>
+                    <a href={`https://wa.me/919899644633?text=Hi, I just submitted a form filling request for ${formModal.name}. Please assist me.`}
+                      target="_blank" rel="noreferrer"
+                      style={{ flex: 1, padding: "12px 0", background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 10, textAlign: "center", fontSize: 13, fontWeight: 700, color: "#065F46", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                       💬 WhatsApp Us
                     </a>
-                    <button style={{ flex: 1, padding: "11px 0", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, fontSize: 13, fontWeight: 700, color: "#1565C0", cursor: "pointer" }}
+                    <button style={{ flex: 1, padding: "12px 0", background: "linear-gradient(135deg, #1565C0, #7C3AED)", border: "none", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "white", cursor: "pointer" }}
                       onClick={() => setFormModal(null)}>Done ✓</button>
                   </div>
                 </div>
               ) : (
+                /* ── FORM STATE ── */
                 <>
-                  {/* Service info box */}
-                  <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10, padding: "14px 16px", marginBottom: 20 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1565C0", marginBottom: 8 }}>What Educeff Does for You</div>
-                    {["Complete online registration on your behalf", "Photo & signature upload to exact specifications", "Fee payment assistance & confirmation", "Error-free form — reviewed before submission", "Confirmation PDF sent to your email"].map(item => (
-                      <div key={item} style={{ fontSize: 12, color: "#374151", marginBottom: 5, display: "flex", gap: 7 }}>
-                        <span style={{ color: "#1565C0", fontWeight: 700 }}>✓</span> {item}
+                  {/* What you get */}
+                  <div style={{ background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "16px 18px", marginBottom: 20 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1565C0", marginBottom: 10 }}>✅ What Educeff Does for You</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px" }}>
+                      {[
+                        "Complete online registration",
+                        "Photo & signature upload",
+                        "Fee payment assistance",
+                        "Error-check before submit",
+                        "Confirmation PDF to email",
+                        "Support until hall ticket",
+                      ].map(item => (
+                        <div key={item} style={{ display: "flex", gap: 6, alignItems: "flex-start', fontSize: 12, color: '#374151'" }}>
+                          <span style={{ color: "#1565C0", fontWeight: 700, fontSize: 13, flexShrink: 0 }}>✓</span>
+                          <span style={{ fontSize: 12, color: "#374151" }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: 12, background: "white", borderRadius: 8, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div style={{ fontSize: 11, color: "#6B7280" }}>Educeff Service Charge</div>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#1565C0", fontFamily: "Sora" }}>₹400 <span style={{ fontSize: 12, fontWeight: 400, color: "#6B7280" }}>GST incl.</span></div>
                       </div>
-                    ))}
-                    <div style={{ marginTop: 10, padding: "8px 12px", background: "white", borderRadius: 7, fontSize: 13, fontWeight: 700, color: "#1565C0", textAlign: "center" }}>
-                      Service Charge: ₹400 (GST incl.) — Pay after completion
+                      <div style={{ fontSize: 11, color: "#059669", fontWeight: 600, textAlign: "right" }}>
+                        💰 Pay only after<br />form is submitted
+                      </div>
                     </div>
                   </div>
 
-                  <label>Your Name</label>
-                  <input placeholder="Full name" value={bookForm.name} onChange={e => setBookForm(f => ({ ...f, name: e.target.value }))} />
-                  <label>Mobile Number</label>
-                  <input placeholder="+91 98765 43210" value={bookForm.mobile} onChange={e => setBookForm(f => ({ ...f, mobile: e.target.value }))} />
-                  <label>Any specific instructions? (optional)</label>
-                  <textarea rows={2} placeholder="e.g. General category, Maharashtra domicile..." style={{ resize: "none" }} value={bookForm.message} onChange={e => setBookForm(f => ({ ...f, message: e.target.value }))} />
+                  {/* Form fields */}
+                  <div style={{ marginBottom: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 6, display: "block" }}>Your Full Name *</label>
+                    <input
+                      placeholder="Enter your full name"
+                      value={bookForm.name}
+                      onChange={e => setBookForm(f => ({ ...f, name: e.target.value }))}
+                      style={{ marginBottom: 14 }}
+                    />
+                    <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 6, display: "block" }}>Mobile Number *</label>
+                    <input
+                      placeholder="+91 98765 43210"
+                      value={bookForm.mobile}
+                      onChange={e => setBookForm(f => ({ ...f, mobile: e.target.value }))}
+                      style={{ marginBottom: 14 }}
+                    />
+                    <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 6, display: "block" }}>Special Instructions <span style={{ fontWeight: 400, color: "#6B7280" }}>(optional)</span></label>
+                    <textarea
+                      rows={2}
+                      placeholder="e.g. General category, Maharashtra domicile, PWD candidate..."
+                      style={{ resize: "none", marginBottom: 6 }}
+                      value={bookForm.message}
+                      onChange={e => setBookForm(f => ({ ...f, message: e.target.value }))}
+                    />
+                  </div>
 
-                  <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                    <button className="btn-primary" style={{ flex: 1, padding: 12, opacity: formLoading ? 0.7 : 1, fontSize: 13 }}
-                      onClick={handleFormRequest} disabled={formLoading || !bookForm.name || !bookForm.mobile}>
-                      {formLoading ? "Sending..." : "🎓 Request Form Filling →"}
-                    </button>
-                    <a href={`https://wa.me/919899644633?text=Hi, I want Educeff to fill ${formModal.name} form for me`} target="_blank" rel="noreferrer"
-                      style={{ padding: "12px 14px", background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 8, fontSize: 13, fontWeight: 700, color: "#065F46", textDecoration: "none", display: "flex", alignItems: "center" }}>
-                      💬
+                  {/* Action buttons */}
+                  <button
+                    style={{ width: "100%", padding: "14px 0", background: !bookForm.name || !bookForm.mobile ? "#E3F2FD" : "linear-gradient(135deg, #1565C0, #7C3AED)", color: !bookForm.name || !bookForm.mobile ? "#94A3B8" : "white", border: "none", borderRadius: 10, cursor: !bookForm.name || !bookForm.mobile ? "not-allowed" : "pointer", fontWeight: 700, fontSize: 14, marginBottom: 10, transition: "all 0.2s", opacity: formLoading ? 0.7 : 1 }}
+                    onClick={handleFormRequest}
+                    disabled={formLoading || !bookForm.name || !bookForm.mobile}>
+                    {formLoading ? "Sending Request..." : "🎓 Request Form Filling →"}
+                  </button>
+
+                  <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+                    <a href={`https://wa.me/919899644633?text=Hi, I want Educeff to fill the ${formModal.name} form for me. Last date: ${formModal.last_date_display || "TBA"}`}
+                      target="_blank" rel="noreferrer"
+                      style={{ flex: 1, padding: "11px 0", background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 10, textAlign: "center", fontSize: 13, fontWeight: 700, color: "#065F46", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                      💬 Request via WhatsApp
+                    </a>
+                    <a href={`tel:+919899644633`}
+                      style={{ flex: 1, padding: "11px 0", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10, textAlign: "center", fontSize: 13, fontWeight: 700, color: "#1565C0", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                      📞 Call Us
                     </a>
                   </div>
-                  <p style={{ fontSize: 11, color: "#6B7280", textAlign: "center", marginTop: 10 }}>
-                    Our counselor will call you within 4 hours · No advance payment needed
-                  </p>
+
+                  <div style={{ textAlign: "center", fontSize: 11, color: "#94A3B8" }}>
+                    🔒 Your details are safe · No spam · Respond within 4 hours
+                  </div>
                 </>
               )}
             </div>
