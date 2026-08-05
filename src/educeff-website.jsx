@@ -1317,11 +1317,12 @@ function RegisterModal({ onClose }) {
 const portalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-  .portal-wrap { display: flex; min-height: 100vh; background: #EFF6FF; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .portal-wrap { display: flex; min-height: 100vh; background: #F0F4FF; font-family: 'Plus Jakarta Sans', sans-serif; }
 
+  /* ── SIDEBAR ── */
   .portal-sidebar-premium {
-    width: 260px;
-    background: linear-gradient(180deg, #1565C0 0%, #1565C0 60%, #1565C0 100%);
+    width: 256px;
+    background: #0F1D3A;
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -1330,181 +1331,201 @@ const portalCSS = `
     top: 0;
     height: 100vh;
     overflow-y: auto;
+    scrollbar-width: none;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
   }
+  .portal-sidebar-premium::-webkit-scrollbar { display: none; }
 
   .portal-sidebar-top {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
 
   .portal-user-card {
-    margin: 20px 16px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
+    margin: 12px 14px 4px;
+    background: linear-gradient(135deg, rgba(21,101,192,0.4), rgba(124,58,237,0.4));
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 14px;
-    padding: 16px;
-    backdrop-filter: blur(10px);
+    padding: 14px 16px;
   }
 
   .portal-avatar {
-    width: 52px; height: 52px;
-    border-radius: 50%;
+    width: 40px; height: 40px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #1565C0, #7C3AED);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 18px; color: white;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 12px rgba(100,181,246,0.4);
+    font-weight: 800; font-size: 15px; color: white;
+    box-shadow: 0 4px 12px rgba(21,101,192,0.5);
+    flex-shrink: 0;
   }
 
-  .portal-nav-section { padding: 8px 12px; margin-top: 4px; }
-  .portal-nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 0 8px; margin: 12px 0 6px; }
+  .portal-nav-section { padding: 4px 12px 0; }
+  .portal-nav-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: rgba(255,255,255,0.25);
+    padding: 0 10px; margin: 14px 0 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .portal-nav-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
 
   .portal-nav-item {
     display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px; border-radius: 10px;
+    padding: 9px 10px; border-radius: 10px;
     font-size: 13px; font-weight: 500;
-    color: rgba(255,255,255,0.65);
-    cursor: pointer; transition: all 0.2s;
-    margin-bottom: 2px;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer; transition: all 0.18s;
+    margin-bottom: 1px;
     position: relative;
+    letter-spacing: 0.01em;
   }
-  .portal-nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .portal-nav-item:hover {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.9);
+  }
+  .portal-nav-item:hover .nav-icon {
+    background: rgba(255,255,255,0.1);
+  }
   .portal-nav-item.active {
-    background: rgba(255,255,255,0.15);
+    background: linear-gradient(135deg, rgba(21,101,192,0.5), rgba(124,58,237,0.4));
     color: white; font-weight: 600;
-    border-left: 3px solid #1565C0;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+  }
+  .portal-nav-item.active::before {
+    content: '';
+    position: absolute; left: 0; top: 25%; bottom: 25%;
+    width: 3px; border-radius: 0 3px 3px 0;
+    background: linear-gradient(180deg, #1565C0, #7C3AED);
   }
   .portal-nav-item .nav-icon {
-    width: 32px; height: 32px;
+    width: 30px; height: 30px;
     border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
-    background: rgba(255,255,255,0.06);
+    font-size: 14px;
+    background: rgba(255,255,255,0.05);
     flex-shrink: 0;
+    transition: all 0.18s;
   }
-  .portal-nav-item.active .nav-icon { background: rgba(100,181,246,0.2); }
+  .portal-nav-item.active .nav-icon {
+    background: linear-gradient(135deg, rgba(21,101,192,0.6), rgba(124,58,237,0.5));
+  }
 
   .portal-badge {
     margin-left: auto;
-    background: #DC2626;
+    background: linear-gradient(135deg, #DC2626, #EF4444);
     color: white;
     font-size: 9px; font-weight: 700;
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: 20px;
     min-width: 18px; text-align: center;
+    box-shadow: 0 2px 6px rgba(220,38,38,0.4);
   }
 
-  .portal-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  /* ── MAIN AREA ── */
+  .portal-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 
   .portal-topbar {
     background: white;
     border-bottom: 1px solid #E3F2FD;
-    padding: 14px 28px;
+    padding: 12px 28px;
     display: flex; align-items: center; justify-content: space-between;
     position: sticky; top: 0; z-index: 10;
+    box-shadow: 0 1px 8px rgba(21,101,192,0.06);
   }
 
-  .portal-content-area { flex: 1; padding: 28px; overflow-y: auto; }
+  .portal-content-area { flex: 1; padding: 24px 28px; overflow-y: auto; background: #F0F4FF; }
 
+  /* ── CARDS ── */
   .premium-stat-card {
     background: white;
     border-radius: 16px;
-    padding: 22px;
+    padding: 20px;
     border: 1px solid #E3F2FD;
     position: relative;
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
   }
-  .premium-stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(100,181,246,0.15); }
-  .premium-stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-  }
+  .premium-stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(21,101,192,0.12); }
 
-  .progress-bar-wrap { background: #E3F2FD; border-radius: 20px; height: 6px; overflow: hidden; }
+  .progress-bar-wrap { background: #E3F2FD; border-radius: 20px; height: 5px; overflow: hidden; }
   .progress-bar-fill { height: 100%; border-radius: 20px; transition: width 1s ease; }
-
-  .activity-item {
-    display: flex; gap: 12px; align-items: flex-start;
-    padding: 12px 0;
-    border-bottom: 1px solid #EFF6FF;
-  }
-  .activity-dot {
-    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
-  }
 
   .quick-action-card {
     background: white;
     border: 1px solid #E3F2FD;
-    border-radius: 12px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
+    border-radius: 12px; padding: 16px;
+    cursor: pointer; transition: all 0.2s;
     display: flex; align-items: center; gap: 12px;
   }
-  .quick-action-card:hover { border-color: #1565C0; box-shadow: 0 4px 12px rgba(100,181,246,0.12); transform: translateY(-2px); }
+  .quick-action-card:hover { border-color: #1565C0; box-shadow: 0 4px 16px rgba(21,101,192,0.12); transform: translateY(-2px); }
 
   .exam-reminder-card {
     background: linear-gradient(135deg, #1565C0, #7C3AED);
-    border-radius: 16px;
-    padding: 20px;
-    color: white;
-    position: relative;
-    overflow: hidden;
+    border-radius: 16px; padding: 20px; color: white;
+    position: relative; overflow: hidden;
   }
   .exam-reminder-card::after {
     content: '📅';
     position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-    font-size: 48px; opacity: 0.15;
+    font-size: 48px; opacity: 0.12;
   }
 
   .premium-welcome-banner {
     background: linear-gradient(135deg, #1565C0 0%, #7C3AED 100%);
-    border-radius: 20px;
-    padding: 28px 32px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 28px;
+    border-radius: 20px; padding: 28px 32px;
+    color: white; position: relative; overflow: hidden;
+    margin-bottom: 24px;
   }
   .premium-welcome-banner::before {
     content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 180px; height: 180px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.06);
+    position: absolute; top: -50px; right: -30px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
   }
   .premium-welcome-banner::after {
     content: '';
-    position: absolute;
-    bottom: -60px; right: 60px;
-    width: 220px; height: 220px;
-    border-radius: 50%;
+    position: absolute; bottom: -70px; right: 80px;
+    width: 240px; height: 240px; border-radius: 50%;
     background: rgba(255,255,255,0.04);
   }
 
+  /* ── MOBILE ── */
   @media (max-width: 768px) {
     .portal-wrap { flex-direction: column; }
-    .portal-sidebar-premium { width: 100%; height: auto; flex-direction: row; position: sticky; top: 0; overflow-x: auto; overflow-y: hidden; padding: 0; z-index: 50; min-height: 60px; }
+    .portal-sidebar-premium {
+      width: 100%; height: auto; flex-direction: row;
+      position: sticky; top: 0; overflow-x: auto; overflow-y: hidden;
+      padding: 0; z-index: 50; min-height: 58px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
     .portal-sidebar-top { display: none; }
     .portal-user-card { display: none; }
-    .portal-nav-section { display: flex; flex-direction: row; padding: 4px 6px; flex-shrink: 0; }
+    .portal-nav-section { display: flex; flex-direction: row; padding: 4px 4px; flex-shrink: 0; }
     .portal-nav-label { display: none; }
-    .portal-nav-item { flex-direction: column; font-size: 9px; gap: 2px; padding: 8px 10px; min-width: 52px; text-align: center; border-left: none !important; border-bottom: 3px solid transparent; border-radius: 0; white-space: nowrap; }
-    .portal-nav-item.active { background: rgba(255,255,255,0.2); border-left: none !important; border-bottom: 3px solid rgba(255,255,255,0.9); }
+    .portal-nav-item {
+      flex-direction: column; font-size: 9px; gap: 3px;
+      padding: 6px 8px; min-width: 54px; text-align: center;
+      border-radius: 0; white-space: nowrap; min-height: 54px;
+      justify-content: center;
+    }
+    .portal-nav-item::before { display: none; }
+    .portal-nav-item.active {
+      background: rgba(255,255,255,0.12) !important;
+      border-bottom: 3px solid #7C3AED;
+    }
     .portal-nav-item .nav-icon { width: 26px; height: 26px; font-size: 13px; margin: 0 auto; }
-    .portal-badge { font-size: 8px; padding: 1px 4px; }
+    .portal-badge { font-size: 8px; padding: 1px 4px; position: absolute; top: 4px; right: 4px; }
     .portal-main { overflow: visible; }
-    .portal-content-area { padding: 14px 12px; }
+    .portal-content-area { padding: 12px 12px; }
     .portal-topbar { padding: 10px 14px; }
+    .premium-welcome-banner { padding: 18px 16px; border-radius: 14px; }
   }
   @media (max-width: 480px) {
-    .portal-nav-item { min-width: 46px; padding: 6px 8px; font-size: 8px; }
-    .portal-nav-item .nav-icon { width: 22px; height: 22px; font-size: 12px; }
+    .portal-nav-item { min-width: 48px; padding: 5px 6px; font-size: 8px; }
     .portal-content-area { padding: 10px 8px; }
+    .premium-welcome-banner { padding: 14px 14px; margin-bottom: 16px; }
   }
 `;
 
@@ -1586,19 +1607,12 @@ function StudentPortal({ setPage, user }) {
 
         {/* User Card */}
         <div className="portal-user-card">
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div className="portal-avatar">{initials}</div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "white" }}>{fullName}</div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>{profile?.course_interest || "Student"}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 5 }}>
-                <div style={{ flex: 1, background: "rgba(255,255,255,0.15)", borderRadius: 10, height: 4, overflow: "hidden" }}>
-                  <div style={{ width: `${profileComplete}%`, height: "100%", background: "linear-gradient(90deg, #1565C0, #C4B5FD)", borderRadius: 10 }} />
-                </div>
-                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", whiteSpace: "nowrap" }}>{profileComplete}%</span>
-              </div>
-            </div>
+          <div className="portal-avatar" style={{ margin: 0 }}>{initials}</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fullName}</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginTop: 1 }}>{profile?.course_interest || "Student"}</div>
           </div>
+          <div style={{ marginLeft: "auto", background: "rgba(255,255,255,0.1)", borderRadius: 8, padding: "3px 8px", fontSize: 10, color: "rgba(255,255,255,0.6)", fontWeight: 600, flexShrink: 0 }}>{profileComplete}%</div>
         </div>
 
         {/* Nav Groups */}
@@ -3774,53 +3788,156 @@ function SupportTab({ user, setTab }) {
 
 // ─── ADMIN CSS ───────────────────────────────────────────────────────────────
 const adminCSS = `
-  .admin-wrap { display: flex; min-height: 100vh; background: #EFF6FF; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .admin-wrap { display: flex; min-height: 100vh; background: #F0F4FF; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+  /* ── SIDEBAR ── */
   .admin-sidebar {
-    width: 220px;
-    background: linear-gradient(180deg, #1A1A2E 0%, #1565C0 50%, #1565C0 100%);
+    width: 230px;
+    background: #0F1D3A;
     display: flex; flex-direction: column;
     padding: 0; flex-shrink: 0;
-    position: sticky; top: 0; height: 100vh; overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.15) transparent;
+    position: sticky; top: 0; height: 100vh;
+    overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: none;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
   }
-  .admin-sidebar-top { padding: 16px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-  .admin-user-card { margin: 10px 12px; padding: 10px 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; }
-  .admin-nav-section { padding: 2px 10px; }
-  .admin-nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 8px; margin: 8px 0 2px; }
-  .admin-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.2s; margin-bottom: 1px; }
-  .admin-nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
-  .admin-nav-item.active { background: rgba(100,181,246,0.2); color: white; font-weight: 600; border-left: 3px solid #1565C0; }
-  .admin-nav-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-  .admin-nav-item.active .admin-nav-icon { background: rgba(100,181,246,0.2); }
-  .admin-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .admin-topbar { background: white; border-bottom: 1px solid #E3F2FD; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-  .admin-content { flex: 1; padding: 28px; overflow-y: auto; }
-  .admin-stat-card { background: white; border-radius: 14px; padding: 20px; border: 1px solid #E3F2FD; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+  .admin-sidebar::-webkit-scrollbar { display: none; }
+
+  .admin-sidebar-top {
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .admin-user-card {
+    margin: 10px 14px 4px;
+    background: linear-gradient(135deg, rgba(21,101,192,0.35), rgba(124,58,237,0.35));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .admin-nav-section { padding: 2px 12px 0; }
+
+  .admin-nav-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: rgba(255,255,255,0.22);
+    padding: 0 10px; margin: 12px 0 3px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .admin-nav-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .admin-nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: 9px;
+    font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer; transition: all 0.18s;
+    margin-bottom: 1px; position: relative;
+    letter-spacing: 0.01em;
+  }
+  .admin-nav-item:hover {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.9);
+  }
+  .admin-nav-item:hover .admin-nav-icon { background: rgba(255,255,255,0.1); }
+
+  .admin-nav-item.active {
+    background: linear-gradient(135deg, rgba(21,101,192,0.5), rgba(124,58,237,0.4));
+    color: white; font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+  }
+  .admin-nav-item.active::before {
+    content: '';
+    position: absolute; left: 0; top: 22%; bottom: 22%;
+    width: 3px; border-radius: 0 3px 3px 0;
+    background: linear-gradient(180deg, #1565C0, #7C3AED);
+  }
+
+  .admin-nav-icon {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    background: rgba(255,255,255,0.05);
+    flex-shrink: 0; transition: all 0.18s;
+  }
+  .admin-nav-item.active .admin-nav-icon {
+    background: linear-gradient(135deg, rgba(21,101,192,0.6), rgba(124,58,237,0.5));
+  }
+
+  /* ── MAIN ── */
+  .admin-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+  .admin-topbar {
+    background: white;
+    border-bottom: 1px solid #E3F2FD;
+    padding: 12px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+    box-shadow: 0 1px 8px rgba(21,101,192,0.06);
+  }
+
+  .admin-content { flex: 1; padding: 24px 28px; overflow-y: auto; background: #F0F4FF; }
+
+  .admin-stat-card {
+    background: white; border-radius: 14px; padding: 20px;
+    border: 1px solid #E3F2FD;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative; overflow: hidden;
+  }
   .admin-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(21,101,192,0.1); }
+
   .student-row { transition: background 0.15s; }
   .student-row:hover { background: #EFF6FF !important; }
-  .detail-modal-overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-  .detail-modal { background: white; border-radius: 16px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.2); }
+
+  .detail-modal-overlay {
+    position: fixed; inset: 0; background: rgba(10,20,60,0.65);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
+  }
+  .detail-modal {
+    background: white; border-radius: 18px;
+    width: 100%; max-width: 680px; max-height: 90vh;
+    overflow-y: auto; box-shadow: 0 32px 80px rgba(0,0,0,0.2);
+  }
+
+  /* ── MOBILE ── */
   @media (max-width: 768px) {
     .admin-wrap { flex-direction: column; }
-    .admin-sidebar { width: 100%; height: auto; flex-direction: row; position: sticky; top: 0; overflow-x: auto; overflow-y: hidden; padding: 0; z-index: 50; min-height: 58px; }
+    .admin-sidebar {
+      width: 100%; height: auto; flex-direction: row;
+      position: sticky; top: 0; overflow-x: auto; overflow-y: hidden;
+      padding: 0; z-index: 50; min-height: 56px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
     .admin-sidebar-top { display: none; }
     .admin-user-card { display: none; }
-    .admin-nav-section { display: flex; flex-direction: row; padding: 4px 6px; flex-shrink: 0; }
+    .admin-nav-section { display: flex; flex-direction: row; padding: 4px 4px; flex-shrink: 0; }
     .admin-nav-label { display: none; }
-    .admin-nav-item { flex-direction: column; font-size: 9px; gap: 2px; padding: 8px 10px; min-width: 50px; text-align: center; border-left: none !important; border-bottom: 3px solid transparent; border-radius: 0; white-space: nowrap; }
-    .admin-nav-item.active { border-bottom-color: #1565C0; background: rgba(100,181,246,0.2); border-left: none !important; }
-    .admin-nav-icon { width: 24px; height: 24px; font-size: 13px; margin: 0 auto; }
+    .admin-nav-item {
+      flex-direction: column; font-size: 8.5px; gap: 3px;
+      padding: 6px 8px; min-width: 50px; min-height: 52px;
+      text-align: center; border-radius: 0; white-space: nowrap;
+      justify-content: center;
+    }
+    .admin-nav-item::before { display: none; }
+    .admin-nav-item.active {
+      background: rgba(255,255,255,0.1) !important;
+      border-bottom: 3px solid #7C3AED;
+    }
+    .admin-nav-icon { width: 24px; height: 24px; font-size: 12px; margin: 0 auto; }
     .admin-main { overflow: visible; }
     .admin-topbar { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
-    .admin-content { padding: 14px 12px; }
-    .detail-modal { max-width: 100%; margin: 0; border-radius: 12px 12px 0 0; }
+    .admin-content { padding: 12px 10px; }
+    .detail-modal { max-width: 100%; margin: 0; border-radius: 18px 18px 0 0; }
     .detail-modal-overlay { padding: 0; align-items: flex-end; }
-    .detail-modal > div:first-child { border-radius: 12px 12px 0 0; }
   }
   @media (max-width: 480px) {
-    .admin-nav-item { min-width: 44px; padding: 6px 8px; font-size: 8px; }
+    .admin-nav-item { min-width: 44px; padding: 5px 6px; font-size: 8px; }
     .admin-nav-icon { width: 20px; height: 20px; font-size: 11px; }
     .admin-content { padding: 10px 8px; }
   }
