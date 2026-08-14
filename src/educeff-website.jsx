@@ -626,7 +626,7 @@ const MOCK_STUDENTS = [
 
 // ─── COMPONENTS ─────────────────────────────────────────────────────────────
 
-function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
+function Navbar({ page, setPage, isLoggedIn, isAdmin, isStudent, setModal, handleLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const publicPages = ["Home", "About", "Services", "Colleges", "Contact"];
 
@@ -2002,21 +2002,8 @@ function PortalProfile({ user, profile, onSave }) {
         return;
       }
 
-      // Create a new supabase client with the fresh token to bypass reauth check
-      const { createClient } = await import("@supabase/supabase-js");
-      const freshClient = createClient(
-        import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY,
-        {
-          global: {
-            headers: {
-              Authorization: `Bearer ${freshSession.session.access_token}`,
-            },
-          },
-        }
-      );
-
-      const { error: updateErr } = await freshClient.auth.updateUser({
+      // Update password directly - session is fresh after signInWithPassword above
+      const { error: updateErr } = await supabase.auth.updateUser({
         password: pwForm.newPw,
       });
 
@@ -6879,7 +6866,7 @@ export default function App() {
           <strong>Supabase not configured:</strong> Add <code style={{ background: "#FFFBEB", padding: "1px 6px", borderRadius: 4 }}>VITE_SUPABASE_URL</code> and <code style={{ background: "#FFFBEB", padding: "1px 6px", borderRadius: 4 }}>VITE_SUPABASE_ANON_KEY</code> to your Vercel environment variables, then redeploy. Login and data features are disabled until then.
         </div>
       )}
-      <Navbar page={page} setPage={setPage} isLoggedIn={isLoggedIn} isAdmin={isAdmin} setModal={(m) => { if (m === null) handleLogout(); else setModal(m); }} />
+      <Navbar page={page} setPage={setPage} isLoggedIn={isLoggedIn} isAdmin={isAdmin} isStudent={isStudent} setModal={setModal} handleLogout={handleLogout} />
 
       {page === "Home" && <>
         <Hero setPage={setPage} setModal={setModal} />
