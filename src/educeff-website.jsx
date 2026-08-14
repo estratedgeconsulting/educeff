@@ -654,8 +654,10 @@ function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
         <div className="desktop-btns" style={{ display: "flex", gap: 10, alignItems: "center", marginLeft: 24 }}>
           {isLoggedIn ? (
             <>
-              <button className="btn-outline" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => setPage(isAdmin ? "Admin" : "Portal")}>{isAdmin ? "Admin Dashboard" : "My Portal"}</button>
-              <button className="btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => setModal(null)}>Logout</button>
+              {(isAdmin || isStudent) && (
+                <button className="btn-outline" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => setPage(isAdmin ? "Admin" : "Portal")}>{isAdmin ? "Admin Dashboard" : "My Portal"}</button>
+              )}
+              <button className="btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={handleLogout}>Logout</button>
             </>
           ) : (
             <>
@@ -682,8 +684,10 @@ function Navbar({ page, setPage, isLoggedIn, isAdmin, setModal }) {
           <div className="mobile-menu-btns">
             {isLoggedIn ? (
               <>
-                <button className="btn-outline" style={{ width: "100%", padding: 12 }} onClick={() => { setPage(isAdmin ? "Admin" : "Portal"); setMenuOpen(false); }}>{isAdmin ? "Admin Dashboard" : "My Portal"}</button>
-                <button className="btn-primary" style={{ width: "100%", padding: 12 }} onClick={() => { setModal(null); setMenuOpen(false); }}>Logout</button>
+                {(isAdmin || isStudent) && (
+                  <button className="btn-outline" style={{ width: "100%", padding: 12 }} onClick={() => { setPage(isAdmin ? "Admin" : "Portal"); setMenuOpen(false); }}>{isAdmin ? "Admin Dashboard" : "My Portal"}</button>
+                )}
+                <button className="btn-primary" style={{ width: "100%", padding: 12 }} onClick={() => { handleLogout(); setMenuOpen(false); }}>Logout</button>
               </>
             ) : (
               <>
@@ -6772,13 +6776,20 @@ export default function App() {
         // Re-check admin status on every page load/refresh
         const admin = await checkAdminStatus(session.user.id, session.user.email);
         setIsAdmin(admin);
-        // Restore page based on verified admin status
+        // Restore page based on verified role
         const storedRole = localStorage.getItem("educeff_role");
         if (admin) {
           localStorage.setItem("educeff_role", "admin");
           setPage("Admin");
         } else if (storedRole === "student") {
-          setPage("Portal");
+          // Re-verify student profile still exists
+          const hasProfile = await checkStudentStatus(session.user.id);
+          if (hasProfile) {
+            setIsStudent(true);
+            setPage("Portal");
+          } else {
+            localStorage.removeItem("educeff_role");
+          }
         }
       } else {
         // No session — clear stored role
@@ -6809,16 +6820,37 @@ export default function App() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const handleLogin = (admin) => {
+  const [isStudent, setIsStudent] = useState(false);
+
+  const checkStudentStatus = async (userId) => {
+    try {
+      const { data } = await supabase.from("students").select("id").eq("user_id", userId).maybeSingle();
+      return !!data;
+    } catch (e) { return false; }
+  };
+
+  const handleLogin = async (admin) => {
     setIsAdmin(admin);
     setModal(null);
-    // Persist role so refresh lands on correct page
     if (admin) {
       localStorage.setItem("educeff_role", "admin");
       setPage("Admin");
     } else {
-      localStorage.setItem("educeff_role", "student");
-      setPage("Portal");
+      // Verify student profile exists before allowing portal access
+      const currentUser = user || (await supabase.auth.getUser()).data.user;
+      const hasProfile = currentUser ? await checkStudentStatus(currentUser.id) : false;
+      if (hasProfile) {
+        setIsStudent(true);
+        localStorage.setItem("educeff_role", "student");
+        setPage("Portal");
+      } else {
+        setIsStudent(false);
+        localStorage.removeItem("educeff_role");
+        await supabase.auth.signOut();
+        setIsLoggedIn(false);
+        setUser(null);
+        alert("No student profile found. Please register on our website first to access the portal.");
+      }
     }
   };
 
@@ -6826,6 +6858,7 @@ export default function App() {
     await supabase.auth.signOut();
     setIsLoggedIn(false);
     setIsAdmin(false);
+    setIsStudent(false);
     setUser(null);
     localStorage.removeItem("educeff_role");
     setPage("Home");
